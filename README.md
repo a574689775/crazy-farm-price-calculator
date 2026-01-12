@@ -13,13 +13,13 @@
 ### 安装依赖
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 启动开发服务器
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 访问 http://localhost:5173 查看应用
@@ -27,7 +27,7 @@ npm run dev
 ### 构建生产版本
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ## 📦 部署到 GitHub Pages
@@ -45,7 +45,7 @@ npm run build
 
 1. 构建项目：
    ```bash
-   npm run build
+   pnpm run build
    ```
 
 2. 在 GitHub 仓库设置中：
@@ -58,12 +58,13 @@ npm run build
 ## 🔗 访问地址
 
 部署成功后，可以通过以下地址访问：
-`https://chenzhaosheng.github.io/crazy-farm-price-calculator/`
+`https://a574689775.github.io/crazy-farm-price-calculator/`
 
 ## 🛠️ 技术栈
 
 - React 18
 - Vite
+- pnpm
 - CSS3
 
 ## 📝 许可证

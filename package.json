@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://chenzhaosheng.github.io/crazy-farm-price-calculator",
+  "homepage": "https://a574689775.github.io/crazy-farm-price-calculator",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
