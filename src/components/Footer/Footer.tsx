@@ -3,7 +3,7 @@ import './Footer.css'
 export const Footer = () => {
   return (
     <footer className="footer">
-      <p>Made with ❤️ for GitHub Pages</p>
+      <p>V1.0.0 大脸猫</p>
     </footer>
   )
 }

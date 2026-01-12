@@ -1,36 +1,36 @@
-import { useCalculator } from '@/hooks/useCalculator'
-import { calculateTotalPrice } from '@/utils/calculations'
+import { useState } from 'react'
+import type { CropConfig } from '@/types'
+import { crops } from '@/data/crops'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { ItemCard } from '@/components/ItemCard'
-import { TotalCard } from '@/components/TotalCard'
-import { initialItems } from './constants'
+import { CropSelector } from '@/components/CropSelector'
+import { CropDetails } from '@/components/CropDetails'
+import { PriceCalculator } from '@/components/PriceCalculator'
 import './App.css'
 
 export const App = () => {
-  const { items, updateQuantity } = useCalculator(initialItems)
-  const totalPrice = calculateTotalPrice(items)
+  const [selectedCrop, setSelectedCrop] = useState<CropConfig | null>(null)
 
   return (
     <div className="app">
       <Header />
       <main className="main">
-        <div className="items-container">
-          {items.map((item) => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              onQuantityChange={updateQuantity}
+        <div className="content-container">
+          <div className="left-panel">
+            <CropSelector
+              crops={crops}
+              selectedCrop={selectedCrop}
+              onSelectCrop={setSelectedCrop}
             />
-          ))}
-        </div>
-
-        <div className="total-section">
-          <TotalCard totalPrice={totalPrice} />
+              <CropDetails crop={selectedCrop} />
+          </div>
+          
+          <div className="right-panel">
+              <PriceCalculator crop={selectedCrop} />
+          </div>
         </div>
       </main>
       <Footer />
     </div>
   )
 }
-

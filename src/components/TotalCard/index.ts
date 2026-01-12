@@ -1,2 +1,0 @@
-export { TotalCard } from './TotalCard'
-
