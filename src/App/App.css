@@ -5,18 +5,34 @@
 }
 
 .app {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
 }
 
 .main {
   flex: 1;
-  padding: 2rem;
+  padding: 0 2rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.main.has-crop {
+  padding: 2rem;
+}
+
+.main::-webkit-scrollbar {
+  display: none;
+}
+
+.main {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .content-container {
@@ -40,7 +56,15 @@
 }
 
 @media (max-width: 768px) {
+  .app {
+    height: 100dvh;
+  }
+  
   .main {
+    padding: 0 1rem;
+  }
+  
+  .main.has-crop {
     padding: 1rem;
   }
   

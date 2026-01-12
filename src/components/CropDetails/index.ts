@@ -1,2 +1,0 @@
-export { CropDetails } from './CropDetails'
-
