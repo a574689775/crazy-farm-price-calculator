@@ -54,11 +54,31 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
       return
     }
     
+    // 允许输入小数点和小数，保留用户输入的原始格式
+    // 只验证是否为有效数字格式
+    const isValidNumber = /^-?\d*\.?\d*$/.test(value)
+    if (!isValidNumber) {
+      return // 如果不是有效数字格式，不更新
+    }
+    
     const weightNum = parseFloat(value) || 0
     // 限制不超过最大重量
     const clampedWeight = Math.min(Math.max(weightNum, 0), crop.maxWeight)
-    setWeight(clampedWeight.toString())
     
+    // 如果输入以小数点结尾（如"2."），保留原始格式
+    // 如果输入是有效数字，使用计算后的值，但保留小数部分
+    if (value.endsWith('.') || value.endsWith('.0') || value.endsWith('.00')) {
+      // 保留用户输入的格式
+      setWeight(value)
+    } else if (weightNum === clampedWeight) {
+      // 如果值没有超出范围，保留用户输入的格式（包括小数位）
+      setWeight(value)
+    } else {
+      // 如果超出范围，使用限制后的值
+      setWeight(clampedWeight.toString())
+    }
+    
+    // 计算百分比时使用数值
     if (clampedWeight > 0) {
       // 转换为百分比，不超过100%
       const calculatedPercentage = (clampedWeight / crop.maxWeight) * 100
