@@ -42,7 +42,7 @@ export const weatherMutations: WeatherMutationConfig[] = [
   { name: '霓虹', color: '彩色', multiplier: 18 },
   
   // 异形突变（紫色品质）
-  { name: '薯片', color: '紫色', multiplier: 1.5 },
+  { name: '薯片', color: '紫色', multiplier: 2.25 },
   { name: '方形', color: '紫色', multiplier: 1.5 },
   { name: '糖葫芦', color: '紫色', multiplier: 1.5 },
   { name: '连体', color: '紫色', multiplier: 1.5 },
