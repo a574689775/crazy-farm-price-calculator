@@ -18,6 +18,7 @@ export type WeatherMutation =
   | '瓷化' | '星环' | '亮晶晶'  // 紫色
   | '水晶'  // 金色
   | '流光' | '霓虹'  // 彩色
+  | '薯片' | '方形' | '糖葫芦' | '连体' | '黄瓜蛇' | '万圣夜' | '香蕉猴' | '笑日葵'  // 异形突变
 
 /**
  * 天气突变配置
@@ -36,6 +37,7 @@ export interface CropConfig {
   priceCoefficient: number  // 售价系数
   maxWeight: number  // 极限重量 (kg)
   weatherMutations: number  // 天气突变数量
+  specialMutations?: WeatherMutation[]  // 异形突变列表（只有部分作物有）
   maxPrices: {
     [K in Quality]: number  // 各品质最大价格 (W)
   }

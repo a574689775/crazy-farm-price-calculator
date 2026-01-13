@@ -40,6 +40,20 @@ export const weatherMutations: WeatherMutationConfig[] = [
   // 彩色突变
   { name: '流光', color: '彩色', multiplier: 30 },
   { name: '霓虹', color: '彩色', multiplier: 18 },
+  
+  // 异形突变（紫色品质）
+  { name: '薯片', color: '紫色', multiplier: 1.5 },
+  { name: '方形', color: '紫色', multiplier: 1.5 },
+  { name: '糖葫芦', color: '紫色', multiplier: 1.5 },
+  { name: '连体', color: '紫色', multiplier: 1.5 },
+  
+  // 异形突变（金色品质）
+  { name: '黄瓜蛇', color: '金色', multiplier: 2.5 },
+  { name: '万圣夜', color: '金色', multiplier: 2 },
+  { name: '香蕉猴', color: '金色', multiplier: 2 },
+  
+  // 异形突变（彩色品质）
+  { name: '笑日葵', color: '彩色', multiplier: 10 },
 ]
 
 /**

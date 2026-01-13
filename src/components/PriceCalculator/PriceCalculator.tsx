@@ -97,16 +97,16 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   // 格式化价格显示，如果没有结果则显示0
   const displayPrice = result ? result.formattedPrice : '0'
 
-  // 处理品质突变（互斥，只能选一个）
-  const toggleQualityMutation = (mutationName: WeatherMutation) => {
+  // 处理互斥突变（品质突变和异形突变，只能选一个）
+  const toggleExclusiveMutation = (mutationName: WeatherMutation, exclusiveGroup: WeatherMutation[]) => {
     setSelectedMutations(prev => {
       if (prev.includes(mutationName)) {
         // 取消选择
         return prev.filter(m => m !== mutationName)
       } else {
-        // 选择新的，先移除其他品质突变
-        const otherQualities = QUALITY_MUTATIONS.filter(m => m !== mutationName)
-        const filtered = prev.filter(m => !otherQualities.includes(m))
+        // 选择新的，先移除同组其他突变
+        const otherMutations = exclusiveGroup.filter(m => m !== mutationName)
+        const filtered = prev.filter(m => !otherMutations.includes(m))
         return [...filtered, mutationName]
       }
     })
@@ -284,7 +284,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                   opacity: isDisabled ? 0.4 : 1,
                 }}
                 disabled={isDisabled}
-                onClick={() => isExclusive ? toggleQualityMutation(mutationName) : toggleMutation(mutationName)}
+                onClick={() => isExclusive ? toggleExclusiveMutation(mutationName, mutations) : toggleMutation(mutationName)}
               >
                 <span className="mutation-name">{mutationName}</span>
                 {isSelected && (
@@ -347,6 +347,11 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
 
         {/* 品质突变（互斥，不显示checkbox） */}
         {renderMutationGroup('品质', QUALITY_MUTATIONS, true, false)}
+        
+        {/* 异形突变（根据作物显示，不互斥） */}
+        {crop.specialMutations && crop.specialMutations.length > 0 && (
+          renderMutationGroup('异形突变', crop.specialMutations, false, false)
+        )}
         
         {/* 常见突变 */}
         {renderMutationGroup('常见突变', COMMON_MUTATIONS)}
