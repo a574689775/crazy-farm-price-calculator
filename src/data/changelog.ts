@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V1.4.0',
+    date: '2026.1.13',
+    items: [
+      '更新魔鬼朝天椒、仙人掌象、惊奇菇、蟠桃、葡萄价格基数',
+    ],
+  },
+  {
     version: 'V1.3.0',
     date: '2026.1.13',
     items: [
