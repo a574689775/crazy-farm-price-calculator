@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V1.2.1',
+    date: '2026.1.13',
+    items: [
+      '修复移动端输入框点击时页面自动放大的问题',
+    ],
+  },
+  {
     version: 'V1.2.0',
     date: '2026.1.13',
     items: [
