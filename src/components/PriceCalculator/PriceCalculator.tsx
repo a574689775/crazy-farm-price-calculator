@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { CropConfig, WeatherMutation } from '@/types'
 import { weatherMutations, mutationColorConfig } from '@/data/weatherMutations'
-import { calculatePrice, formatWeight } from '@/utils/priceCalculator'
+import { calculatePrice } from '@/utils/priceCalculator'
 import './PriceCalculator.css'
 
 interface PriceCalculatorProps {
@@ -13,7 +13,7 @@ interface PriceCalculatorProps {
 const QUALITY_MUTATIONS: WeatherMutation[] = ['银', '金', '水晶', '流光'] // 品质（互斥）
 const COMMON_MUTATIONS: WeatherMutation[] = ['潮湿', '生机', '覆雪', '迷雾', '颤栗', '落雷', '冰冻', '极光', '瓷化', '亮晶晶'] // 常见突变
 const RARE_MUTATIONS: WeatherMutation[] = ['血月', '彩虹', '荧光', '星环', '霓虹'] // 罕见突变
-const PAST_MUTATIONS: WeatherMutation[] = ['幽魂', '惊魂夜'] // 过往突变
+const PAST_MUTATIONS: WeatherMutation[] = ['幽魂', '惊魂夜'] // 往期突变
 const INTERMEDIATE_MUTATIONS: WeatherMutation[] = ['沙尘', '灼热', '结霜', '陶化'] // 中间状态突变
 
 // 合成规则：当同时存在这些突变时，会合成成目标突变
@@ -31,11 +31,11 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const [percentage, setPercentage] = useState<string>('')
   const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>([])
 
-  // 当作物切换时，清空重量和突变
+  // 当作物切换时，清空重量和突变，默认选中常见突变
   useEffect(() => {
     setWeight('')
     setPercentage('')
-    setSelectedMutations([])
+    setSelectedMutations(COMMON_MUTATIONS)
   }, [crop?.name])
 
   if (!crop) {
@@ -93,6 +93,9 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const result = isValidWeight
     ? calculatePrice(crop, weightNum, selectedMutations)
     : null
+  
+  // 格式化价格显示，如果没有结果则显示0
+  const displayPrice = result ? result.formattedPrice : '0'
 
   // 处理品质突变（互斥，只能选一个）
   const toggleQualityMutation = (mutationName: WeatherMutation) => {
@@ -308,80 +311,61 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
 
       <div className="calculator-inputs">
         <div className="input-group">
-          <label className="input-label">
-            重量 (kg)
-            <span className="input-hint">最大: {crop.maxWeight}kg</span>
-          </label>
-          <input
-            type="number"
-            className="input-field"
-            value={weight}
-            onChange={(e) => handleWeightChange(e.target.value)}
-            placeholder="请输入重量"
-            min="0"
-            max={crop.maxWeight}
-            step="0.01"
-          />
+          <div className="input-group-row">
+            <label className="input-label">重量 (kg)</label>
+            <input
+              type="number"
+              className="input-field"
+              value={weight}
+              onChange={(e) => handleWeightChange(e.target.value)}
+              placeholder={`最大: ${crop.maxWeight}`}
+              min="0"
+              max={crop.maxWeight}
+              step="0.01"
+            />
+          </div>
           {weightNum > crop.maxWeight && (
             <span className="input-error">重量不能超过 {crop.maxWeight}kg</span>
           )}
         </div>
 
         <div className="input-group">
-          <label className="input-label">
-            百分比 (%)
-            <span className="input-hint">范围: 1-100%</span>
-          </label>
-          <input
-            type="number"
-            className="input-field"
-            value={percentage}
-            onChange={(e) => handlePercentageChange(e.target.value)}
-            placeholder="请输入百分比"
-            min="1"
-            max="100"
-            step="1"
-          />
+          <div className="input-group-row">
+            <label className="input-label">百分比 (%)</label>
+            <input
+              type="number"
+              className="input-field"
+              value={percentage}
+              onChange={(e) => handlePercentageChange(e.target.value)}
+              placeholder="范围: 1-100%"
+              min="1"
+              max="100"
+              step="1"
+            />
+          </div>
         </div>
 
-        <div className="input-group">
-          <label className="input-label">选择突变</label>
-          
-          {/* 品质突变（互斥，不显示checkbox） */}
-          {renderMutationGroup('品质', QUALITY_MUTATIONS, true, false)}
-          
-          {/* 常见突变 */}
-          {renderMutationGroup('常见突变', COMMON_MUTATIONS)}
-          
-          {/* 中间状态突变（不显示checkbox） */}
-          {renderMutationGroup('中间状态突变', INTERMEDIATE_MUTATIONS, false, false)}
-          
-          {/* 罕见突变 */}
-          {renderMutationGroup('罕见突变', RARE_MUTATIONS)}
-          
-          {/* 过往突变 */}
-          {renderMutationGroup('过往突变', PAST_MUTATIONS)}
-        </div>
+        {/* 品质突变（互斥，不显示checkbox） */}
+        {renderMutationGroup('品质', QUALITY_MUTATIONS, true, false)}
+        
+        {/* 常见突变 */}
+        {renderMutationGroup('常见突变', COMMON_MUTATIONS)}
+        
+        {/* 中间状态突变（不显示checkbox） */}
+        {renderMutationGroup('中间状态突变', INTERMEDIATE_MUTATIONS, false, false)}
+        
+        {/* 罕见突变 */}
+        {renderMutationGroup('罕见突变', RARE_MUTATIONS)}
+        
+        {/* 往期突变 */}
+        {renderMutationGroup('往期突变', PAST_MUTATIONS)}
       </div>
 
-      {result && (
-        <div className="calculator-result">
-          <div className="result-item">
-            <span className="result-label">重量</span>
-            <span className="result-value">{formatWeight(weightNum)}</span>
-          </div>
-          {selectedMutations.length > 0 && (
-            <div className="result-item">
-              <span className="result-label">突变总倍数</span>
-              <span className="result-value">{result.totalMultiplier}</span>
-            </div>
-          )}
-          <div className="result-item highlight">
-            <span className="result-label">最终价格</span>
-            <span className="result-value-large">{result.formattedPrice}</span>
-          </div>
-        </div>
-      )}
+      {/* 固定底部的价格展示区域 */}
+      <div className="calculator-result-fixed">
+        <span className="result-label">最终价格</span>
+        <span className="result-value-large">{displayPrice}</span>
+      </div>
     </div>
   )
 }

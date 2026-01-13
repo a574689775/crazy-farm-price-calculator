@@ -1,0 +1,146 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.modal-qrcode {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.modal-text {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.6;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.modal-hint {
+  font-size: 0.875rem;
+  color: #999;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* 更新日志样式 */
+.changelog {
+  text-align: left;
+}
+
+.changelog-item {
+  margin-bottom: 1.5rem;
+}
+
+.changelog-item:last-child {
+  margin-bottom: 0;
+}
+
+.changelog-version {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.changelog-date {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: #999;
+}
+
+.changelog-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.8;
+}
+
+.changelog-list li {
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0;
+  }
+  
+  .modal-content {
+    padding: 16px;
+    width: calc(100% - 32px);
+    height: calc(100% - 32px);
+    max-width: none;
+    max-height: none;
+    margin: 16px;
+  }
+  
+  .modal-title {
+    font-size: 1.125rem;
+  }
+}
+

@@ -12,6 +12,10 @@ export const App = () => {
 
   return (
     <div className="app">
+      <div className="lightEffect">
+        <div className="lightLeft"></div>
+        <div className="lightRight"></div>
+      </div>
       {!selectedCrop && <Header />}
       <main className={`main ${selectedCrop ? 'has-crop' : ''}`}>
         <div className="content-container">
