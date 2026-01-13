@@ -4,12 +4,12 @@
 
 .crop-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
 .crop-item {
-  height: 40px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,9 +24,17 @@
     0.5px -0.5px 0 #000,
     -0.5px 0.5px 0 #000,
     0.5px 0.5px 0 #000;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.crop-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+@media (hover: hover) and (pointer: fine) {
+  .crop-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.crop-item:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

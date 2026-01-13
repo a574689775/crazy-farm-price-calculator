@@ -6,6 +6,20 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V1.5.0',
+    date: '2026.1.13',
+    items: [
+      '计算器界面全面升级为深色主题，视觉效果更统一',
+      '优化计算器布局，header和底部价格区域高度更协调',
+      '优化输入框样式，与深色主题完美融合',
+      '优化checkbox样式，采用自定义深色风格',
+      '优化作物选择页面，一行显示三个，布局更紧凑',
+      '优化整体间距和字号，界面更精致',
+      '优化价格显示，字体更大更醒目',
+      '移除不必要的点击高亮效果，交互更流畅',
+    ],
+  },
+  {
     version: 'V1.4.1',
     date: '2026.1.13',
     items: [

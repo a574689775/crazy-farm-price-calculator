@@ -1,6 +1,6 @@
 .footer {
   text-align: center;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   color: white;
   opacity: 0.8;
 }
@@ -16,7 +16,7 @@
 
 .footer-version {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .footer-actions {
@@ -39,7 +39,7 @@
 
 @media (max-width: 768px) {
   .footer {
-    padding: 0.5rem;
+    padding: 0.75rem 1rem;
   }
   
   .footer-content {
@@ -47,7 +47,7 @@
   }
   
   .footer-version {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
   }
   
   .footer-actions {
@@ -55,7 +55,7 @@
   }
   
   .footer-link {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
   }
 }
 

@@ -29,7 +29,7 @@ const COMBINATION_RULES: Array<{
 export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const [weight, setWeight] = useState<string>('')
   const [percentage, setPercentage] = useState<string>('')
-  const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>([])
+  const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>(COMMON_MUTATIONS)
 
   // 当作物切换时，清空重量和突变，默认选中常见突变
   useEffect(() => {
