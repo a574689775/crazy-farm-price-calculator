@@ -17,6 +17,7 @@ const COMMON_MUTATIONS: WeatherMutation[] = ['潮湿', '生机', '覆雪', '迷�
 const RARE_MUTATIONS: WeatherMutation[] = ['血月', '彩虹', '荧光', '星环', '霓虹'] // 罕见突变
 const PAST_MUTATIONS: WeatherMutation[] = ['幽魂', '惊魂夜'] // 往期突变
 const INTERMEDIATE_MUTATIONS: WeatherMutation[] = ['沙尘', '灼热', '结霜', '陶化'] // 中间状态突变
+const SPECIAL_MUTATIONS: WeatherMutation[] = ['薯片', '方形', '糖葫芦', '连体', '黄瓜蛇', '万圣夜', '香蕉猴', '笑日葵'] // 异形突变
 
 // 合成规则：当同时存在这些突变时，会合成成目标突变
 const COMBINATION_RULES: Array<{
@@ -34,8 +35,8 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>(COMMON_MUTATIONS)
   const [showShareModal, setShowShareModal] = useState(false)
   const [shareUrl, setShareUrl] = useState<string>('')
-  const [isCopied, setIsCopied] = useState(false)
   const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false)
+  const [showToast, setShowToast] = useState(false)
 
   // 获取当前选中的品质突变（银、金、水晶、流光）
   const getSelectedQuality = (): string => {
@@ -43,8 +44,24 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
     return quality || '普通'
   }
 
-  // 分享文案模版（随机选择）
-  const shareTemplates = [
+  // 获取当前选中的异形突变
+  const getSelectedSpecial = (): string | null => {
+    const special = selectedMutations.find(m => SPECIAL_MUTATIONS.includes(m))
+    return special || null
+  }
+
+  // 分享文案模版（有异形突变）
+  const shareTemplatesWithSpecial = [
+    (quality: string, special: string) => `我的${quality}${special}居然这么值钱？`,
+    (quality: string, special: string) => `没想到${quality}${special}能卖这个价！`,
+    (quality: string, special: string) => `${quality}${special}的价格也太夸张了吧`,
+    (quality: string, special: string) => `我的${quality}${special}竟然值这么多？`,
+    (quality: string, special: string) => `${quality}${special}这个价格你敢信？`,
+    (quality: string, special: string) => `看看我的${quality}${special}值多少钱`,
+  ]
+
+  // 分享文案模版（无异形突变）
+  const shareTemplatesWithoutSpecial = [
     (quality: string, cropName: string) => `我的${quality}${cropName}居然这么值钱？`,
     (quality: string, cropName: string) => `没想到${quality}${cropName}能卖这个价！`,
     (quality: string, cropName: string) => `${quality}${cropName}的价格也太夸张了吧`,
@@ -387,7 +404,6 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                   mutations: selectedMutations,
                 })
                 setShareUrl(url)
-                setIsCopied(false)
                 setShowShareModal(true)
               }
             }
@@ -462,19 +478,20 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
         <span className="result-value-large">{displayPrice}</span>
       </div>
 
+      {/* Toast 提示 */}
+      {showToast && (
+        <div className="toast">
+          <div className="toast-content">已复制到剪贴板</div>
+        </div>
+      )}
+
       {/* 分享弹窗 */}
       {showShareModal && (
-        <div className="share-modal-overlay" onClick={() => {
-          setShowShareModal(false)
-          setIsCopied(false)
-        }}>
+        <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>
             <div className="share-modal-header">
               <h3>分享计算结果</h3>
-              <button className="share-modal-close" onClick={() => {
-                setShowShareModal(false)
-                setIsCopied(false)
-              }}>×</button>
+              <button className="share-modal-close" onClick={() => setShowShareModal(false)}>×</button>
             </div>
             <div className="share-modal-content">
               <div className="share-url-container">
@@ -487,23 +504,39 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                 />
                 <button
                   className="share-copy-button"
-                  disabled={isCopied}
                   onClick={() => {
-                    // 获取当前品质和作物名
+                    // 获取当前品质、异形突变和作物名
                     const quality = getSelectedQuality()
+                    const special = getSelectedSpecial()
                     const cropName = crop.name
                     
-                    // 随机选择一个文案模版并填充数据
-                    const randomTemplate = shareTemplates[Math.floor(Math.random() * shareTemplates.length)]
-                    const shareText = randomTemplate(quality, cropName)
+                    // 根据是否有异形突变选择不同的文案模版
+                    let shareText: string
+                    if (special) {
+                      // 有异形突变：只显示品质+异形突变
+                      const randomTemplate = shareTemplatesWithSpecial[Math.floor(Math.random() * shareTemplatesWithSpecial.length)]
+                      shareText = randomTemplate(quality, special)
+                    } else {
+                      // 无异形突变：品质+作物名
+                      const randomTemplate = shareTemplatesWithoutSpecial[Math.floor(Math.random() * shareTemplatesWithoutSpecial.length)]
+                      shareText = randomTemplate(quality, cropName)
+                    }
+                    
                     const textToCopy = `${shareText} ${shareUrl}`
                     
                     navigator.clipboard.writeText(textToCopy).then(() => {
-                      setIsCopied(true)
+                      // 关闭弹窗
+                      setShowShareModal(false)
+                      // 显示提示
+                      setShowToast(true)
+                      // 2秒后自动隐藏提示
+                      setTimeout(() => {
+                        setShowToast(false)
+                      }, 2000)
                     })
                   }}
                 >
-                  {isCopied ? '已复制' : '复制链接'}
+                  复制链接
                 </button>
               </div>
               <div className="share-info">

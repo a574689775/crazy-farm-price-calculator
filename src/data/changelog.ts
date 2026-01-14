@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V1.6.2',
+    date: '2026.1.14',
+    items: [
+      '优化分享文案，有异形突变时显示更简洁',
+      '优化复制按钮交互，复制成功后自动关闭弹窗并提示',
+    ],
+  },
+  {
     version: 'V1.6.1',
     date: '2026.1.14',
     items: [
