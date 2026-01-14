@@ -5,6 +5,7 @@ import { weatherMutations, mutationColorConfig } from '@/data/weatherMutations'
 import { calculatePrice } from '@/utils/priceCalculator'
 import { generateShareUrl, parseShareUrl } from '@/utils/shareEncoder'
 import { crops } from '@/data/crops'
+import { Modal } from '@/components/Modal'
 import './PriceCalculator.css'
 
 interface PriceCalculatorProps {
@@ -359,22 +360,24 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
             const colorConfig = mutationColorConfig[mutation.color]
             
             return (
-              <button
+              <div
                 key={mutationName}
-                type="button"
                 className={`mutation-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
                 style={{
                   background: colorConfig.gradient || colorConfig.bgColor,
                   opacity: isDisabled ? 0.4 : 1,
                 }}
-                disabled={isDisabled}
-                onClick={() => isExclusive ? toggleExclusiveMutation(mutationName, mutations) : toggleMutation(mutationName)}
+                onClick={() => {
+                  if (!isDisabled) {
+                    isExclusive ? toggleExclusiveMutation(mutationName, mutations) : toggleMutation(mutationName)
+                  }
+                }}
               >
                 <span className="mutation-name">{mutationName}</span>
                 {isSelected && (
                   <span className="mutation-checkmark">✓</span>
                 )}
-              </button>
+              </div>
             )
           })}
         </div>
@@ -493,71 +496,60 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
       )}
 
       {/* 分享弹窗 */}
-      {showShareModal && (
-        <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
-          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="share-modal-header">
-              <img 
-                src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/田园阿公.png" 
-                alt="阿公" 
-                className="share-modal-title-image"
-              />
-              <h3>分享计算结果</h3>
-            </div>
-            <button className="share-modal-close" onClick={() => setShowShareModal(false)}>×</button>
-            <div className="share-modal-content">
-              <div className="share-url-container">
-                <input
-                  type="text"
-                  className="share-url-input"
-                  value={shareUrl}
-                  readOnly
-                  onClick={(e) => e.currentTarget.select()}
-                />
-                <button
-                  className="share-copy-button"
-                  onClick={() => {
-                    // 获取当前品质、异形突变和作物名
-                    const quality = getSelectedQuality()
-                    const special = getSelectedSpecial()
-                    const cropName = crop.name
-                    
-                    // 根据是否有异形突变选择不同的文案模版
-                    let shareText: string
-                    if (special) {
-                      // 有异形突变：只显示品质+异形突变
-                      const randomTemplate = shareTemplatesWithSpecial[Math.floor(Math.random() * shareTemplatesWithSpecial.length)]
-                      shareText = randomTemplate(quality, special)
-                    } else {
-                      // 无异形突变：品质+作物名
-                      const randomTemplate = shareTemplatesWithoutSpecial[Math.floor(Math.random() * shareTemplatesWithoutSpecial.length)]
-                      shareText = randomTemplate(quality, cropName)
-                    }
-                    
-                    const textToCopy = `${shareText} ${shareUrl}`
-                    
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                      // 关闭弹窗
-                      setShowShareModal(false)
-                      // 显示提示
-                      setShowToast(true)
-                      // 2秒后自动隐藏提示
-                      setTimeout(() => {
-                        setShowToast(false)
-                      }, 2000)
-                    })
-                  }}
-                >
-                  复制链接
-                </button>
-              </div>
-              <div className="share-info">
-                <p>复制链接发送给好友</p>
-              </div>
-            </div>
+      <Modal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title="分享计算结果"
+      >
+          <div className="share-url-container">
+            <input
+              type="text"
+              className="share-url-input"
+              value={shareUrl}
+              readOnly
+              onClick={(e) => e.currentTarget.select()}
+            />
+            <button
+              className="share-copy-button"
+              onClick={() => {
+                // 获取当前品质、异形突变和作物名
+                const quality = getSelectedQuality()
+                const special = getSelectedSpecial()
+                const cropName = crop.name
+                
+                // 根据是否有异形突变选择不同的文案模版
+                let shareText: string
+                if (special) {
+                  // 有异形突变：只显示品质+异形突变
+                  const randomTemplate = shareTemplatesWithSpecial[Math.floor(Math.random() * shareTemplatesWithSpecial.length)]
+                  shareText = randomTemplate(quality, special)
+                } else {
+                  // 无异形突变：品质+作物名
+                  const randomTemplate = shareTemplatesWithoutSpecial[Math.floor(Math.random() * shareTemplatesWithoutSpecial.length)]
+                  shareText = randomTemplate(quality, cropName)
+                }
+                
+                const textToCopy = `${shareText} ${shareUrl}`
+                
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                  // 关闭弹窗
+                  setShowShareModal(false)
+                  // 显示提示
+                  setShowToast(true)
+                  // 2秒后自动隐藏提示
+                  setTimeout(() => {
+                    setShowToast(false)
+                  }, 2000)
+                })
+              }}
+            >
+              点此复制链接
+            </button>
           </div>
-        </div>
-      )}
+          <div className="share-info">
+            <p>复制链接发送给好友</p>
+          </div>
+      </Modal>
     </div>
   )
 }

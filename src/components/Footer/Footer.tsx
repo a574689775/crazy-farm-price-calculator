@@ -13,19 +13,19 @@ export const Footer = () => {
     <>
       <footer className="footer">
         <div className="footer-content">
-          <button className="footer-link" onClick={() => setShowChangelogModal(true)}>
+          <div className="footer-link" onClick={() => setShowChangelogModal(true)}>
             {changelog[0].version}
-          </button>
+          </div>
           <div className="footer-actions">
-            <button className="footer-link" onClick={() => setShowGroupModal(true)}>
+            <div className="footer-link" onClick={() => setShowGroupModal(true)}>
               用户群
-            </button>
-            <button className="footer-link" onClick={() => setShowDonateModal(true)}>
+            </div>
+            <div className="footer-link" onClick={() => setShowDonateModal(true)}>
               支持作者
-            </button>
-            <button className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
+            </div>
+            <div className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
               免责声明
-            </button>
+            </div>
           </div>
         </div>
       </footer>

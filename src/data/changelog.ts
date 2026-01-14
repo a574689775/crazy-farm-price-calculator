@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.0.2',
+    date: '2026.1.14',
+    items: [
+      '优化弹窗标题区域样式，添加过渡动画',
+      '优化页面SEO'
+    ],
+  },
+  {
     version: 'V2.0.1',
     date: '2026.1.14',
     items: [

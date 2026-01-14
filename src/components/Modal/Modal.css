@@ -9,7 +9,40 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 12px;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.modal-overlay-initial {
+  opacity: 0;
+}
+
+.modal-overlay-enter {
+  animation-name: modalOverlayFadeIn;
+}
+
+.modal-overlay-exit {
+  animation-name: modalOverlayFadeOut;
+}
+
+@keyframes modalOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalOverlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .modal-content {
@@ -21,12 +54,50 @@
   padding: 0;
   max-width: 400px;
   width: 100%;
-  max-height: 90vh;
+  max-height: calc(100% - 24px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.modal-content-initial {
+  opacity: 0;
+  transform: scale(0.9) translateY(-20px);
+}
+
+.modal-content-enter {
+  animation-name: modalContentSlideIn;
+}
+
+.modal-content-exit {
+  animation-name: modalContentSlideOut;
+}
+
+@keyframes modalContentSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalContentSlideOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
 }
 
 .modal-content::-webkit-scrollbar {
@@ -39,12 +110,20 @@
   z-index: 10;
   background: rgba(255, 252, 239, 1);
   padding: 0 60px 0 16px;
-  height: 63px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
   flex-shrink: 0;
+  position: relative;
+}
+
+.modal-title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
 .modal-title-image {
@@ -57,26 +136,24 @@
 .modal-title {
   font-size: 24px;
   font-weight: 700;
-  font-family: 'HarmonyOS Sans', sans-serif;
   font-style: normal;
   color: rgba(132, 49, 0, 1);
   line-height: 28px;
   letter-spacing: 0px;
   text-align: center;
   margin: 0;
-  flex: 1;
 }
 
 .modal-close {
   position: absolute;
-  top: 12px;
+  top: 16px;
   right: 16px;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #f8dec2;
-  border: 1px solid #f5d0aa;
-  color: #FFFFFF;
+  background: transparent;
+  border: none;
+  color: rgba(132, 49, 0, 1);
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
@@ -166,15 +243,13 @@
 
 @media (max-width: 768px) {
   .modal-overlay {
-    padding: 0;
+    padding: 12px;
   }
   
   .modal-content {
-    width: calc(100% - 32px);
-    height: calc(100% - 32px);
+    width: 100%;
     max-width: none;
-    max-height: none;
-    margin: 16px;
+    max-height: 100%;
   }
   
   .modal-title {
