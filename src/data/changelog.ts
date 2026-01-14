@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.0.1',
+    date: '2026.1.14',
+    items: [
+      '修复IOS系统点击输入框自动放大聚焦的问题',
+    ],
+  },
+  {
     version: 'V2.0.0',
     date: '2026.1.14',
     items: [
