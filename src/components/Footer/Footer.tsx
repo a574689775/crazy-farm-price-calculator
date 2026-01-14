@@ -17,7 +17,7 @@ export const Footer = () => {
           </button>
           <div className="footer-actions">
             <button className="footer-link" onClick={() => setShowGroupModal(true)}>
-              加入用户群
+              用户群
             </button>
             <button className="footer-link" onClick={() => setShowDonateModal(true)}>
               捐赠作者

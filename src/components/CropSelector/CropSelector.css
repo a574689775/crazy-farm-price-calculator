@@ -6,6 +6,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  padding-top: 2px; /* 为第一行hover上浮效果预留空间 */
 }
 
 .crop-item {

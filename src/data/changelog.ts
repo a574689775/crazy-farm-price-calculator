@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V1.6.1',
+    date: '2026.1.14',
+    items: [
+      '优化分享文案，会根据你的品质和作物自动生成个性化文案',
+      '优化底部按钮样式，改为方框按钮更美观',
+      '修复选择页面第一行hover效果被截断的问题',
+    ],
+  },
+  {
     version: 'V1.6.0',
     date: '2026.1.14',
     items: [

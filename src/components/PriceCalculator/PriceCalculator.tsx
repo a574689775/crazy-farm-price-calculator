@@ -37,6 +37,22 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const [isCopied, setIsCopied] = useState(false)
   const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false)
 
+  // 获取当前选中的品质突变（银、金、水晶、流光）
+  const getSelectedQuality = (): string => {
+    const quality = selectedMutations.find(m => QUALITY_MUTATIONS.includes(m))
+    return quality || '普通'
+  }
+
+  // 分享文案模版（随机选择）
+  const shareTemplates = [
+    (quality: string, cropName: string) => `我的${quality}${cropName}居然这么值钱？`,
+    (quality: string, cropName: string) => `没想到${quality}${cropName}能卖这个价！`,
+    (quality: string, cropName: string) => `${quality}${cropName}的价格也太夸张了吧`,
+    (quality: string, cropName: string) => `我的${quality}${cropName}竟然值这么多？`,
+    (quality: string, cropName: string) => `${quality}${cropName}这个价格你敢信？`,
+    (quality: string, cropName: string) => `看看我的${quality}${cropName}值多少钱`,
+  ]
+
   // 从URL参数恢复配置（仅在首次加载时）
   useEffect(() => {
     if (hasRestoredFromUrl || !crop) return
@@ -473,16 +489,17 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                   className="share-copy-button"
                   disabled={isCopied}
                   onClick={() => {
-                    navigator.clipboard.writeText(shareUrl).then(() => {
+                    // 获取当前品质和作物名
+                    const quality = getSelectedQuality()
+                    const cropName = crop.name
+                    
+                    // 随机选择一个文案模版并填充数据
+                    const randomTemplate = shareTemplates[Math.floor(Math.random() * shareTemplates.length)]
+                    const shareText = randomTemplate(quality, cropName)
+                    const textToCopy = `${shareText} ${shareUrl}`
+                    
+                    navigator.clipboard.writeText(textToCopy).then(() => {
                       setIsCopied(true)
-                    }).catch(() => {
-                      // 降级方案：手动选择文本
-                      const input = document.querySelector('.share-url-input') as HTMLInputElement
-                      if (input) {
-                        input.select()
-                        document.execCommand('copy')
-                        setIsCopied(true)
-                      }
                     })
                   }}
                 >
