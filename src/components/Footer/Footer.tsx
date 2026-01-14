@@ -7,6 +7,7 @@ export const Footer = () => {
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [showDonateModal, setShowDonateModal] = useState(false)
   const [showChangelogModal, setShowChangelogModal] = useState(false)
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
 
   return (
     <>
@@ -21,6 +22,9 @@ export const Footer = () => {
             </button>
             <button className="footer-link" onClick={() => setShowDonateModal(true)}>
               捐赠作者
+            </button>
+            <button className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
+              免责声明
             </button>
           </div>
         </div>
@@ -79,6 +83,36 @@ export const Footer = () => {
           className="modal-qrcode"
         />
         <p className="modal-hint">扫码支持，感谢你的慷慨 ❤️</p>
+      </Modal>
+
+      {/* 免责声明模态框 */}
+      <Modal
+        isOpen={showDisclaimerModal}
+        onClose={() => setShowDisclaimerModal(false)}
+        title="免责声明"
+      >
+        <div className="modal-text disclaimer-text">
+          <p><strong>1. 非官方工具</strong></p>
+          <p>本工具为第三方独立开发，与网易游戏《蛋仔派对》官方无任何关联，非官方授权产品。</p>
+          
+          <p><strong>2. 数据仅供参考</strong></p>
+          <p>本工具提供的价格计算结果基于公开的游戏机制和数据，仅供参考，不保证准确性。实际游戏内价格以官方为准。</p>
+          
+          <p><strong>3. 使用风险</strong></p>
+          <p>用户使用本工具所产生的任何后果，包括但不限于数据错误、经济损失等，均由用户自行承担。</p>
+          
+          <p><strong>4. 免责条款</strong></p>
+          <p>开发者不对本工具的使用结果承担任何责任，包括但不限于直接、间接、偶然、特殊或后果性损失。</p>
+          
+          <p><strong>5. 知识产权</strong></p>
+          <p>《蛋仔派对》为网易游戏所有，本工具仅用于学习和交流目的，不涉及任何商业用途。</p>
+          
+          <p><strong>6. 服务变更</strong></p>
+          <p>开发者保留随时修改、暂停或终止本工具服务的权利，无需提前通知。</p>
+          
+          <p><strong>7. 用户责任</strong></p>
+          <p>用户使用本工具即表示已阅读、理解并同意本免责声明的所有条款。</p>
+        </div>
       </Modal>
     </>
   )
