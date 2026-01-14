@@ -8,14 +8,14 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #000000;
+  background: rgba(255, 248, 220, 1);
   overflow: hidden;
   position: relative;
 }
 
 .main {
   flex: 1;
-  padding: 0 2rem;
+  padding: 0;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -44,120 +44,12 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  height: 100%;
 }
 
 .content-container > * {
   width: 100%;
   max-width: 800px;
-}
-
-/* 光晕效果 */
-.lightEffect {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.lightLeft {
-  position: absolute;
-  top: 50%;
-  left: -50px;
-  width: 100px;
-  height: 400px;
-  border-radius: 400px;
-  background: #e2ff9d80;
-  filter: blur(100px);
-  will-change: transform, width, height, opacity;
-  transform: translateY(-50%);
-  animation: lightLeftPC 12s ease-in-out infinite;
-}
-
-.lightRight {
-  position: absolute;
-  top: 50%;
-  right: -50px;
-  width: 100px;
-  height: 400px;
-  border-radius: 400px;
-  background: #db9dff80;
-  filter: blur(100px);
-  will-change: transform, width, height, opacity;
-  transform: translateY(-50%);
-  animation: lightRightPC 15s ease-in-out infinite;
-}
-
-/* 左侧光晕动画 - PC端 */
-@keyframes lightLeftPC {
-  0% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 100px;
-    height: 400px;
-    opacity: 0.8;
-  }
-  25% {
-    transform: translate(20px, -52%) rotate(5deg);
-    width: 120px;
-    height: 450px;
-    opacity: 1;
-  }
-  50% {
-    transform: translate(-30px, -48%) rotate(-3deg);
-    width: 140px;
-    height: 380px;
-    opacity: 0.6;
-  }
-  75% {
-    transform: translate(30px, -51%) rotate(2deg);
-    width: 110px;
-    height: 420px;
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 100px;
-    height: 400px;
-    opacity: 0.8;
-  }
-}
-
-/* 右侧光晕动画 - PC端 */
-@keyframes lightRightPC {
-  0% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 100px;
-    height: 400px;
-    opacity: 0.8;
-  }
-  30% {
-    transform: translate(-20px, -48%) rotate(-4deg);
-    width: 130px;
-    height: 430px;
-    opacity: 1;
-  }
-  60% {
-    transform: translate(25px, -53%) rotate(3deg);
-    width: 115px;
-    height: 370px;
-    opacity: 0.6;
-  }
-  85% {
-    transform: translate(-10px, -47%) rotate(-2deg);
-    width: 125px;
-    height: 410px;
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 100px;
-    height: 400px;
-    opacity: 0.8;
-  }
 }
 
 @media (max-width: 768px) {
@@ -166,96 +58,14 @@
   }
   
   .main {
-    padding: 0 1rem;
+    padding: 0;
   }
   
   .main.has-crop {
-    padding: 1rem;
+    padding: 12px;
   }
   
   .content-container {
     gap: 1rem;
-  }
-  
-  .lightLeft {
-    width: 80px;
-    height: 320px;
-    filter: blur(60px);
-    animation: lightLeftMobile 12s ease-in-out infinite;
-  }
-  
-  .lightRight {
-    width: 80px;
-    height: 320px;
-    filter: blur(60px);
-    animation: lightRightMobile 15s ease-in-out infinite;
-  }
-}
-
-/* 左侧光晕动画 - 移动端 */
-@keyframes lightLeftMobile {
-  0% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 80px;
-    height: 320px;
-    opacity: 0.8;
-  }
-  25% {
-    transform: translate(10px, -51%) rotate(3deg);
-    width: 90px;
-    height: 340px;
-    opacity: 1;
-  }
-  50% {
-    transform: translate(-15px, -49%) rotate(-2deg);
-    width: 100px;
-    height: 310px;
-    opacity: 0.6;
-  }
-  75% {
-    transform: translate(15px, -50.5%) rotate(1deg);
-    width: 85px;
-    height: 330px;
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 80px;
-    height: 320px;
-    opacity: 0.8;
-  }
-}
-
-/* 右侧光晕动画 - 移动端 */
-@keyframes lightRightMobile {
-  0% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 80px;
-    height: 320px;
-    opacity: 0.8;
-  }
-  30% {
-    transform: translate(-10px, -49%) rotate(-3deg);
-    width: 95px;
-    height: 345px;
-    opacity: 1;
-  }
-  60% {
-    transform: translate(12px, -52%) rotate(2deg);
-    width: 85px;
-    height: 305px;
-    opacity: 0.6;
-  }
-  85% {
-    transform: translate(-8px, -48%) rotate(-1deg);
-    width: 90px;
-    height: 335px;
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate(0, -50%) rotate(0deg);
-    width: 80px;
-    height: 320px;
-    opacity: 0.8;
   }
 }

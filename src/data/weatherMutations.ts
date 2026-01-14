@@ -74,20 +74,20 @@ export const getWeatherMutationsByColor = (color: MutationColor): WeatherMutatio
  * 突变颜色配置（用于样式）
  */
 export const mutationColorConfig: Record<MutationColor, { label: string; bgColor: string; textColor: string; gradient?: string }> = {
-  '灰色': { label: '灰色突变', bgColor: '#7fadce', textColor: '#fff' },
-  '绿色': { label: '绿色突变', bgColor: '#34bc72', textColor: '#fff' },
-  '蓝色': { label: '蓝色突变', bgColor: '#3cb5fe', textColor: '#fff' },
-  '紫色': { label: '紫色突变', bgColor: '#d777ff', textColor: '#fff' },
+  '灰色': { label: '灰色突变', bgColor: '#96B2C6', textColor: '#fff' },
+  '绿色': { label: '绿色突变', bgColor: '#27D777', textColor: '#fff' },
+  '蓝色': { label: '蓝色突变', bgColor: '#65C7FF', textColor: '#fff' },
+  '紫色': { label: '紫色突变', bgColor: '#D990F9', textColor: '#fff' },
   '金色': { 
     label: '金色突变', 
-    bgColor: '#f77234', 
+    bgColor: 'rgba(245, 130, 50, 1)', 
     textColor: '#fff',
-    gradient: 'linear-gradient(135deg, #f77234 0%, #f1bd29 100%)'
+    gradient: 'linear-gradient(90deg, rgba(245, 130, 50, 1) 0%, rgba(255, 186, 49, 1) 100%)'
   },
   '彩色': { 
     label: '彩色突变', 
-    bgColor: '#50fffd', 
+    bgColor: 'rgba(121, 229, 255, 1)', 
     textColor: '#fff',
-    gradient: 'linear-gradient(90deg, #50fffd 0%, #fa8dfe 50%, #40c2ff 100%)'
+    gradient: 'linear-gradient(90deg, rgba(121, 229, 255, 1) 0%, rgba(238, 141, 250, 1) 49%, rgba(121, 229, 255, 1) 100%)'
   },
 }

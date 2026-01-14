@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { LeftOutlined, ShareAltOutlined } from '@ant-design/icons'
 import type { CropConfig, WeatherMutation } from '@/types'
 import { weatherMutations, mutationColorConfig } from '@/data/weatherMutations'
 import { calculatePrice } from '@/utils/priceCalculator'
@@ -386,7 +387,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
       <div className="calculator-header">
         {onBack && (
           <span className="back-link" onClick={onBack}>
-            &lt; 返回
+            <LeftOutlined />
           </span>
         )}
         <h3 className="calculator-title">{crop.name}</h3>
@@ -411,44 +412,50 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
           disabled={!isValidWeight || weightNum === 0}
           title="分享计算结果"
         >
-          分享结果
+          <ShareAltOutlined />
         </button>
       </div>
 
       <div className="calculator-inputs">
         <div className="input-group">
-          <div className="input-group-row">
-            <label className="input-label">重量 (kg)</label>
-            <input
-              type="number"
-              className="input-field"
-              value={weight}
-              onChange={(e) => handleWeightChange(e.target.value)}
-              placeholder={`最大: ${crop.maxWeight}`}
-              min="0"
-              max={crop.maxWeight}
-              step="0.01"
+          <div className="input-group-row-with-image">
+            <div className="input-fields-wrapper">
+              <div className="input-group-row">
+                <label className="input-label">重量 (kg)</label>
+                <input
+                  type="number"
+                  className="input-field"
+                  value={weight}
+                  onChange={(e) => handleWeightChange(e.target.value)}
+                  placeholder={`最大: ${crop.maxWeight}`}
+                  min="0"
+                  max={crop.maxWeight}
+                  step="0.01"
+                />
+              </div>
+              <div className="input-group-row">
+                <label className="input-label">百分比 (%)</label>
+                <input
+                  type="number"
+                  className="input-field"
+                  value={percentage}
+                  onChange={(e) => handlePercentageChange(e.target.value)}
+                  placeholder="范围: 1-100%"
+                  min="1"
+                  max="100"
+                  step="1"
+                />
+              </div>
+            </div>
+            <img 
+              src={`https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/${crop.name}.png`}
+              alt={crop.name}
+              className="crop-image"
             />
           </div>
           {weightNum > crop.maxWeight && (
             <span className="input-error">重量不能超过 {crop.maxWeight}kg</span>
           )}
-        </div>
-
-        <div className="input-group">
-          <div className="input-group-row">
-            <label className="input-label">百分比 (%)</label>
-            <input
-              type="number"
-              className="input-field"
-              value={percentage}
-              onChange={(e) => handlePercentageChange(e.target.value)}
-              placeholder="范围: 1-100%"
-              min="1"
-              max="100"
-              step="1"
-            />
-          </div>
         </div>
 
         {/* 品质突变（互斥，不显示checkbox） */}
@@ -490,9 +497,14 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
         <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>
             <div className="share-modal-header">
+              <img 
+                src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/田园阿公.png" 
+                alt="阿公" 
+                className="share-modal-title-image"
+              />
               <h3>分享计算结果</h3>
-              <button className="share-modal-close" onClick={() => setShowShareModal(false)}>×</button>
             </div>
+            <button className="share-modal-close" onClick={() => setShowShareModal(false)}>×</button>
             <div className="share-modal-content">
               <div className="share-url-container">
                 <input
