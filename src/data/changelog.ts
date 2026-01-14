@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.0.3',
+    date: '2026.1.14',
+    items: [
+      '优化全局字体显示效果，使用资源圆角中文字体',
+      '优化更新日志滚动区域高度计算，修复内容溢出问题',
+    ],
+  },
+  {
     version: 'V2.0.2',
     date: '2026.1.14',
     items: [

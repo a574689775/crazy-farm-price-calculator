@@ -1,10 +1,10 @@
-/* @font-face {
-  font-family: 'GenJyuuGothic Bold';
-  src: url('https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/GenJyuuGothic-Bold.ttf') format('truetype');
-  font-weight: 700;
+@font-face {
+  font-family: 'ResourceHanRoundedCN Medium';
+  src: url('https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/ResourceHanRoundedCN-Medium.ttf') format('truetype');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
-} */
+}
 
 html, body {
   height: 100%;
@@ -14,7 +14,7 @@ html, body {
 }
 
 body {
-  /* font-family: 'GenJyuuGothic Bold', sans-serif; */
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;

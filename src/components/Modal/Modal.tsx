@@ -70,7 +70,9 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
         )}
         <button className="modal-close" onClick={onClose}>×</button>
         <div className="modal-body">
-          {children}
+          <div className="modal-body-content">
+            {children}
+          </div>
         </div>
       </div>
     </div>
