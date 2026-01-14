@@ -21,7 +21,7 @@ export const Footer = () => {
               用户群
             </button>
             <button className="footer-link" onClick={() => setShowDonateModal(true)}>
-              捐赠作者
+              支持作者
             </button>
             <button className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
               免责声明
@@ -70,19 +70,19 @@ export const Footer = () => {
       <Modal
         isOpen={showDonateModal}
         onClose={() => setShowDonateModal(false)}
-        title="请开发者喝杯咖啡☕"
+        title="支持作者"
       >
         <div className="modal-text">
-          <p>独立开发不易，服务器和域名都需要成本 💰</p>
-          <p>如果这个工具对你有帮助，欢迎请我喝杯咖啡 ☕</p>
-          <p>你的支持是我持续更新的动力 ❤️</p>
+          <p>服务器和域名每个月都要续费，成本不小</p>
+          <p>如果这个工具对你有用，支持一下，非常感谢</p>
+          <p>你的支持是我持续更新的动力</p>
         </div>
         <img
           src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/收款码1.12.png"
           alt="捐赠二维码"
           className="modal-qrcode"
         />
-        <p className="modal-hint">扫码支持，感谢你的慷慨 ❤️</p>
+        <p className="modal-hint">扫码支持，感谢你的慷慨</p>
       </Modal>
 
       {/* 免责声明模态框 */}
