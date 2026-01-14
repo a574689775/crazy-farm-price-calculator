@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import type { CropConfig, WeatherMutation } from '@/types'
 import { weatherMutations, mutationColorConfig } from '@/data/weatherMutations'
 import { calculatePrice } from '@/utils/priceCalculator'
+import { generateShareUrl, parseShareUrl } from '@/utils/shareEncoder'
+import { crops } from '@/data/crops'
 import './PriceCalculator.css'
 
 interface PriceCalculatorProps {
@@ -30,13 +32,41 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const [weight, setWeight] = useState<string>('')
   const [percentage, setPercentage] = useState<string>('')
   const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>(COMMON_MUTATIONS)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [shareUrl, setShareUrl] = useState<string>('')
+  const [isCopied, setIsCopied] = useState(false)
+  const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false)
+
+  // 从URL参数恢复配置（仅在首次加载时）
+  useEffect(() => {
+    if (hasRestoredFromUrl || !crop) return
+    
+    const shareData = parseShareUrl()
+    if (shareData && shareData.cropIndex < crops.length) {
+      const sharedCrop = crops[shareData.cropIndex]
+      // 如果当前作物与分享的作物匹配，恢复配置
+      if (crop.name === sharedCrop.name) {
+        setWeight(shareData.weight.toFixed(2))
+        setPercentage(shareData.percentage.toString())
+        setSelectedMutations(shareData.mutations)
+        setHasRestoredFromUrl(true)
+      }
+    }
+  }, [crop, hasRestoredFromUrl])
 
   // 当作物切换时，清空重量和突变，默认选中常见突变
   useEffect(() => {
-    setWeight('')
-    setPercentage('')
-    setSelectedMutations(COMMON_MUTATIONS)
-  }, [crop?.name])
+    // 如果已经从URL恢复过配置，不再重置
+    if (hasRestoredFromUrl) return
+    
+    // 如果URL中没有分享参数，才重置
+    const shareData = parseShareUrl()
+    if (!shareData || crops[shareData.cropIndex]?.name !== crop?.name) {
+      setWeight('')
+      setPercentage('')
+      setSelectedMutations(COMMON_MUTATIONS)
+    }
+  }, [crop?.name, hasRestoredFromUrl])
 
   if (!crop) {
     return (
@@ -327,6 +357,30 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
           </span>
         )}
         <h3 className="calculator-title">{crop.name}</h3>
+        <button
+          className="share-header-button"
+          onClick={() => {
+            if (isValidWeight && weightNum > 0) {
+              const cropIndex = crops.findIndex(c => c.name === crop.name)
+              if (cropIndex !== -1) {
+                const percentageNum = parseFloat(percentage) || 0
+                const url = generateShareUrl({
+                  cropIndex,
+                  weight: weightNum,
+                  percentage: percentageNum || Math.round((weightNum / crop.maxWeight) * 100),
+                  mutations: selectedMutations,
+                })
+                setShareUrl(url)
+                setIsCopied(false)
+                setShowShareModal(true)
+              }
+            }
+          }}
+          disabled={!isValidWeight || weightNum === 0}
+          title="分享计算结果"
+        >
+          分享结果
+        </button>
       </div>
 
       <div className="calculator-inputs">
@@ -391,6 +445,57 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
         <span className="result-label">最终价格</span>
         <span className="result-value-large">{displayPrice}</span>
       </div>
+
+      {/* 分享弹窗 */}
+      {showShareModal && (
+        <div className="share-modal-overlay" onClick={() => {
+          setShowShareModal(false)
+          setIsCopied(false)
+        }}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="share-modal-header">
+              <h3>分享计算结果</h3>
+              <button className="share-modal-close" onClick={() => {
+                setShowShareModal(false)
+                setIsCopied(false)
+              }}>×</button>
+            </div>
+            <div className="share-modal-content">
+              <div className="share-url-container">
+                <input
+                  type="text"
+                  className="share-url-input"
+                  value={shareUrl}
+                  readOnly
+                  onClick={(e) => e.currentTarget.select()}
+                />
+                <button
+                  className="share-copy-button"
+                  disabled={isCopied}
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                      setIsCopied(true)
+                    }).catch(() => {
+                      // 降级方案：手动选择文本
+                      const input = document.querySelector('.share-url-input') as HTMLInputElement
+                      if (input) {
+                        input.select()
+                        document.execCommand('copy')
+                        setIsCopied(true)
+                      }
+                    })
+                  }}
+                >
+                  {isCopied ? '已复制' : '复制链接'}
+                </button>
+              </div>
+              <div className="share-info">
+                <p>复制链接发送给好友</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

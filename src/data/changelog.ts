@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V1.6.0',
+    date: '2026.1.14',
+    items: [
+      '新增分享功能，可以把自己的计算结果分享给好友',
+      '好友打开链接就能看到你的配置和价格，不用再截图了',
+    ],
+  },
+  {
     version: 'V1.5.1',
     date: '2026.1.13',
     items: [
