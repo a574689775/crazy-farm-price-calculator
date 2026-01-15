@@ -263,6 +263,28 @@
   font-weight: 700;
 }
 
+.value-with-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.value-text {
+  color: rgba(132, 49, 0, 1);
+}
+
+.diff-improved {
+  color: #27D777;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.diff-worsened {
+  color: #ff6b6b;
+  font-weight: 700;
+  font-size: 12px;
+}
+
 .accuracy-high {
   color: #27D777;
   font-weight: 700;
@@ -276,6 +298,76 @@
 .accuracy-low {
   color: #ff6b6b;
   font-weight: 700;
+}
+
+.feedback-deleted-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 212, 176, 0.3);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: rgba(132, 49, 0, 0.7);
+}
+
+.feedback-restore-all {
+  padding: 4px 12px;
+  background: rgba(39, 215, 119, 0.2);
+  border: 1px solid rgba(39, 215, 119, 0.5);
+  border-radius: 6px;
+  color: rgba(132, 49, 0, 1);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feedback-restore-all:hover {
+  background: rgba(39, 215, 119, 0.3);
+}
+
+.feedback-delete-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid rgba(255, 107, 107, 0.5);
+  border-radius: 50%;
+  color: #ff6b6b;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feedback-delete-btn:hover {
+  background: rgba(255, 107, 107, 0.3);
+  transform: scale(1.1);
+}
+
+.feedback-restore-btn {
+  padding: 4px 8px;
+  background: rgba(39, 215, 119, 0.2);
+  border: 1px solid rgba(39, 215, 119, 0.5);
+  border-radius: 4px;
+  color: rgba(132, 49, 0, 1);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feedback-restore-btn:hover {
+  background: rgba(39, 215, 119, 0.3);
+}
+
+.feedback-deleted-row {
+  opacity: 0.5;
+  background: rgba(255, 212, 176, 0.1) !important;
 }
 
 @media (max-width: 768px) {

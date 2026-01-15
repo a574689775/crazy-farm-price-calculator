@@ -6,7 +6,6 @@
 
 .feedback-question-text {
   color: rgba(132, 49, 0, 1);
-  font-family: 'HarmonyOS Sans', sans-serif;
   font-style: normal;
   font-size: 16px;
   font-weight: 700;
@@ -28,7 +27,6 @@
   border-radius: 4px;
   background: rgba(132, 49, 0, 1);
   color: #FFFFFF;
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 0.875rem;
   font-weight: 700;
@@ -65,7 +63,6 @@
 
 .feedback-label {
   color: rgba(132, 49, 0, 1);
-  font-family: 'HarmonyOS Sans', sans-serif;
   font-style: normal;
   font-size: 14px;
   font-weight: 700;
@@ -89,7 +86,6 @@
   color: rgba(132, 49, 0, 1);
   border: 2px solid rgba(255, 212, 176, 1);
   border-radius: 20px;
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 14px;
   font-weight: 600;
@@ -107,7 +103,6 @@
 
 .feedback-input::placeholder {
   color: rgba(132, 49, 0, 0.5);
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 14px;
   font-weight: 600;
@@ -120,7 +115,6 @@
   position: absolute;
   right: 16px;
   color: rgba(132, 49, 0, 1);
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 14px;
   font-weight: 700;
@@ -131,7 +125,6 @@
 
 .feedback-hint {
   color: rgba(132, 49, 0, 0.7);
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 12px;
   font-weight: 600;
@@ -148,7 +141,6 @@
   border: 2px solid rgba(132, 49, 0, 0.3);
   border-radius: 12px;
   color: rgba(132, 49, 0, 1);
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 14px;
   font-weight: 600;
@@ -164,7 +156,6 @@
   border-radius: 4px;
   background: rgba(132, 49, 0, 1);
   color: #FFFFFF;
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 0.875rem;
   font-weight: 700;
@@ -202,7 +193,6 @@
 
 .feedback-success-text {
   color: rgba(132, 49, 0, 1);
-  font-family: 'HarmonyOS Sans', sans-serif;
   font-style: normal;
   font-size: 20px;
   font-weight: 700;
@@ -214,7 +204,6 @@
 
 .feedback-success-desc {
   color: rgba(132, 49, 0, 0.7);
-  font-family: 'Alimama FangYuanTi VF', sans-serif;
   font-style: normal;
   font-size: 14px;
   font-weight: 600;

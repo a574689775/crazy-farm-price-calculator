@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase, type FeedbackData } from '@/utils/supabase'
 import { crops } from '@/data/crops'
-import { formatPrice, parseFormattedPrice } from '@/utils/priceCalculator'
+import { formatPrice, parseFormattedPrice, convertToYuan } from '@/utils/priceCalculator'
 import { getWeatherMutation } from '@/data/weatherMutations'
 import type { CropConfig, WeatherMutation } from '@/types'
 import './FeedbackDataView.css'
@@ -23,6 +23,7 @@ export const FeedbackDataView = () => {
   const [error, setError] = useState<string>('')
   const [adjustedCoefficient, setAdjustedCoefficient] = useState<number | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
+  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set())
 
   // 获取所有反馈数据
   const fetchFeedbackData = async (cropName?: string) => {
@@ -72,6 +73,7 @@ export const FeedbackDataView = () => {
   const handleCropSelect = (crop: CropConfig) => {
     setSelectedCrop(crop)
     setAdjustedCoefficient(null) // 重置调整后的基数
+    setDeletedIds(new Set()) // 清除删除记录
     fetchFeedbackData(crop.name)
   }
 
@@ -79,7 +81,27 @@ export const FeedbackDataView = () => {
   const handleClearFilter = () => {
     setSelectedCrop(null)
     setAdjustedCoefficient(null)
+    setDeletedIds(new Set()) // 清除删除记录
     fetchFeedbackData()
+  }
+
+  // 删除记录（仅前端隐藏）
+  const handleDeleteRecord = (id: number) => {
+    setDeletedIds(prev => new Set([...prev, id]))
+  }
+
+  // 恢复删除的记录
+  const handleRestoreRecord = (id: number) => {
+    setDeletedIds(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(id)
+      return newSet
+    })
+  }
+
+  // 获取过滤后的数据（排除已删除的记录）
+  const getFilteredData = () => {
+    return feedbackData.filter(item => !deletedIds.has(item.id))
   }
 
   // 解析突变并计算倍数
@@ -145,22 +167,14 @@ export const FeedbackDataView = () => {
     }
   }
 
-  // 获取实际价格（准确的数据用计算价格，但保留两位小数）
+  // 获取实际价格
   const getActualPrice = (item: FeedbackRecord): number => {
     if (item.is_accurate) {
-      // 准确的数据：用户看到的是格式化后的价格（如"2.07亿"）
-      // 需要从格式化价格反推实际价格，确保与用户看到的一致
+      // 准确的数据：用户看到的是格式化后的价格（如"2.07亿"），需要从格式化价格反推
+      // 这样与实际用户看到的精度一致（补0）
       const formatted = formatPrice(item.calculated_price)
       const { value, unit } = parseFormattedPrice(formatted)
-      
-      // 转换回元
-      if (unit === '亿') {
-        return value * 100_000_000
-      } else if (unit === '万') {
-        return value * 10_000
-      } else {
-        return value
-      }
+      return convertToYuan(value, unit)
     }
     return item.actual_price || item.calculated_price
   }
@@ -169,12 +183,16 @@ export const FeedbackDataView = () => {
   const statistics = useMemo(() => {
     if (!selectedCrop || feedbackData.length === 0) return null
 
+    // 使用过滤后的数据（排除已删除的记录）
+    const filteredData = getFilteredData()
+    if (filteredData.length === 0) return null
+
     const currentCoefficient = adjustedCoefficient ?? selectedCrop.priceCoefficient
     const actualPrices: number[] = []
     const adjustedPrices: number[] = []
     const originalPrices: number[] = []
 
-    feedbackData.forEach(item => {
+    filteredData.forEach(item => {
       const actualPrice = getActualPrice(item)
       const { adjustedPrice } = calculateAdjustedPrice(item, currentCoefficient)
       
@@ -197,9 +215,64 @@ export const FeedbackDataView = () => {
         ? ((avgOriginalError - avgAdjustedError) / avgOriginalError) * 100 
         : 0
     }
-  }, [selectedCrop, feedbackData, adjustedCoefficient])
+  }, [selectedCrop, feedbackData, adjustedCoefficient, deletedIds])
 
-  // 自动计算最优基数
+  // 计算给定系数下的平均误差
+  const calculateAverageError = (
+    coefficient: number,
+    data: Array<{ actualPrice: number; multiplier: number; weightPower: number }>
+  ): number => {
+    let totalError = 0
+    for (const item of data) {
+      const calculatedPrice = coefficient * item.multiplier * item.weightPower
+      const error = Math.abs(calculatedPrice - item.actualPrice)
+      totalError += error
+    }
+    return totalError / data.length
+  }
+
+  // 使用最小二乘法计算最优系数
+  // 公式：coefficient = Σ(price * multiplier * weightPower) / Σ((multiplier * weightPower)^2)
+  const calculateCoefficientByLeastSquares = (
+    data: Array<{ actualPrice: number; multiplier: number; weightPower: number }>
+  ): number => {
+    let numerator = 0  // Σ(price * multiplier * weightPower)
+    let denominator = 0  // Σ((multiplier * weightPower)^2)
+
+    for (const item of data) {
+      const factor = item.multiplier * item.weightPower
+      numerator += item.actualPrice * factor
+      denominator += factor * factor
+    }
+
+    if (denominator === 0) {
+      return 0
+    }
+
+    return numerator / denominator
+  }
+
+  // 去除异常值（使用IQR方法）
+  const removeOutliers = (
+    coefficients: number[]
+  ): number[] => {
+    if (coefficients.length < 4) {
+      return coefficients  // 数据太少，不进行异常值检测
+    }
+
+    const sorted = [...coefficients].sort((a, b) => a - b)
+    const q1Index = Math.floor(sorted.length * 0.25)
+    const q3Index = Math.floor(sorted.length * 0.75)
+    const q1 = sorted[q1Index]
+    const q3 = sorted[q3Index]
+    const iqr = q3 - q1
+    const lowerBound = q1 - 1.5 * iqr
+    const upperBound = q3 + 1.5 * iqr
+
+    return coefficients.filter(coeff => coeff >= lowerBound && coeff <= upperBound)
+  }
+
+  // 自动计算最优基数：使用最小二乘法 + 异常值处理
   const calculateOptimalCoefficient = () => {
     if (!selectedCrop || feedbackData.length === 0) return
 
@@ -208,73 +281,88 @@ export const FeedbackDataView = () => {
     // 使用 setTimeout 让 UI 有机会更新
     setTimeout(() => {
       try {
-        const baseCoefficient = selectedCrop.priceCoefficient
-        const actualPrices: number[] = []
-        const multipliers: number[] = []
-        const weights: number[] = []
+        // 获取过滤后的数据（排除已删除的记录）
+        const filteredData = getFilteredData()
+        
+        if (filteredData.length === 0) {
+          setIsCalculating(false)
+          setError('没有可用的数据')
+          return
+        }
 
         // 预处理数据
-        feedbackData.forEach(item => {
+        const processedData = filteredData.map(item => {
           const actualPrice = getActualPrice(item)
           const { totalMultiplier } = parseMutations(item.mutations)
-          
-          actualPrices.push(actualPrice)
-          multipliers.push(totalMultiplier)
-          weights.push(Math.pow(item.weight, 1.5))
+          const weightPower = Math.pow(item.weight, 1.5)
+          return {
+            actualPrice,
+            multiplier: totalMultiplier,
+            weightPower
+          }
         })
 
-        // 搜索范围：当前基数的 50% 到 200%
-        const minCoefficient = baseCoefficient * 0.5
-        const maxCoefficient = baseCoefficient * 2.0
-        const step = Math.max(baseCoefficient * 0.001, 0.01) // 步长为基数的 0.1% 或最小 0.01
+        const baseCoefficient = selectedCrop.priceCoefficient
 
-        let bestCoefficient = baseCoefficient
-        let minError = Infinity
+        // 方法1：使用最小二乘法（最科学的方法）
+        const leastSquaresCoefficient = calculateCoefficientByLeastSquares(processedData)
+        
+        // 方法2：反推系数后去除异常值，再取中位数（对异常值更鲁棒）
+        const reversedCoefficients = processedData
+          .map(item => {
+            const factor = item.multiplier * item.weightPower
+            if (factor > 0 && item.actualPrice > 0) {
+              return item.actualPrice / factor
+            }
+            return null
+          })
+          .filter((coeff): coeff is number => coeff !== null)
+        
+        const cleanedCoefficients = removeOutliers(reversedCoefficients)
+        const medianCoefficient = cleanedCoefficients.length > 0
+          ? cleanedCoefficients.sort((a, b) => a - b)[Math.floor(cleanedCoefficients.length / 2)]
+          : baseCoefficient
 
-        // 粗搜索：大步长
-        for (let coeff = minCoefficient; coeff <= maxCoefficient; coeff += step * 10) {
-          let totalError = 0
-          
-          for (let i = 0; i < feedbackData.length; i++) {
-            const calculatedPrice = coeff * multipliers[i] * weights[i]
-            const error = Math.abs(calculatedPrice - actualPrices[i])
-            totalError += error
-          }
-          
-          const avgError = totalError / feedbackData.length
-          
-          if (avgError < minError) {
-            minError = avgError
-            bestCoefficient = coeff
-          }
+        // 比较两种方法，选择误差更小的
+        const lsError = calculateAverageError(leastSquaresCoefficient, processedData)
+        const medianError = calculateAverageError(medianCoefficient, processedData)
+        const baseError = calculateAverageError(baseCoefficient, processedData)
+
+        let bestCoefficient = lsError < medianError ? leastSquaresCoefficient : medianCoefficient
+        let minError = Math.min(lsError, medianError)
+
+        // 如果两种方法都不如原始基数，使用原始基数
+        if (baseError < minError) {
+          bestCoefficient = baseCoefficient
+          minError = baseError
         }
 
-        // 细搜索：在最优值附近小步长搜索
-        const fineSearchRange = step * 10
-        const fineMin = Math.max(minCoefficient, bestCoefficient - fineSearchRange)
-        const fineMax = Math.min(maxCoefficient, bestCoefficient + fineSearchRange)
-
-        for (let coeff = fineMin; coeff <= fineMax; coeff += step) {
-          let totalError = 0
-          
-          for (let i = 0; i < feedbackData.length; i++) {
-            const calculatedPrice = coeff * multipliers[i] * weights[i]
-            const error = Math.abs(calculatedPrice - actualPrices[i])
-            totalError += error
-          }
-          
-          const avgError = totalError / feedbackData.length
-          
-          if (avgError < minError) {
-            minError = avgError
-            bestCoefficient = coeff
-          }
-        }
-
-        // 保留合理的小数位数
+        // 保留2位小数
         bestCoefficient = Math.round(bestCoefficient * 100) / 100
         
-        setAdjustedCoefficient(bestCoefficient)
+        const improvement = ((baseError - minError) / baseError) * 100
+        
+        console.log('自动计算结果:', {
+          原始基数: baseCoefficient,
+          最小二乘法系数: leastSquaresCoefficient.toFixed(2),
+          中位数系数: medianCoefficient.toFixed(2),
+          最优基数: bestCoefficient,
+          原始平均误差: baseError.toFixed(2),
+          最小二乘法误差: lsError.toFixed(2),
+          中位数误差: medianError.toFixed(2),
+          最优平均误差: minError.toFixed(2),
+          改善: improvement.toFixed(2) + '%',
+          样本数量: processedData.length,
+          去除异常值后数量: cleanedCoefficients.length
+        })
+        
+        // 只要有改善就更新（即使很小）
+        if (improvement > 0) {
+          setAdjustedCoefficient(bestCoefficient)
+        } else {
+          // 如果没有改善，保持当前基数
+          setAdjustedCoefficient(baseCoefficient)
+        }
       } catch (err) {
         console.error('计算最优基数失败:', err)
         setError('计算最优基数失败')
@@ -288,7 +376,8 @@ export const FeedbackDataView = () => {
   const getCropStats = () => {
     if (!selectedCrop) return null
 
-    const cropData = feedbackData.filter(item => item.crop_name === selectedCrop.name)
+    const filteredData = getFilteredData()
+    const cropData = filteredData.filter(item => item.crop_name === selectedCrop.name)
     const total = cropData.length
     const accurate = cropData.filter(item => item.is_accurate).length
     const inaccurate = cropData.filter(item => !item.is_accurate).length
@@ -413,53 +502,123 @@ export const FeedbackDataView = () => {
           ) : feedbackData.length === 0 ? (
             <div className="feedback-empty">暂无 {selectedCrop.name} 的反馈数据</div>
           ) : (
-            <div className="feedback-data-table-wrapper">
-              <table className="feedback-data-table">
-                <thead>
-                  <tr>
-                    <th>作物</th>
-                    <th>重量</th>
-                    <th>突变倍数</th>
-                    <th>计算价格</th>
-                    <th>调整后价格</th>
-                    <th>实际价格</th>
-                    <th>误差</th>
-                    <th>准确率</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {feedbackData.map((item) => {
+            <>
+              {deletedIds.size > 0 && (
+                <div className="feedback-deleted-info">
+                  <span>已隐藏 {deletedIds.size} 条记录</span>
+                  <button 
+                    className="feedback-restore-all"
+                    onClick={() => setDeletedIds(new Set())}
+                  >
+                    恢复全部
+                  </button>
+                </div>
+              )}
+              <div className="feedback-data-table-wrapper">
+                <table className="feedback-data-table">
+                  <thead>
+                    <tr>
+                      <th>操作</th>
+                      <th>作物</th>
+                      <th>重量</th>
+                      <th>突变倍数</th>
+                      <th>计算价格</th>
+                      <th>调整后价格</th>
+                      <th>实际价格</th>
+                      <th>误差</th>
+                      <th>准确率</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {getFilteredData().map((item) => {
                     const { totalMultiplier } = parseMutations(item.mutations)
                     const currentCoefficient = adjustedCoefficient ?? selectedCrop!.priceCoefficient
                     const { adjustedPrice, formattedAdjustedPrice } = calculateAdjustedPrice(item, currentCoefficient)
                     const actualPrice = getActualPrice(item)
                     
-                    // 计算误差（调整后价格与实际价格的差值）
-                    const error = Math.abs(adjustedPrice - actualPrice)
-                    
-                    // 计算准确率（1 - 相对误差）* 100%
-                    const accuracy = actualPrice > 0 
-                      ? Math.max(0, (1 - error / actualPrice) * 100) 
+                    // 计算原始误差和准确率
+                    const originalError = Math.abs(item.calculated_price - actualPrice)
+                    const originalAccuracy = actualPrice > 0 
+                      ? Math.max(0, (1 - originalError / actualPrice) * 100) 
                       : 0
+                    
+                    // 计算调整后误差和准确率
+                    const adjustedError = Math.abs(adjustedPrice - actualPrice)
+                    const adjustedAccuracy = actualPrice > 0 
+                      ? Math.max(0, (1 - adjustedError / actualPrice) * 100) 
+                      : 0
+                    
+                    // 判断改善情况（只有调整了基数时才显示差值）
+                    const isAdjusted = adjustedCoefficient !== null && adjustedCoefficient !== selectedCrop!.priceCoefficient
+                    const accuracyDiff = isAdjusted ? adjustedAccuracy - originalAccuracy : 0
 
                     return (
                       <tr key={item.id}>
+                        <td>
+                          <button
+                            className="feedback-delete-btn"
+                            onClick={() => handleDeleteRecord(item.id)}
+                            title="删除此记录（仅前端隐藏）"
+                          >
+                            ×
+                          </button>
+                        </td>
                         <td>{item.crop_name}</td>
                         <td>{item.weight}kg</td>
                         <td>{totalMultiplier.toFixed(2)}×</td>
                         <td>{formatPrice(item.calculated_price)}</td>
                         <td>{formattedAdjustedPrice}</td>
                         <td>{formatPrice(actualPrice)}</td>
-                        <td>{formatPrice(error)}</td>
-                        <td className={accuracy >= 95 ? 'accuracy-high' : accuracy >= 90 ? 'accuracy-medium' : 'accuracy-low'}>
-                          {accuracy.toFixed(2)}%
+                        <td>{formatPrice(adjustedError)}</td>
+                        <td className={adjustedAccuracy >= 95 ? 'accuracy-high' : adjustedAccuracy >= 90 ? 'accuracy-medium' : 'accuracy-low'}>
+                          <span className="value-with-indicator">
+                            <span className="value-text">{adjustedAccuracy.toFixed(2)}%</span>
+                            {isAdjusted && accuracyDiff !== 0 && (
+                              <span className={accuracyDiff > 0 ? 'diff-improved' : 'diff-worsened'}>
+                                {accuracyDiff > 0 ? '+' : ''}{accuracyDiff.toFixed(2)}%
+                              </span>
+                            )}
+                          </span>
                         </td>
+                      </tr>
+                    )
+                  })}
+                  {deletedIds.size > 0 && feedbackData.filter(item => deletedIds.has(item.id)).map((item) => {
+                    const { totalMultiplier } = parseMutations(item.mutations)
+                    const currentCoefficient = adjustedCoefficient ?? selectedCrop!.priceCoefficient
+                    const { adjustedPrice, formattedAdjustedPrice } = calculateAdjustedPrice(item, currentCoefficient)
+                    const actualPrice = getActualPrice(item)
+                    const adjustedError = Math.abs(adjustedPrice - actualPrice)
+                    const adjustedAccuracy = actualPrice > 0 
+                      ? Math.max(0, (1 - adjustedError / actualPrice) * 100) 
+                      : 0
+
+                    return (
+                      <tr key={item.id} className="feedback-deleted-row">
+                        <td>
+                          <button
+                            className="feedback-restore-btn"
+                            onClick={() => handleRestoreRecord(item.id)}
+                            title="恢复此记录"
+                          >
+                            恢复
+                          </button>
+                        </td>
+                        <td>{item.crop_name}</td>
+                        <td>{item.weight}kg</td>
+                        <td>{totalMultiplier.toFixed(2)}×</td>
+                        <td>{formatPrice(item.calculated_price)}</td>
+                        <td>{formattedAdjustedPrice}</td>
+                        <td>{formatPrice(actualPrice)}</td>
+                        <td>{formatPrice(adjustedError)}</td>
+                        <td>{adjustedAccuracy.toFixed(2)}%</td>
                       </tr>
                     )
                   })}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
         </div>
       </div>

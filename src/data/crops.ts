@@ -26,16 +26,16 @@ export const crops: CropConfig[] = [
   { name: '南瓜', priceCoefficient: 12.9, maxWeight: 205.00, weatherMutations: 81, specialMutations: ['万圣夜'], maxPrices: { '普通': 310.48, '银': 931.44, '金': 3104.81, '水晶': 6209.61, '流光': 9314.42 } },
   { name: '草莓', priceCoefficient: 8709.29, maxWeight: 8.50, weatherMutations: 81, specialMutations: ['连体'], maxPrices: { '普通': 1769.80, '银': 5309.41, '金': 17698.03, '水晶': 35396.07, '流光': 53094.10 } },
   { name: '猕猴桃', priceCoefficient: 2100, maxWeight: 13.50, weatherMutations: 81, maxPrices: { '普通': 854.15, '银': 2562.45, '金': 8541.49, '水晶': 17082.99, '流光': 25624.48 } },
-  { name: '荔枝', priceCoefficient: 202.48, maxWeight: 24.50, weatherMutations: 81, maxPrices: { '普通': 201.35, '银': 604.04, '金': 2013.47, '水晶': 4026.94, '流光': 6040.41 } },
+  { name: '荔枝', priceCoefficient: 790.2, maxWeight: 24.50, weatherMutations: 81, maxPrices: { '普通': 201.35, '银': 604.04, '金': 2013.47, '水晶': 4026.94, '流光': 6040.41 } },
   { name: '榴莲', priceCoefficient: 790.19, maxWeight: 61.50, weatherMutations: 81, maxPrices: { '普通': 3125.06, '银': 9375.17, '金': 31250.58, '水晶': 62501.16, '流光': 93751.73 } },
   { name: '向日葵', priceCoefficient: 370, maxWeight: 51.00, weatherMutations: 81, specialMutations: ['笑日葵'], maxPrices: { '普通': 1105.02, '银': 3315.07, '金': 11050.22, '水晶': 22100.44, '流光': 33150.65 } },
   { name: '松果', priceCoefficient: 4600, maxWeight: 17.00, weatherMutations: 81, maxPrices: { '普通': 2643.90, '银': 7931.70, '金': 26439.00, '水晶': 52878.01, '流光': 79317.01 } },
-  { name: '大王菊', priceCoefficient: 25000, maxWeight: 10.20, weatherMutations: 81, maxPrices: { '普通': 6678.12, '银': 20034.36, '金': 66781.18, '水晶': 133562.37, '流光': 200343.55 } },
+  { name: '大王菊', priceCoefficient: 24827.26, maxWeight: 10.20, weatherMutations: 81, maxPrices: { '普通': 6678.12, '银': 20034.36, '金': 66781.18, '水晶': 133562.37, '流光': 200343.55 } },
   { name: '葡萄', priceCoefficient: 24832.04, maxWeight: 10.20, weatherMutations: 81, maxPrices: { '普通': 6633.25, '银': 19899.76, '金': 66332.52, '水晶': 132665.04, '流光': 198997.56 } },
   { name: '蟠桃', priceCoefficient: 8782.12, maxWeight: 20.40, weatherMutations: 81, maxPrices: { '普通': 6635.27, '银': 19905.81, '金': 66352.68, '水晶': 132705.36, '流光': 199058.04 } },
-  { name: '惊奇菇', priceCoefficient: 49662.09, maxWeight: 10.20, weatherMutations: 81, maxPrices: { '普通': 13265.98, '银': 39797.92, '金': 132659.73, '水晶': 265319.46, '流光': 397979.19 } },
+  { name: '惊奇菇', priceCoefficient: 49662.01, maxWeight: 10.20, weatherMutations: 81, maxPrices: { '普通': 13265.98, '银': 39797.92, '金': 132659.73, '水晶': 265319.46, '流光': 397979.19 } },
   { name: '仙人掌象', priceCoefficient: 9527.55, maxWeight: 34.00, weatherMutations: 81, maxPrices: { '普通': 15488.64, '银': 46465.94, '金': 154886.46, '水晶': 309772.93, '流光': 464659.39 } },
-  { name: '魔鬼朝天椒', priceCoefficient: 33125.96, maxWeight: 10.20, weatherMutations: 81, maxPrices: { '普通': 8848.77, '银': 26546.29, '金': 88487.63, '水晶': 176975.27, '流光': 265462.90 } },
+  { name: '魔鬼朝天椒', priceCoefficient: 33142.8, maxWeight: 10.20, weatherMutations: 81, maxPrices: { '普通': 8848.77, '银': 26546.29, '金': 88487.63, '水晶': 176975.27, '流光': 265462.90 } },
 ]
 
 /**

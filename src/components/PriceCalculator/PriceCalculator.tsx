@@ -378,7 +378,11 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
               >
                 <span className="mutation-name">{mutationName}</span>
                 {isSelected && (
-                  <span className="mutation-checkmark">✓</span>
+                  <img 
+                    className="mutation-checkmark" 
+                    src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/对号.png" 
+                    alt="选中"
+                  />
                 )}
               </div>
             )
