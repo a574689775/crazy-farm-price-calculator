@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.1.1',
+    date: '2026.1.15',
+    items: [
+      '回退突变选中效果',
+    ],
+  },
+  {
     version: 'V2.1.0',
     date: '2026.1.15',
     items: [
