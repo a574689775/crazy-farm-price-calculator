@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.1.0',
+    date: '2026.1.15',
+    items: [
+      '增加价格反馈功能，收集真实价格精进准确度',
+      '更新用户群二维码',
+      '优化突变选中效果'
+    ],
+  },
+  {
     version: 'V2.0.3',
     date: '2026.1.14',
     items: [

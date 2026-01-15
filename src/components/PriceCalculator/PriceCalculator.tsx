@@ -6,6 +6,7 @@ import { calculatePrice } from '@/utils/priceCalculator'
 import { generateShareUrl, parseShareUrl } from '@/utils/shareEncoder'
 import { crops } from '@/data/crops'
 import { Modal } from '@/components/Modal'
+import { PriceFeedback } from '@/components/PriceFeedback'
 import './PriceCalculator.css'
 
 interface PriceCalculatorProps {
@@ -39,6 +40,8 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const [shareUrl, setShareUrl] = useState<string>('')
   const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false)
   const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState<string>('')
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
 
   // 获取当前选中的品质突变（银、金、水晶、流光）
   const getSelectedQuality = (): string => {
@@ -410,9 +413,14 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                 setShareUrl(url)
                 setShowShareModal(true)
               }
+            } else {
+              setToastMessage('请先输入重量并选择突变')
+              setShowToast(true)
+              setTimeout(() => {
+                setShowToast(false)
+              }, 2000)
             }
           }}
-          disabled={!isValidWeight || weightNum === 0}
           title="分享计算结果"
         >
           <ShareAltOutlined />
@@ -484,14 +492,32 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
 
       {/* 固定底部的价格展示区域 */}
       <div className="calculator-result-fixed">
-        <span className="result-label">最终价格</span>
-        <span className="result-value-large">{displayPrice}</span>
+        <button
+          className="feedback-button"
+          onClick={() => {
+            if (isValidWeight && result) {
+              setShowFeedbackModal(true)
+            } else {
+              setToastMessage('请先输入重量并选择突变')
+              setShowToast(true)
+              setTimeout(() => {
+                setShowToast(false)
+              }, 2000)
+            }
+          }}
+        >
+          反馈
+        </button>
+        <div className="result-right">
+          <span className="result-label">价格:</span>
+          <span className="result-value-large">{displayPrice}</span>
+        </div>
       </div>
 
       {/* Toast 提示 */}
       {showToast && (
         <div className="toast">
-          <div className="toast-content">已复制到剪贴板</div>
+          <div className="toast-content">{toastMessage || '已复制到剪贴板'}</div>
         </div>
       )}
 
@@ -535,6 +561,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                   // 关闭弹窗
                   setShowShareModal(false)
                   // 显示提示
+                  setToastMessage('已复制到剪贴板')
                   setShowToast(true)
                   // 2秒后自动隐藏提示
                   setTimeout(() => {
@@ -550,6 +577,19 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
             <p>复制链接发送给好友</p>
           </div>
       </Modal>
+
+      {/* 价格反馈弹窗 */}
+      {isValidWeight && result && (
+        <PriceFeedback
+          isOpen={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          crop={crop}
+          weight={weightNum}
+          mutations={selectedMutations}
+          calculatedPrice={result.price}
+          formattedPrice={result.formattedPrice}
+        />
+      )}
     </div>
   )
 }

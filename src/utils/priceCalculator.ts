@@ -82,3 +82,43 @@ export const formatWeight = (weight: number): string => {
   return `${weight.toFixed(2)}kg`
 }
 
+/**
+ * 从格式化价格中提取单位和数值
+ * 例如: "1.5亿" -> { value: 1.5, unit: "亿" }
+ *       "123万" -> { value: 123, unit: "万" }
+ *       "456元" -> { value: 456, unit: "元" }
+ */
+export const parseFormattedPrice = (formattedPrice: string): { value: number; unit: '元' | '万' | '亿' } => {
+  if (formattedPrice.endsWith('亿')) {
+    const value = parseFloat(formattedPrice.replace('亿', ''))
+    return { value, unit: '亿' }
+  }
+  if (formattedPrice.endsWith('万')) {
+    const value = parseFloat(formattedPrice.replace('万', ''))
+    return { value, unit: '万' }
+  }
+  if (formattedPrice.endsWith('元')) {
+    const value = parseFloat(formattedPrice.replace('元', ''))
+    return { value, unit: '元' }
+  }
+  // 默认返回元
+  const value = parseFloat(formattedPrice) || 0
+  return { value, unit: '元' }
+}
+
+/**
+ * 将单位值转换为元（原始数值）
+ * @param value 用户输入的值
+ * @param unit 单位（元/万/亿）
+ * @returns 转换为元后的数值
+ */
+export const convertToYuan = (value: number, unit: '元' | '万' | '亿'): number => {
+  if (unit === '亿') {
+    return value * 100_000_000
+  }
+  if (unit === '万') {
+    return value * 10_000
+  }
+  return value
+}
+

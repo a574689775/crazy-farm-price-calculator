@@ -99,19 +99,8 @@
   fill: #843100;
 }
 
-.share-header-button:hover:not(:disabled) {
+.share-header-button:hover {
   opacity: 0.7;
-}
-
-.share-header-button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.share-header-button:disabled svg {
-  color: #843100;
-  fill: #843100;
-  opacity: 0.3;
 }
 
 .calculator-inputs {
@@ -404,11 +393,22 @@
 .mutation-checkmark {
   position: absolute;
   top: -4px;
-  right: 2px;
-  font-size: 0.875rem;
+  right: -4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: rgba(255, 252, 239, 1);
+  border: 1.5px solid rgba(255, 212, 176, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(225, 130, 73, 1) !important;
+  font-size: 10px;
   font-weight: bold;
-  color: white;
-  
+  line-height: 1;
+  flex-shrink: 0;
+  -webkit-text-stroke: 0 !important;
+  -webkit-text-fill-color: rgba(225, 130, 73, 1) !important;
 }
 
 .calculator-result {
@@ -438,6 +438,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: #e0e0e0;
+  transform: translateY(2px);
 }
 
 .result-value {
@@ -474,8 +475,16 @@
   box-sizing: border-box;
 }
 
+.calculator-result-fixed .result-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .calculator-result-fixed .result-label {
   color: rgba(132, 49, 0, 1);
+  font-family: 'HarmonyOS Sans', sans-serif;
   font-style: normal;
   font-size: 16px;
   font-weight: 700;
@@ -491,12 +500,42 @@
   font-style: normal;
   font-size: 24px;
   font-weight: 700;
-  line-height: 19px;
   letter-spacing: 0px;
   text-align: center;
   -webkit-text-stroke: 4px #fff;
   -webkit-text-fill-color: rgb(132, 49, 0);
   paint-order: stroke fill;
+}
+
+.feedback-button {
+  width: 62px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 252, 239, 1);
+  color: rgba(132, 49, 0, 1);
+  font-family: 'Alimama FangYuanTi VF', sans-serif;
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 14px;
+  letter-spacing: 0px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.feedback-button:hover {
+  opacity: 0.8;
+}
+
+.feedback-button:active {
+  opacity: 0.6;
 }
 
 .share-button {

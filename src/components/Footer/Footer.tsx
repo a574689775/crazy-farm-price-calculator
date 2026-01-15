@@ -59,7 +59,7 @@ export const Footer = () => {
         title="加入用户群"
       >
         <img
-          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/用户群1.12.png"
+          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/用户群1.15.png"
           alt="用户群二维码"
           className="modal-qrcode"
         />
@@ -78,7 +78,7 @@ export const Footer = () => {
           <p>你的支持是我持续更新的动力</p>
         </div>
         <img
-          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/收款码1.12.png"
+          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/收款码1.15.png"
           alt="捐赠二维码"
           className="modal-qrcode"
         />
