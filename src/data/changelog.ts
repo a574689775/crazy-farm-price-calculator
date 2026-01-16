@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.3.0',
+    date: '2026.1.16',
+    items: [
+      '添加页面切换滑动效果',
+    ],
+  },
+  {
     version: 'V2.2.0',
     date: '2026.1.15',
     items: [

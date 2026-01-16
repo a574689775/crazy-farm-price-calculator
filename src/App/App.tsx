@@ -34,7 +34,10 @@ export const App = () => {
 
   const handleSelectCrop = (crop: CropConfig) => {
     setSelectedCrop(crop)
-    setCurrentPage('calculator')
+    // 使用 setTimeout 确保 DOM 更新后再添加 active 类，让动画生效
+    setTimeout(() => {
+      setCurrentPage('calculator')
+    }, 0)
   }
 
   const handleBackToSelector = () => {
@@ -42,30 +45,43 @@ export const App = () => {
     const url = new URL(window.location.href)
     url.searchParams.delete('s')
     window.history.replaceState({}, '', url.toString())
-    setSelectedCrop(null)
+    // 先移除 active 类，让计算器页面滑出
     setCurrentPage('selector')
+    // 延迟清空 selectedCrop，确保动画完成后再移除 DOM
+    setTimeout(() => {
+      setSelectedCrop(null)
+    }, 300)
   }
 
   return (
     <div className="app">
-      <main className={`main ${selectedCrop ? 'has-crop' : ''}`}>
-        <div className="content-container">
-          {currentPage === 'selector' && (
-            <CropSelector
-              crops={crops}
-              selectedCrop={selectedCrop}
-              onSelectCrop={handleSelectCrop}
-            />
-          )}
-          {currentPage === 'calculator' && selectedCrop && (
-            <PriceCalculator crop={selectedCrop} onBack={handleBackToSelector} />
-          )}
+      <main className="main">
+        <div className={`content-container ${currentPage === 'calculator' ? 'calculator-active' : ''}`}>
+          {/* 选择作物页面 - 始终渲染，通过transform控制位置 */}
+          <div className="page-wrapper page-selector">
+            <div className="selector-page-container">
+              <CropSelector
+                crops={crops}
+                selectedCrop={selectedCrop}
+                onSelectCrop={handleSelectCrop}
+              />
+              <Footer />
+            </div>
+          </div>
+          
+          {/* 计算器页面 - 始终渲染，通过transform控制位置 */}
+          <div className={`page-wrapper page-calculator ${currentPage === 'calculator' && selectedCrop ? 'active' : ''}`}>
+            {selectedCrop && (
+              <PriceCalculator crop={selectedCrop} onBack={handleBackToSelector} />
+            )}
+          </div>
+          
+          {/* 反馈数据页面 - 独立处理，不参与滑动 */}
           {currentPage === 'feedback' && (
             <FeedbackDataView />
           )}
         </div>
       </main>
-      {currentPage === 'selector' && <Footer />}
     </div>
   )
 }
