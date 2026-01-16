@@ -16,9 +16,9 @@ interface PriceCalculatorProps {
 
 // 突变分组
 const QUALITY_MUTATIONS: WeatherMutation[] = ['银', '金', '水晶', '流光'] // 品质（互斥）
-const COMMON_MUTATIONS: WeatherMutation[] = ['潮湿', '生机', '覆雪', '迷雾', '颤栗', '落雷', '冰冻', '极光', '瓷化', '亮晶晶'] // 常见突变
+const COMMON_MUTATIONS: WeatherMutation[] = ['潮湿', '生机', '覆雪', '迷雾', '颤栗', '落雷', '冰冻', '瓷化', '亮晶晶'] // 常见突变
 const RARE_MUTATIONS: WeatherMutation[] = ['血月', '彩虹', '荧光', '星环', '霓虹'] // 罕见突变
-const PAST_MUTATIONS: WeatherMutation[] = ['幽魂', '惊魂夜'] // 往期突变
+const PAST_MUTATIONS: WeatherMutation[] = ['幽魂', '极光', '惊魂夜'] // 往期突变
 const INTERMEDIATE_MUTATIONS: WeatherMutation[] = ['沙尘', '灼热', '结霜', '陶化'] // 中间状态突变
 const SPECIAL_MUTATIONS: WeatherMutation[] = ['薯片', '方形', '糖葫芦', '连体', '黄瓜蛇', '万圣夜', '香蕉猴', '笑日葵'] // 异形突变
 

@@ -112,32 +112,31 @@ export const App = () => {
 
   return (
     <div className="app">
-      <main className="main">
-        <div className={`content-container ${currentPage === 'calculator' ? 'calculator-active' : ''}`}>
-          {/* 选择作物页面 - 始终渲染，通过transform控制位置 */}
-          <div className="page-wrapper page-selector">
-            <div className="selector-page-container">
-              <CropSelector
-                crops={crops}
-                selectedCrop={selectedCrop}
-                onSelectCrop={handleSelectCrop}
-              />
-              <Footer />
+      <main className={`main ${currentPage === 'feedback' ? 'feedback-mode' : ''}`}>
+        {currentPage === 'feedback' ? (
+          <FeedbackDataView />
+        ) : (
+          <div className={`content-container ${currentPage === 'calculator' ? 'calculator-active' : ''}`}>
+            {/* 选择作物页面 - 始终渲染，通过transform控制位置 */}
+            <div className="page-wrapper page-selector">
+              <div className="selector-page-container">
+                <CropSelector
+                  crops={crops}
+                  selectedCrop={selectedCrop}
+                  onSelectCrop={handleSelectCrop}
+                />
+                <Footer />
+              </div>
+            </div>
+            
+            {/* 计算器页面 - 始终渲染，通过transform控制位置 */}
+            <div className={`page-wrapper page-calculator ${currentPage === 'calculator' && selectedCrop ? 'active' : ''}`}>
+              {selectedCrop && (
+                <PriceCalculator crop={selectedCrop} onBack={handleBackToSelector} />
+              )}
             </div>
           </div>
-          
-          {/* 计算器页面 - 始终渲染，通过transform控制位置 */}
-          <div className={`page-wrapper page-calculator ${currentPage === 'calculator' && selectedCrop ? 'active' : ''}`}>
-            {selectedCrop && (
-              <PriceCalculator crop={selectedCrop} onBack={handleBackToSelector} />
-            )}
-          </div>
-          
-          {/* 反馈数据页面 - 独立处理，不参与滑动 */}
-          {currentPage === 'feedback' && (
-            <FeedbackDataView />
-          )}
-        </div>
+        )}
       </main>
     </div>
   )

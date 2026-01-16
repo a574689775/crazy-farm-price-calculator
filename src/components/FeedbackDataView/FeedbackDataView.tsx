@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { supabase, type FeedbackData } from '@/utils/supabase'
+import { supabase, type FeedbackData, deleteFeedback } from '@/utils/supabase'
 import { crops } from '@/data/crops'
 import { formatPrice, parseFormattedPrice, convertToYuan } from '@/utils/priceCalculator'
 import { getWeatherMutation } from '@/data/weatherMutations'
@@ -23,7 +23,7 @@ export const FeedbackDataView = () => {
   const [error, setError] = useState<string>('')
   const [adjustedCoefficient, setAdjustedCoefficient] = useState<number | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
-  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set())
+  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set())
 
   // 获取所有反馈数据
   const fetchFeedbackData = async (cropName?: string) => {
@@ -73,7 +73,6 @@ export const FeedbackDataView = () => {
   const handleCropSelect = (crop: CropConfig) => {
     setSelectedCrop(crop)
     setAdjustedCoefficient(null) // 重置调整后的基数
-    setDeletedIds(new Set()) // 清除删除记录
     fetchFeedbackData(crop.name)
   }
 
@@ -81,27 +80,36 @@ export const FeedbackDataView = () => {
   const handleClearFilter = () => {
     setSelectedCrop(null)
     setAdjustedCoefficient(null)
-    setDeletedIds(new Set()) // 清除删除记录
     fetchFeedbackData()
   }
 
-  // 删除记录（仅前端隐藏）
-  const handleDeleteRecord = (id: number) => {
-    setDeletedIds(prev => new Set([...prev, id]))
+  // 删除记录（从数据库删除）
+  const handleDeleteRecord = async (id: number) => {
+    if (!confirm('确定要删除这条记录吗？此操作不可恢复。')) {
+      return
+    }
+
+    setDeletingIds(prev => new Set([...prev, id]))
+    
+    try {
+      await deleteFeedback(id)
+      // 从本地状态中移除该记录
+      setFeedbackData(prev => prev.filter(item => item.id !== id))
+    } catch (err: any) {
+      console.error('删除记录失败:', err)
+      setError(err.message || '删除记录失败')
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(id)
+        return newSet
+      })
+    }
   }
 
-  // 恢复删除的记录
-  const handleRestoreRecord = (id: number) => {
-    setDeletedIds(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(id)
-      return newSet
-    })
-  }
-
-  // 获取过滤后的数据（排除已删除的记录）
+  // 获取过滤后的数据（现在不需要过滤，因为已删除的记录已经从数据库中删除）
   const getFilteredData = () => {
-    return feedbackData.filter(item => !deletedIds.has(item.id))
+    return feedbackData
   }
 
   // 解析突变并计算倍数
@@ -215,20 +223,40 @@ export const FeedbackDataView = () => {
         ? ((avgOriginalError - avgAdjustedError) / avgOriginalError) * 100 
         : 0
     }
-  }, [selectedCrop, feedbackData, adjustedCoefficient, deletedIds])
+  }, [selectedCrop, feedbackData, adjustedCoefficient])
 
-  // 计算给定系数下的平均误差
+  // 计算给定系数下的平均误差（基于格式化后的显示值）
   const calculateAverageError = (
     coefficient: number,
     data: Array<{ actualPrice: number; multiplier: number; weightPower: number }>
   ): number => {
     let totalError = 0
+    let errorCount = 0
+    
     for (const item of data) {
       const calculatedPrice = coefficient * item.multiplier * item.weightPower
+      
+      // 格式化实际价格和计算价格
+      const formattedActual = formatPrice(item.actualPrice)
+      const formattedCalculated = formatPrice(calculatedPrice)
+      
+      // 如果格式化后相同，误差为0
+      if (formattedActual === formattedCalculated) {
+        continue // 误差为0，不累加
+      }
+      
+      // 如果格式化后不同，计算实际数值误差
       const error = Math.abs(calculatedPrice - item.actualPrice)
       totalError += error
+      errorCount++
     }
-    return totalError / data.length
+    
+    // 如果所有记录格式化后都相同，平均误差为0
+    if (errorCount === 0) {
+      return 0
+    }
+    
+    return totalError / errorCount
   }
 
   // 使用最小二乘法计算最优系数
@@ -503,22 +531,12 @@ export const FeedbackDataView = () => {
             <div className="feedback-empty">暂无 {selectedCrop.name} 的反馈数据</div>
           ) : (
             <>
-              {deletedIds.size > 0 && (
-                <div className="feedback-deleted-info">
-                  <span>已隐藏 {deletedIds.size} 条记录</span>
-                  <button 
-                    className="feedback-restore-all"
-                    onClick={() => setDeletedIds(new Set())}
-                  >
-                    恢复全部
-                  </button>
-                </div>
-              )}
               <div className="feedback-data-table-wrapper">
                 <table className="feedback-data-table">
                   <thead>
                     <tr>
                       <th>操作</th>
+                      <th>ID</th>
                       <th>作物</th>
                       <th>重量</th>
                       <th>突变倍数</th>
@@ -542,8 +560,13 @@ export const FeedbackDataView = () => {
                       ? Math.max(0, (1 - originalError / actualPrice) * 100) 
                       : 0
                     
-                    // 计算调整后误差和准确率
-                    const adjustedError = Math.abs(adjustedPrice - actualPrice)
+                    // 计算调整后误差和准确率（基于格式化后的显示值）
+                    const formattedAdjusted = formatPrice(adjustedPrice)
+                    const formattedActual = formatPrice(actualPrice)
+                    // 如果格式化后相同，误差为0
+                    const adjustedError = formattedAdjusted === formattedActual 
+                      ? 0 
+                      : Math.abs(adjustedPrice - actualPrice)
                     const adjustedAccuracy = actualPrice > 0 
                       ? Math.max(0, (1 - adjustedError / actualPrice) * 100) 
                       : 0
@@ -558,11 +581,13 @@ export const FeedbackDataView = () => {
                           <button
                             className="feedback-delete-btn"
                             onClick={() => handleDeleteRecord(item.id)}
-                            title="删除此记录（仅前端隐藏）"
+                            disabled={deletingIds.has(item.id)}
+                            title="删除此记录（从数据库删除）"
                           >
-                            ×
+                            {deletingIds.has(item.id) ? '…' : '×'}
                           </button>
                         </td>
+                        <td>{item.id}</td>
                         <td>{item.crop_name}</td>
                         <td>{item.weight}kg</td>
                         <td>{totalMultiplier.toFixed(2)}×</td>
@@ -580,38 +605,6 @@ export const FeedbackDataView = () => {
                             )}
                           </span>
                         </td>
-                      </tr>
-                    )
-                  })}
-                  {deletedIds.size > 0 && feedbackData.filter(item => deletedIds.has(item.id)).map((item) => {
-                    const { totalMultiplier } = parseMutations(item.mutations)
-                    const currentCoefficient = adjustedCoefficient ?? selectedCrop!.priceCoefficient
-                    const { adjustedPrice, formattedAdjustedPrice } = calculateAdjustedPrice(item, currentCoefficient)
-                    const actualPrice = getActualPrice(item)
-                    const adjustedError = Math.abs(adjustedPrice - actualPrice)
-                    const adjustedAccuracy = actualPrice > 0 
-                      ? Math.max(0, (1 - adjustedError / actualPrice) * 100) 
-                      : 0
-
-                    return (
-                      <tr key={item.id} className="feedback-deleted-row">
-                        <td>
-                          <button
-                            className="feedback-restore-btn"
-                            onClick={() => handleRestoreRecord(item.id)}
-                            title="恢复此记录"
-                          >
-                            恢复
-                          </button>
-                        </td>
-                        <td>{item.crop_name}</td>
-                        <td>{item.weight}kg</td>
-                        <td>{totalMultiplier.toFixed(2)}×</td>
-                        <td>{formatPrice(item.calculated_price)}</td>
-                        <td>{formattedAdjustedPrice}</td>
-                        <td>{formatPrice(actualPrice)}</td>
-                        <td>{formatPrice(adjustedError)}</td>
-                        <td>{adjustedAccuracy.toFixed(2)}%</td>
                       </tr>
                     )
                   })}

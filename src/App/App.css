@@ -22,6 +22,12 @@
   overflow: hidden;
 }
 
+/* 反馈页面时，允许滚动 */
+.main.feedback-mode {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* 只给计算器页面添加 padding，不影响选择页面 */
 .page-calculator {
   padding: 2rem;

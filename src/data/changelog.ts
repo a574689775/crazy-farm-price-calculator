@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.3.2',
+    date: '2026.1.16',
+    items: [
+      '番茄、黄瓜、苹果、向日葵、蟠桃、惊奇菇、大王菊准确度调整',
+      '调整极光分组为往期突变'
+    ],
+  },
+  {
     version: 'V2.3.1',
     date: '2026.1.16',
     items: [

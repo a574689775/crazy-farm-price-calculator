@@ -32,3 +32,33 @@ export const submitFeedback = async (data: FeedbackData) => {
   return true
 }
 
+// 删除反馈记录
+export const deleteFeedback = async (id: number) => {
+  if (!supabase) {
+    throw new Error('Supabase client is not initialized. Please check your environment variables.')
+  }
+
+  // 先查询记录是否存在
+  const { data: existingData, error: queryError } = await supabase
+    .from('price_feedback')
+    .select('id')
+    .eq('id', id)
+    .single()
+
+  if (queryError || !existingData) {
+    throw new Error('记录不存在或已被删除')
+  }
+
+  // 执行删除
+  const { error } = await supabase
+    .from('price_feedback')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    throw error
+  }
+
+  return true
+}
+
