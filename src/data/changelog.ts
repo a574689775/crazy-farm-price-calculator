@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.3.1',
+    date: '2026.1.16',
+    items: [
+      '支持浏览器滑动前进后退',
+    ],
+  },
+  {
     version: 'V2.3.0',
     date: '2026.1.16',
     items: [
