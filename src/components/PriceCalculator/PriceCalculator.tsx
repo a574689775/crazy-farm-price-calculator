@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { LeftOutlined, ShareAltOutlined } from '@ant-design/icons'
 import type { CropConfig, WeatherMutation } from '@/types'
 import { weatherMutations, mutationColorConfig } from '@/data/weatherMutations'
-import { calculatePrice } from '@/utils/priceCalculator'
+import { calculatePrice, formatPrice, parseFormattedPrice, convertToYuan } from '@/utils/priceCalculator'
 import { generateShareUrl, parseShareUrl } from '@/utils/shareEncoder'
 import { crops } from '@/data/crops'
 import { Modal } from '@/components/Modal'
@@ -31,6 +31,84 @@ const COMBINATION_RULES: Array<{
   { ingredients: ['陶化', '灼热'], result: '瓷化' },
   { ingredients: ['潮湿', '结霜'], result: '冰冻' },
 ]
+
+// 数字滚动动画 hook
+const useAnimatedPrice = (targetPrice: string) => {
+  const [displayPrice, setDisplayPrice] = useState(targetPrice)
+  const animationRef = useRef<number | null>(null)
+  const startTimeRef = useRef<number | null>(null)
+  const startValueRef = useRef<number>(0)
+  const targetValueRef = useRef<number>(0)
+  const startUnitRef = useRef<'元' | '万' | '亿'>('元')
+  const targetUnitRef = useRef<'元' | '万' | '亿'>('元')
+
+  useEffect(() => {
+    if (targetPrice === displayPrice) return // 如果目标价格和当前显示价格相同，不需要动画
+
+    // 解析目标价格
+    const targetParsed = parseFormattedPrice(targetPrice)
+    const targetValue = convertToYuan(targetParsed.value, targetParsed.unit)
+    
+    // 解析当前显示价格
+    const currentParsed = parseFormattedPrice(displayPrice)
+    const currentValue = convertToYuan(currentParsed.value, currentParsed.unit)
+
+    // 如果数值相同，直接更新显示（可能是单位变化）
+    if (Math.abs(targetValue - currentValue) < 0.01) {
+      setDisplayPrice(targetPrice)
+      return
+    }
+
+    // 设置起始值和目标值
+    startValueRef.current = currentValue
+    targetValueRef.current = targetValue
+    startUnitRef.current = currentParsed.unit
+    targetUnitRef.current = targetParsed.unit
+
+    // 清除之前的动画
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current)
+    }
+
+    // 动画持续时间（毫秒）
+    const duration = 200
+    startTimeRef.current = Date.now()
+
+    const animate = () => {
+      const now = Date.now()
+      const elapsed = now - (startTimeRef.current || now)
+      const progress = Math.min(elapsed / duration, 1)
+
+      // 使用缓动函数（ease-out）
+      const easeOut = 1 - Math.pow(1 - progress, 3)
+
+      // 计算当前值
+      const currentValue = startValueRef.current + (targetValueRef.current - startValueRef.current) * easeOut
+
+      // 格式化并更新显示
+      const formatted = formatPrice(currentValue)
+      setDisplayPrice(formatted)
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate)
+      } else {
+        // 动画完成，确保显示目标值
+        setDisplayPrice(targetPrice)
+        animationRef.current = null
+      }
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [targetPrice])
+
+  return displayPrice
+}
 
 export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   const [weight, setWeight] = useState<string>('')
@@ -106,6 +184,16 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
     }
   }, [crop?.name, hasRestoredFromUrl])
 
+  // 计算价格（必须在所有 hooks 之后，条件返回之前）
+  const weightNum = parseFloat(weight) || 0
+  const isValidWeight = crop ? (weightNum > 0 && weightNum <= crop.maxWeight) : false
+  const result = isValidWeight && crop
+    ? calculatePrice(crop, weightNum, selectedMutations)
+    : null
+  const targetPrice = result ? result.formattedPrice : '0'
+  // 使用动画价格 hook（必须在条件返回之前调用）
+  const displayPrice = useAnimatedPrice(targetPrice)
+
   if (!crop) {
     return null
   }
@@ -169,17 +257,6 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
     const calculatedWeight = (clampedPercentage / 100) * crop.maxWeight
     setWeight(calculatedWeight.toFixed(2))
   }
-
-  const weightNum = parseFloat(weight) || 0
-  const isValidWeight = weightNum > 0 && weightNum <= crop.maxWeight
-
-  // 只要有重量就可以计算，不一定要有突变
-  const result = isValidWeight
-    ? calculatePrice(crop, weightNum, selectedMutations)
-    : null
-  
-  // 格式化价格显示，如果没有结果则显示0
-  const displayPrice = result ? result.formattedPrice : '0'
 
   // 处理互斥突变（品质突变和异形突变，只能选一个）
   const toggleExclusiveMutation = (mutationName: WeatherMutation, exclusiveGroup: WeatherMutation[]) => {
@@ -373,13 +450,11 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                 }}
               >
                 <span className="mutation-name">{mutationName}</span>
-                {isSelected && (
-                  <img 
-                    className="mutation-checkmark" 
-                    src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/对号.png" 
-                    alt="选中"
-                  />
-                )}
+                <img 
+                  className={`mutation-checkmark ${isSelected ? 'visible' : ''}`}
+                  src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/对号.png" 
+                  alt="选中"
+                />
               </div>
             )
           })}

@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.4.2',
+    date: '2026.1.16',
+    items: [
+      '添加突变选中/取消选中过渡动画效果',
+      '添加价格数字滚动动画效果，价格变化更流畅',
+    ],
+  },
+  {
     version: 'V2.4.1',
     date: '2026.1.16',
     items: [
