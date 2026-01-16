@@ -107,11 +107,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
   }, [crop?.name, hasRestoredFromUrl])
 
   if (!crop) {
-    return (
-      <div className="price-calculator empty">
-        <p>请先选择作物</p>
-      </div>
-    )
+    return null
   }
 
   // 处理重量输入变化

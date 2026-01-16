@@ -73,16 +73,17 @@ export const Footer = () => {
         title="支持作者"
       >
         <div className="modal-text">
-          <p>服务器和域名每个月都要续费，成本不小</p>
-          <p>如果这个工具对你有用，支持一下，非常感谢</p>
-          <p>你的支持是我持续更新的动力</p>
+          <p>本工具完全免费，但维持运行需要成本。</p>
+          <p>如果你觉得它帮到了你，欢迎扫码支持，</p>
+          <p>帮助它活下去、变得更好。</p>
+          <p>感谢每一位支持的小伙伴，你们让更新更有意义✨</p>
         </div>
         <img
           src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/收款码1.15.png"
           alt="捐赠二维码"
           className="modal-qrcode"
         />
-        <p className="modal-hint">扫码支持，感谢你的慷慨</p>
+        <p className="modal-hint">无论是否支持，都感谢你的使用 ❤️</p>
       </Modal>
 
       {/* 免责声明模态框 */}

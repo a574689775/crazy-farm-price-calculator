@@ -131,9 +131,7 @@ export const App = () => {
             
             {/* 计算器页面 - 始终渲染，通过transform控制位置 */}
             <div className={`page-wrapper page-calculator ${currentPage === 'calculator' && selectedCrop ? 'active' : ''}`}>
-              {selectedCrop && (
-                <PriceCalculator crop={selectedCrop} onBack={handleBackToSelector} />
-              )}
+              <PriceCalculator crop={selectedCrop} onBack={handleBackToSelector} />
             </div>
           </div>
         )}
