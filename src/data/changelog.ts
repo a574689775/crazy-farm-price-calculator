@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.4.4',
+    date: '2026.1.17',
+    items: [
+      '修复部分浏览器字体描边bug',
+    ],
+  },
+  {
     version: 'V2.4.3',
     date: '2026.1.17',
     items: [
