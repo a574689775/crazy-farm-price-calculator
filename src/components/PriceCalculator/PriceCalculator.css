@@ -369,14 +369,9 @@
   justify-content: center;
   font-size: 14px;
   font-weight: 900;
-  color: #fff;
+  color: white;
   -webkit-text-stroke: 2px #000;
   -webkit-text-fill-color: #fff;
-  text-shadow: 
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
   paint-order: stroke fill;
   outline: none;
   -webkit-tap-highlight-color: transparent;
@@ -500,16 +495,7 @@
   line-height: 19px;
   letter-spacing: 0px;
   -webkit-text-stroke: 4px #fff;
-  -webkit-text-fill-color: rgba(132, 49, 0, 1);
-  text-shadow: 
-    -2px -2px 0 #fff,
-    2px -2px 0 #fff,
-    -2px 2px 0 #fff,
-    2px 2px 0 #fff,
-    -2px 0 0 #fff,
-    2px 0 0 #fff,
-    0 -2px 0 #fff,
-    0 2px 0 #fff;
+  -webkit-text-fill-color: rgb(132, 49, 0);
   paint-order: stroke fill;
 }
 
@@ -521,16 +507,7 @@
   letter-spacing: 0px;
   text-align: center;
   -webkit-text-stroke: 4px #fff;
-  -webkit-text-fill-color: rgba(132, 49, 0, 1);
-  text-shadow: 
-    -2px -2px 0 #fff,
-    2px -2px 0 #fff,
-    -2px 2px 0 #fff,
-    2px 2px 0 #fff,
-    -2px 0 0 #fff,
-    2px 0 0 #fff,
-    0 -2px 0 #fff,
-    0 2px 0 #fff;
+  -webkit-text-fill-color: rgb(132, 49, 0);
   paint-order: stroke fill;
 }
 

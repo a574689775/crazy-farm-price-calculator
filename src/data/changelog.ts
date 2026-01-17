@@ -4,7 +4,13 @@ export interface ChangelogItem {
   items: string[]
 }
 
-export const changelog: ChangelogItem[] = [
+export const changelog: ChangelogItem[] = [{
+  version: 'V2.4.5',
+  date: '2026.1.17',
+  items: [
+    '回退字条描边方案',
+  ],
+},
   {
     version: 'V2.4.4',
     date: '2026.1.17',
