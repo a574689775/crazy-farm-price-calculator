@@ -6,8 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V2.4.7',
+    date: '2026.1.18',
+    items: [
+      '反馈按钮样式微调',
+    ],
+  },
+  {
     version: 'V2.4.6',
-    date: '2026.1.17',
+    date: '2026.1.18',
     items: [
       '使用svg渲染描边字体，修复部分浏览器字体描边bug',
     ],

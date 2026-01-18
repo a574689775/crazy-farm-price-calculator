@@ -596,6 +596,9 @@
   transition: all 0.2s;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .share-copy-button:hover:not(:disabled) {

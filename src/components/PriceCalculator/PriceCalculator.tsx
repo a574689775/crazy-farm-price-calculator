@@ -578,7 +578,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
 
       {/* 固定底部的价格展示区域 */}
       <div className="calculator-result-fixed">
-        <button
+        <div
           className="feedback-button"
           onClick={() => {
             if (isValidWeight && result) {
@@ -593,7 +593,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
           }}
         >
           反馈
-        </button>
+        </div>
         <div className="result-right">
           <span className="result-label">
             <SVGText
@@ -643,7 +643,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
               readOnly
               onClick={(e) => e.currentTarget.select()}
             />
-            <button
+            <div
               className="share-copy-button"
               onClick={() => {
                 // 获取当前品质、异形突变和作物名
@@ -679,7 +679,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
               }}
             >
               点此复制链接
-            </button>
+            </div>
           </div>
           <div className="share-info">
             <p>复制链接发送给好友</p>
