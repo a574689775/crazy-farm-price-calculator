@@ -32,16 +32,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 1);
-  font-style: normal;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 23px;
-  letter-spacing: 0px;
-  text-align: left;
-  -webkit-text-stroke: 5px rgba(177, 95, 47, 1);
-  -webkit-text-fill-color: rgba(255, 255, 255, 1);
-  paint-order: stroke fill;
 }
 
 .crop-grid {

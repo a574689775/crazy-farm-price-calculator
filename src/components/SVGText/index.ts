@@ -1,0 +1,2 @@
+export { SVGText } from './SVGText'
+

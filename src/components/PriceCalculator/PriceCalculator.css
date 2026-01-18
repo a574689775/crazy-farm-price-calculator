@@ -367,18 +367,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 900;
-  color: white;
-  -webkit-text-stroke: 2px #000;
-  -webkit-text-fill-color: #fff;
-  paint-order: stroke fill;
   outline: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
   box-sizing: border-box;
   transition: box-shadow 0.2s ease;
+}
+
+.mutation-item .mutation-name {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mutation-item.selected {
@@ -488,27 +490,17 @@
 }
 
 .calculator-result-fixed .result-label {
-  color: rgba(132, 49, 0, 1);
-  font-style: normal;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 19px;
-  letter-spacing: 0px;
-  -webkit-text-stroke: 4px #fff;
-  -webkit-text-fill-color: rgb(132, 49, 0);
-  paint-order: stroke fill;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
 }
 
 .calculator-result-fixed .result-value-large {
-  color: rgba(132, 49, 0, 1);
-  font-style: normal;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0px;
-  text-align: center;
-  -webkit-text-stroke: 4px #fff;
-  -webkit-text-fill-color: rgb(132, 49, 0);
-  paint-order: stroke fill;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
 }
 
 .feedback-button {

@@ -4,13 +4,21 @@ export interface ChangelogItem {
   items: string[]
 }
 
-export const changelog: ChangelogItem[] = [{
-  version: 'V2.4.5',
-  date: '2026.1.17',
-  items: [
-    '回退字条描边方案',
-  ],
-},
+export const changelog: ChangelogItem[] = [
+  {
+    version: 'V2.4.6',
+    date: '2026.1.17',
+    items: [
+      '使用svg渲染描边字体，修复部分浏览器字体描边bug',
+    ],
+  },
+  {
+    version: 'V2.4.5',
+    date: '2026.1.17',
+    items: [
+      '回退字条描边方案',
+    ],
+  },
   {
     version: 'V2.4.4',
     date: '2026.1.17',

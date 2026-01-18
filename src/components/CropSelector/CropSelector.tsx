@@ -1,4 +1,5 @@
 import type { CropConfig } from '@/types'
+import { SVGText } from '@/components/SVGText'
 import './CropSelector.css'
 
 interface CropSelectorProps {
@@ -11,7 +12,16 @@ export const CropSelector = ({ crops, onSelectCrop }: CropSelectorProps) => {
   return (
     <div className="crop-selector">
       <div className="crop-title">
-        疯狂农场价格计算器
+        <SVGText
+          fillColor="#fff"
+          strokeColor="rgba(177, 95, 47, 1)"
+          strokeWidth={5}
+          fontSize={20}
+          fontWeight={700}
+          style={{ width: '100%', height: '100%' }}
+        >
+          疯狂农场价格计算器
+        </SVGText>
       </div>
       <div className="crop-grid">
         {[...crops].reverse().map(crop => {

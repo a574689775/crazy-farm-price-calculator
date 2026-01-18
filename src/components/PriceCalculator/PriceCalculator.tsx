@@ -7,6 +7,7 @@ import { generateShareUrl, parseShareUrl } from '@/utils/shareEncoder'
 import { crops } from '@/data/crops'
 import { Modal } from '@/components/Modal'
 import { PriceFeedback } from '@/components/PriceFeedback'
+import { SVGText } from '@/components/SVGText'
 import './PriceCalculator.css'
 
 interface PriceCalculatorProps {
@@ -449,7 +450,17 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                   }
                 }}
               >
-                <span className="mutation-name">{mutationName}</span>
+                <SVGText
+                  fillColor="#fff"
+                  strokeColor="#000"
+                  strokeWidth={2}
+                  fontSize={14}
+                  fontWeight={900}
+                  className="mutation-name"
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  {mutationName}
+                </SVGText>
                 <img 
                   className={`mutation-checkmark ${isSelected ? 'visible' : ''}`}
                   src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/对号.png" 
@@ -584,8 +595,30 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
           反馈
         </button>
         <div className="result-right">
-          <span className="result-label">价格:</span>
-          <span className="result-value-large">{displayPrice}</span>
+          <span className="result-label">
+            <SVGText
+              fillColor="rgba(132, 49, 0, 1)"
+              strokeColor="#fff"
+              strokeWidth={4}
+              fontSize={16}
+              fontWeight={700}
+              style={{ width: '100%', height: '100%' }}
+            >
+              价格:
+            </SVGText>
+          </span>
+          <span className="result-value-large">
+            <SVGText
+              fillColor="rgba(132, 49, 0, 1)"
+              strokeColor="#fff"
+              strokeWidth={4}
+              fontSize={24}
+              fontWeight={700}
+              style={{ width: '100%', height: '100%' }}
+            >
+              {displayPrice}
+            </SVGText>
+          </span>
         </div>
       </div>
 
