@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.1.0',
+    date: '2026.1.19',
+    items: [
+      '增加按价格计算重量的功能',
+      '价格展示不到1万元的作物展示纯数字，不再展示单位',
+      '历史记录文案修改'
+    ],
+  },
+  {
     version: 'V3.0.4',
     date: '2026.1.19',
     items: [

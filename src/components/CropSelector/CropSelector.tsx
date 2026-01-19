@@ -61,7 +61,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory }: CropSelecto
             <div className="champion-title">本期果王争霸：</div>
             <GradientButton onClick={onShowHistory}>
               <ClockCircleOutlined style={{ marginRight: '4px', color: '#000' }} />
-              历史记录
+              计算历史
             </GradientButton>
           </div>
           <div className="champion-grid">

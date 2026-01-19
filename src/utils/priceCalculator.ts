@@ -68,8 +68,8 @@ export const formatPrice = (price: number): string => {
     return val % 1 === 0 ? `${val}万` : `${val.toFixed(2)}万`
   }
 
-  // < 1万：保留元
-  return price % 1 === 0 ? `${price}元` : `${price.toFixed(2)}元`
+  // < 1万：显示纯数字（不带单位）
+  return price % 1 === 0 ? `${price}` : `${price.toFixed(2)}`
 }
 
 /**
@@ -86,7 +86,8 @@ export const formatWeight = (weight: number): string => {
  * 从格式化价格中提取单位和数值
  * 例如: "1.5亿" -> { value: 1.5, unit: "亿" }
  *       "123万" -> { value: 123, unit: "万" }
- *       "456元" -> { value: 456, unit: "元" }
+ *       "456" -> { value: 456, unit: "元" } (纯数字，不带单位)
+ *       "456元" -> { value: 456, unit: "元" } (兼容旧格式)
  */
 export const parseFormattedPrice = (formattedPrice: string): { value: number; unit: '元' | '万' | '亿' } => {
   if (formattedPrice.endsWith('亿')) {
@@ -101,7 +102,7 @@ export const parseFormattedPrice = (formattedPrice: string): { value: number; un
     const value = parseFloat(formattedPrice.replace('元', ''))
     return { value, unit: '元' }
   }
-  // 默认返回元
+  // 纯数字（不带单位），默认返回元
   const value = parseFloat(formattedPrice) || 0
   return { value, unit: '元' }
 }
@@ -120,5 +121,59 @@ export const convertToYuan = (value: number, unit: '元' | '万' | '亿'): numbe
     return value * 10_000
   }
   return value
+}
+
+/**
+ * 从价格反推重量
+ * 公式：重量 = (价格 / (基础价格系数 × 先天突变倍数 × (天气突变总倍数 + 1) × 异形突变倍数))^(2/3)
+ * @param crop 作物配置
+ * @param priceInYuan 价格（单位：元）
+ * @param selectedMutations 选中的突变
+ * @returns 反推的重量，如果计算结果无效则返回 null
+ */
+export const calculateWeightFromPrice = (
+  crop: CropConfig,
+  priceInYuan: number,
+  selectedMutations: WeatherMutation[]
+): number | null => {
+  const INNATE_MUTATIONS = new Set<WeatherMutation>(['银', '金', '水晶', '流光'])
+  const SPECIAL_MUTATIONS = new Set<WeatherMutation>(['薯片', '方形', '糖葫芦', '连体', '黄瓜蛇', '万圣夜', '香蕉猴', '笑日葵'])
+
+  let innateMultiplier = 1 // 先天突变倍数，取最大值
+  let weatherMultiplierSum = 0 // 天气突变倍数求和
+  let specialMultiplier = 1 // 异形突变倍数，取最大值
+
+  selectedMutations.forEach(mutationName => {
+    const mutation = getWeatherMutation(mutationName)
+    if (!mutation) return
+
+    if (INNATE_MUTATIONS.has(mutationName)) {
+      innateMultiplier = Math.max(innateMultiplier, mutation.multiplier)
+    } else if (SPECIAL_MUTATIONS.has(mutationName)) {
+      specialMultiplier = Math.max(specialMultiplier, mutation.multiplier)
+    } else {
+      weatherMultiplierSum += mutation.multiplier
+    }
+  })
+
+  // 计算分母：基础价格系数 × 先天突变倍数 × (天气突变总倍数 + 1) × 异形突变倍数
+  const denominator = crop.priceCoefficient * innateMultiplier * (weatherMultiplierSum + 1) * specialMultiplier
+  
+  if (denominator === 0 || priceInYuan <= 0) {
+    return null
+  }
+
+  // 反推重量：重量 = (价格 / 分母)^(2/3)
+  const weight = Math.pow(priceInYuan / denominator, 2 / 3)
+  
+  // 限制在 0 到最大重量之间
+  if (weight < 0) {
+    return 0
+  }
+  if (weight > crop.maxWeight) {
+    return crop.maxWeight
+  }
+  
+  return weight
 }
 

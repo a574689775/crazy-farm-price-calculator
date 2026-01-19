@@ -241,6 +241,11 @@
   background: rgba(255, 234, 182, 1);
 }
 
+.input-field:read-only {
+  cursor: default;
+  opacity: 0.7;
+}
+
 .input-field::placeholder {
   color: rgba(132, 49, 0, 0.5);
   font-style: normal;
@@ -552,6 +557,29 @@
   font-weight: 700;
   line-height: 28px;
   display: inline-block;
+}
+
+.result-value-input {
+  width: 100%;
+  max-width: 100px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #843100;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 28px;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
+.mode-hint {
+  color: #843100;
+  font-size: 12px;
+  font-weight: 400;
+  margin-left: 8px;
+  opacity: 0.7;
 }
 
 .save-button {
