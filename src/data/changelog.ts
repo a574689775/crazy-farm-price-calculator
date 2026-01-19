@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.1.1',
+    date: '2026.1.19',
+    items: [
+      '删除价格区域模式展示',
+    ],
+  },
+  {
     version: 'V3.1.0',
     date: '2026.1.19',
     items: [

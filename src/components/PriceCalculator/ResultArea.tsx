@@ -21,7 +21,6 @@ interface ResultAreaProps {
  * 包含反馈按钮、保存按钮、价格显示
  */
 export const ResultArea = ({
-  calculationMode,
   displayPrice,
   priceInput,
   isEditingPrice,
@@ -37,12 +36,6 @@ export const ResultArea = ({
         反馈
       </GradientButton>
       <div className="result-right">
-        {calculationMode === 'price' && (
-          <span className="mode-hint">按价格计算</span>
-        )}
-        {calculationMode === 'weight' && (
-          <span className="mode-hint">按重量计算</span>
-        )}
         <button className="save-button" onClick={onSave}>
           <SaveOutlined />
         </button>
