@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.1.2',
+    date: '2026.1.19',
+    items: [
+      '禁用浏览器暗色模式',
+    ],
+  },
+  {
     version: 'V3.1.1',
     date: '2026.1.19',
     items: [

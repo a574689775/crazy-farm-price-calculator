@@ -13,6 +13,11 @@ html, body {
   overflow: hidden;
 }
 
+html {
+  /* 强制使用浅色模式，防止浏览器暗色模式自动适配 */
+  color-scheme: light;
+}
+
 body {
   font-family: 'ResourceHanRoundedCN Medium', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -21,4 +26,7 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  /* 确保背景色和文字颜色明确指定，防止暗色模式影响 */
+  background-color: #fff;
+  color: #000;
 }
