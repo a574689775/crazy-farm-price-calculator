@@ -13,9 +13,19 @@ html, body {
   overflow: hidden;
 }
 
+/* 强制使用浅色模式，完全禁用暗色模式 */
+:root {
+  color-scheme: only light;
+  /* 明确指定所有颜色变量，防止暗色模式影响 */
+  background-color: #fff;
+  color: #000;
+}
+
 html {
-  /* 强制使用浅色模式，防止浏览器暗色模式自动适配 */
-  color-scheme: light;
+  color-scheme: only light;
+  /* 确保背景色和文字颜色明确指定 */
+  background-color: #fff !important;
+  color: #000 !important;
 }
 
 body {
@@ -27,6 +37,32 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   /* 确保背景色和文字颜色明确指定，防止暗色模式影响 */
-  background-color: #fff;
-  color: #000;
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+/* 强制覆盖所有暗色模式的媒体查询 - 即使系统是暗色模式也强制使用浅色 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: only light !important;
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  
+  html {
+    color-scheme: only light !important;
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  
+  body {
+    color-scheme: only light !important;
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  
+  /* 确保所有元素都使用浅色 */
+  * {
+    color-scheme: only light !important;
+  }
 }

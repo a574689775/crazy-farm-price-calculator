@@ -12,6 +12,22 @@
   background-repeat: no-repeat;
   overflow: hidden;
   position: relative;
+  /* 强制浅色模式，防止暗色模式影响 */
+  color-scheme: only light;
+}
+
+/* 强制覆盖暗色模式 */
+@media (prefers-color-scheme: dark) {
+  .app {
+    color-scheme: only light !important;
+    /* 确保背景图片和颜色不受暗色模式影响 */
+    background-color: transparent !important;
+  }
+  
+  /* 确保所有子元素也使用浅色模式 */
+  .app * {
+    color-scheme: only light !important;
+  }
 }
 
 .main {
