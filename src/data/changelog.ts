@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.1.4',
+    date: '2026.1.19',
+    items: [
+      '修复陶化和瓷化共存的bug',
+    ],
+  },
+  {
     version: 'V3.1.3',
     date: '2026.1.19',
     items: [

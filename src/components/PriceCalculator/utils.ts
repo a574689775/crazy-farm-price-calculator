@@ -72,7 +72,10 @@ export const getAllIngredients = (
 
 /**
  * 检查某个突变是否因为合成结果存在而被禁用
- * 规则：如果合成结果已存在，除了潮湿以外的所有合成条件（包括间接的）都禁用
+ * 规则：
+ * 1. 如果合成结果已存在，除了潮湿以外的所有合成条件（包括间接的）都禁用
+ * 2. 潮湿比较特殊：即使"陶化"或"瓷化"存在，潮湿也不禁用
+ * 3. 但是"沙尘"不能和"潮湿"共存（因为会合成"陶化"）
  * 
  * @param mutationName 要检查的突变名称
  * @param selectedMutations 当前选中的突变列表
@@ -82,8 +85,20 @@ export const isMutationDisabled = (
   mutationName: WeatherMutation,
   selectedMutations: WeatherMutation[]
 ): boolean => {
-  // 潮湿比较特殊，即使合成完了也能单独出现，所以不禁用
+  // 潮湿比较特殊，即使"陶化"或"瓷化"存在，潮湿也不禁用
   if (mutationName === '潮湿') {
+    return false
+  }
+  
+  // 特殊处理："沙尘"不能和"潮湿"共存（因为会合成"陶化"）
+  // 但是只有当"陶化"或"瓷化"已存在时，才禁用"沙尘"（说明已经合成了，不能再选择原料）
+  // 如果"陶化"和"瓷化"都不存在，允许选择"沙尘"（即使"潮湿"已存在，让用户自己选择是否合成）
+  if (mutationName === '沙尘' && selectedMutations.includes('潮湿')) {
+    // 只有当"陶化"或"瓷化"已存在时，才禁用"沙尘"（因为已经合成了，不能再选择原料）
+    if (selectedMutations.includes('陶化') || selectedMutations.includes('瓷化')) {
+      return true
+    }
+    // 如果"陶化"和"瓷化"都不存在，允许选择"沙尘"（即使"潮湿"已存在，选择"沙尘"会触发合成）
     return false
   }
   
@@ -92,7 +107,9 @@ export const isMutationDisabled = (
     if (selectedMutations.includes(rule.result)) {
       // 获取所有合成条件（包括间接的）
       const allIngredients = getAllIngredients(rule.result)
-      if (allIngredients.includes(mutationName)) {
+      // 排除"潮湿"，因为潮湿比较特殊
+      const ingredientsWithoutShi = allIngredients.filter(ing => ing !== '潮湿')
+      if (ingredientsWithoutShi.includes(mutationName)) {
         return true
       }
     }

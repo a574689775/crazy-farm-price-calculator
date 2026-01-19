@@ -5,8 +5,9 @@ import {
   RARE_MUTATIONS,
   PAST_MUTATIONS,
   INTERMEDIATE_MUTATIONS,
+  COMBINATION_RULES,
 } from './constants'
-import { applyCombinations, isMutationDisabled } from './utils'
+import { applyCombinations, isMutationDisabled, getAllIngredients } from './utils'
 import { MutationGroup } from './MutationGroup'
 import './PriceCalculator.css'
 
@@ -77,8 +78,24 @@ export const MutationGroups = ({
       // 取消选择
       onMutationsChange(selectedMutations.filter(m => m !== mutationName))
     } else {
-      // 选择新的突变，直接添加后应用合成规则
-      const newMutations = [...selectedMutations, mutationName]
+      // 选择新的突变
+      let newMutations = [...selectedMutations]
+      
+      // 检查这个突变是否是某个合成规则的结果
+      // 如果是，需要移除它的所有原料（包括直接和间接的），但排除"潮湿"
+      for (const rule of COMBINATION_RULES) {
+        if (rule.result === mutationName) {
+          // 获取所有原料（包括间接的，如"瓷化"需要"陶化"和"灼热"，"陶化"又需要"沙尘"和"潮湿"）
+          const allIngredients = getAllIngredients(mutationName)
+          // 移除所有原料（包括间接的），但排除"潮湿"（因为潮湿比较特殊）
+          newMutations = newMutations.filter(m => !allIngredients.includes(m) || m === '潮湿')
+        }
+      }
+      
+      // 添加新选择的突变
+      newMutations.push(mutationName)
+      
+      // 应用合成规则（处理其他可能的合成，如"沙尘"+"潮湿"→"陶化"）
       onMutationsChange(applyCombinations(newMutations))
     }
   }
