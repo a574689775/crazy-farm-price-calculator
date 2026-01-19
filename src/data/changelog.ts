@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.0.2',
+    date: '2026.1.19',
+    items: [
+      '修复浏览器连续快速点击回退时，页面状态错误的bug',
+      '修改网页主题色'
+    ],
+  },
+  {
     version: 'V3.0.1',
     date: '2026.1.19',
     items: [
