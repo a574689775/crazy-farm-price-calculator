@@ -16,14 +16,29 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   style = {},
   disabled = false,
 }) => {
+  const handleClick = () => {
+    if (!disabled && onClick) {
+      onClick()
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault()
+      onClick?.()
+    }
+  }
+
   return (
-    <button
-      className={`gradient-button ${className}`}
-      onClick={onClick}
+    <div
+      className={`gradient-button ${disabled ? 'disabled' : ''} ${className}`}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       style={style}
-      disabled={disabled}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
     >
       {children}
-    </button>
+    </div>
   )
 }

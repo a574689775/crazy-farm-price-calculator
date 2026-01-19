@@ -22,15 +22,15 @@
   box-sizing: border-box;
 }
 
-.gradient-button:hover:not(:disabled) {
+.gradient-button:not(.disabled):hover {
   opacity: 0.8;
 }
 
-.gradient-button:active:not(:disabled) {
+.gradient-button:not(.disabled):active {
   opacity: 0.6;
 }
 
-.gradient-button:disabled {
+.gradient-button.disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }

@@ -215,7 +215,7 @@
 }
 
 .input-field {
-  width: 125px;
+  width: 100px;
   height: 28px;
   padding: 0 0.75rem;
   box-sizing: border-box;
@@ -257,11 +257,15 @@
 }
 
 .crop-image {
-  width: 100px;
-  height: 100px;
+  max-width: 100px;
+  max-height: 100px;
+  width: auto;
+  height: auto;
+  min-width: 0;
   aspect-ratio: 1;
   object-fit: contain;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  flex-basis: 100px;
   margin-left: 16px;
 }
 
