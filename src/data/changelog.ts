@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.0.1',
+    date: '2026.1.19',
+    items: [
+      '反馈页面支持浏览器回退',
+    ],
+  },
+  {
     version: 'V3.0.0',
     date: '2026.1.19',
     items: [

@@ -30,6 +30,12 @@ export const App = () => {
       return
     }
 
+    // 检查是否是历史记录页面（可以同时有作物参数）
+    const isHistory = urlParams.get('page') === 'history'
+    if (isHistory) {
+      setShowHistory(true)
+    }
+
     // 检查是否有作物参数（用于浏览器前进/后退）
     const cropName = urlParams.get('crop')
     if (cropName) {
@@ -57,8 +63,13 @@ export const App = () => {
   const handleSelectCrop = (crop: CropConfig) => {
     setSelectedCrop(crop)
     // 更新 URL，添加作物参数，支持浏览器前进/后退
+    // 如果历史记录页面已经打开，保留 page=history 参数
     const url = new URL(window.location.href)
     url.searchParams.set('crop', crop.name)
+    // 从当前 URL 检查历史记录状态，如果已经打开则保留
+    if (url.searchParams.get('page') === 'history' || showHistory) {
+      url.searchParams.set('page', 'history')
+    }
     window.history.pushState({ page: 'calculator', crop: crop.name }, '', url.toString())
     // 使用 setTimeout 确保 DOM 更新后再添加 active 类，让动画生效
     setTimeout(() => {
@@ -72,9 +83,16 @@ export const App = () => {
     // 延迟更新 URL 和清空状态，确保动画完成
     setTimeout(() => {
       const url = new URL(window.location.href)
-      // 清除所有参数（包括 crop 和 s）
-      url.search = ''
-      window.history.pushState({ page: 'selector' }, '', url.toString())
+      // 清除作物参数，但保留 page=history（如果历史记录页面打开）
+      url.searchParams.delete('crop')
+      url.searchParams.delete('s')
+      // 如果历史记录打开，保留 page=history，否则清除所有参数
+      if (showHistory) {
+        url.searchParams.set('page', 'history')
+      } else {
+        url.search = ''
+      }
+      window.history.pushState({ page: showHistory ? 'history' : 'selector' }, '', url.toString())
       setSelectedCrop(null)
       setPrefillData(null)
     }, 300)
@@ -82,10 +100,20 @@ export const App = () => {
 
   const handleShowHistory = () => {
     setShowHistory(true)
+    // 更新 URL，添加历史记录参数，支持浏览器前进/后退
+    const url = new URL(window.location.href)
+    url.searchParams.set('page', 'history')
+    window.history.pushState({ page: 'history' }, '', url.toString())
   }
 
   const handleBackFromHistory = () => {
     setShowHistory(false)
+    // 延迟更新 URL，确保动画完成
+    setTimeout(() => {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('page')
+      window.history.pushState({ page: 'selector' }, '', url.toString())
+    }, 300)
   }
 
   const handleSelectHistoryRecord = (record: HistoryRecord) => {
@@ -98,9 +126,11 @@ export const App = () => {
       mutations: record.mutations,
     })
 
+    // 从历史记录选择作物时，保留 page=history 参数，同时添加 crop 参数
     const url = new URL(window.location.href)
+    url.searchParams.set('page', 'history')
     url.searchParams.set('crop', crop.name)
-    window.history.pushState({ page: 'calculator', crop: crop.name }, '', url.toString())
+    window.history.pushState({ page: 'history', crop: crop.name }, '', url.toString())
 
     setTimeout(() => {
       setCurrentPage('calculator')
@@ -111,7 +141,12 @@ export const App = () => {
   useEffect(() => {
     const handlePopState = () => {
       const urlParams = new URLSearchParams(window.location.search)
+      const page = urlParams.get('page')
       const cropName = urlParams.get('crop')
+      
+      // 检查是否是历史记录页面
+      const isHistory = page === 'history'
+      setShowHistory(isHistory)
       
       if (cropName) {
         // 从 URL 恢复作物和页面状态（前进到计算器页面）
@@ -126,14 +161,16 @@ export const App = () => {
           // 如果找不到作物，返回选择页面
           setSelectedCrop(null)
           setCurrentPage('selector')
+          setPrefillData(null)
         }
       } else {
-        // 没有作物参数，返回选择页面（后退到选择页面）
+        // 没有作物参数，关闭计算器页面
         // 先移除 active 类，让计算器页面滑出
         setCurrentPage('selector')
         // 延迟清空 selectedCrop，确保动画完成
         setTimeout(() => {
           setSelectedCrop(null)
+          setPrefillData(null)
         }, 300)
       }
     }
