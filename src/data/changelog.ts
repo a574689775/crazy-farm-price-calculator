@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.0.0',
+    date: '2026.1.19',
+    items: [
+      '优化界面样式，全新设计风格，更美观易用',
+      '新增历史记录功能，支持保存计算结果并随时查看',
+      '新增"本期果王争霸"模块，在选择作物页面顶部展示重点推荐作物',
+    ],
+  },
+  {
     version: 'V2.4.7',
     date: '2026.1.18',
     items: [

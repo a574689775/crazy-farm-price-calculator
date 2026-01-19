@@ -1,14 +1,37 @@
 .price-calculator {
   box-sizing: border-box;
-  border: 4px solid rgba(255, 212, 176, 1);
+  border: none;
   border-radius: 20px;
-  background: rgba(255, 252, 239, 1);
+  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
   max-height: calc(100dvh - 24px);
   max-height: calc(100vh - 24px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  padding: 0;
+}
+
+.price-calculator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  padding: 4px;
+  background: linear-gradient(to bottom, #E19859, #D58D50);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .price-calculator::-webkit-scrollbar {
@@ -18,19 +41,43 @@
 .price-calculator.empty {
   text-align: center;
   color: #888;
-  padding: 2rem;
+  padding: 0;
+}
+
+.price-calculator.empty::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  padding: 4px;
+  background: linear-gradient(to bottom, #E19859, #D58D50);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .calculator-header {
   padding: 20px 20px 16px;
   position: sticky;
   top: 0;
-  background: rgba(255, 252, 239, 1);
+  background: transparent;
   z-index: 20;
   display: flex;
   align-items: center;
   flex-shrink: 0;
   position: relative;
+  margin: 4px 4px 0 4px;
+  border-radius: 16px 16px 0 0;
 }
 
 .calculator-header::after {
@@ -40,11 +87,11 @@
   left: 16px;
   right: 16px;
   height: 0;
-  border-bottom: 2px dashed rgba(255, 212, 176, 1);
+  border-bottom: 2px dashed #F1BF94;
 }
 
 .calculator-title {
-  color: rgba(132, 49, 0, 1);
+  color: #000;
   font-style: normal;
   font-size: 20px;
   font-weight: 700;
@@ -61,7 +108,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #843100;
+  color: #000;
   cursor: pointer;
   transition: opacity 0.2s;
   position: absolute;
@@ -89,14 +136,14 @@
   padding: 0;
   -webkit-tap-highlight-color: transparent;
   font-size: 20px;
-  color: #843100 !important;
+  color: #000 !important;
 }
 
 .share-header-button svg {
   width: 20px;
   height: 20px;
-  color: #843100;
-  fill: #843100;
+  color: #000;
+  fill: #000;
 }
 
 .share-header-button:hover {
@@ -113,6 +160,10 @@
   gap: 0.875rem;
   display: flex;
   flex-direction: column;
+  margin: 0 4px 0 4px;
+  border-radius: 0 0 16px 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .calculator-inputs::-webkit-scrollbar {
@@ -153,15 +204,14 @@
 }
 
 .input-label {
-  color: rgba(132, 49, 0, 1);
   font-style: normal;
-  font-size: 14px;
-  font-weight: 700;
   line-height: 16px;
   letter-spacing: 0px;
   text-align: left;
   width: 74px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .input-field {
@@ -183,6 +233,7 @@
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
+  box-shadow: inset 0 0 4px 0 #00000025;
 }
 
 .input-field:focus {
@@ -275,7 +326,7 @@
 .mutation-group-checkbox-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 6px;
   cursor: pointer;
   color: rgba(132, 49, 0, 1);
   font-style: normal;
@@ -296,16 +347,16 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background: #fffcef;
-  border: 2px solid rgba(132, 49, 0, 1);
+  background: transparent;
+  border: 2px solid #843100;
   border-radius: 4px;
   position: relative;
   transition: all 0.2s;
 }
 
 .mutation-group-checkbox:checked {
-  background: #fffcef;
-  border-color: rgba(132, 49, 0, 1);
+  background: #843100;
+  border-color: #843100;
 }
 
 .mutation-group-checkbox:checked::after {
@@ -315,14 +366,14 @@
   top: 0;
   width: 4px;
   height: 8px;
-  border: solid rgba(132, 49, 0, 1);
+  border: solid #fff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
 .mutation-group-checkbox:indeterminate {
-  background-color: #fffcef;
-  border-color: rgba(132, 49, 0, 1);
+  background-color: #843100;
+  border-color: #843100;
 }
 
 .mutation-group-checkbox:indeterminate::after {
@@ -333,19 +384,17 @@
   transform: translateY(-50%);
   width: 10px;
   height: 2px;
-  background: rgba(132, 49, 0, 1);
+  background: #fff;
 }
 
 .mutation-group-label {
-  color: rgba(132, 49, 0, 1);
   font-style: normal;
-  font-size: 14px;
-  font-weight: 700;
   line-height: 16px;
   letter-spacing: 0px;
   text-align: left;
   margin: 0;
-  display: block;
+  display: flex;
+  align-items: center;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -442,7 +491,6 @@
 }
 
 .result-label {
-  transform: translateY(2px);
   font-size: 1rem;
   font-weight: 600;
   color: #e0e0e0;
@@ -466,13 +514,10 @@
 /* 固定底部的价格展示区域 */
 .calculator-result-fixed {
   position: sticky;
-  bottom: -4px;
-  height: 64px;
-  width: calc(100% + 8px);
-  margin-left: -4px;
-  margin-right: -4px;
-  border-radius: 0px 0px 20px 20px;
-  background: rgba(255, 212, 176, 1);
+  height: 60px;
+  width: calc(100% - 8px);
+  border-radius: 0 0 16px 16px;
+  background: #f5d6a7;
   padding: 0 20px;
   display: flex;
   align-items: center;
@@ -480,6 +525,7 @@
   flex-shrink: 0;
   z-index: 20;
   box-sizing: border-box;
+  margin: 0 4px 4px 4px;
 }
 
 .calculator-result-fixed .result-right {
@@ -489,49 +535,46 @@
   margin-left: auto;
 }
 
-.calculator-result-fixed .result-label {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
+.calculator-result-fixed .result-value-container {
+  padding: 4px 20px;
+  background: #FFF6D9;
+  box-shadow: inset 0 0 4px 0 #00000025;
+  border-radius: 999px;
 }
 
 .calculator-result-fixed .result-value-large {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
+  color: #843100;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 28px;
+  display: inline-block;
 }
 
-.feedback-button {
-  width: 62px;
-  height: 24px;
+.save-button {
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: none;
   border-radius: 999px;
-  background: rgba(255, 252, 239, 1);
-  color: rgba(132, 49, 0, 1);
-  font-style: normal;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 14px;
-  letter-spacing: 0px;
-  text-align: center;
+  background: linear-gradient(to bottom, #F6F8FC, #E7ECF7);
+  box-shadow: 0 1px 2px 0 #00000025;
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.2s;
 }
 
-.feedback-button:hover {
-  opacity: 0.8;
+.save-button:hover {
+  opacity: 0.7;
 }
 
-.feedback-button:active {
-  opacity: 0.6;
+.save-button:active {
+  opacity: 0.5;
 }
+
 
 .share-button {
   position: absolute;

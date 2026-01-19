@@ -36,11 +36,19 @@ export interface CropConfig {
   name: string
   priceCoefficient: number  // 售价系数
   maxWeight: number  // 极限重量 (kg)
-  weatherMutations: number  // 天气突变数量
   specialMutations?: WeatherMutation[]  // 异形突变列表（只有部分作物有）
-  maxPrices: {
-    [K in Quality]: number  // 各品质最大价格 (W)
-  }
+}
+
+/**
+ * 历史记录
+ */
+export interface HistoryRecord {
+  id: string
+  cropName: string
+  weight: number
+  mutations: WeatherMutation[]
+  price: string
+  timestamp: number
 }
 
 /**

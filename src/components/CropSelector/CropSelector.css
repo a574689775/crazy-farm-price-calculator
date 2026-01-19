@@ -1,25 +1,60 @@
 .crop-selector {
   box-sizing: border-box;
-  border: 4px solid rgba(255, 212, 176, 1);
+  border: none;
   border-radius: 20px;
-  background: rgba(255, 252, 239, 1);
+  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
   margin-top: 40px;
   margin-left: 12px;
   margin-right: 12px;
-  padding: 32px 16px 16px;
+  padding: 0;
   height: calc(100% - 40px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.crop-selector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  padding: 4px;
+  background: linear-gradient(to bottom, #E19859, #D58D50);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.crop-selector-content {
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  margin: 4px;
+  padding: 32px 12px 12px;
+  position: relative;
+  z-index: 1;
+  border-radius: 16px;
 }
 
-.crop-selector::-webkit-scrollbar {
+.crop-selector-content::-webkit-scrollbar {
   display: none;
 }
 
 .crop-title {
-  position: absolute;
+  position: fixed;
   top: 12px;
   left: 50%;
   transform: translateX(-50%);
@@ -32,12 +67,47 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.champion-section {
+  margin-bottom: 16px;
+}
+
+.champion-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.champion-title {
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: left;
+}
+
+.champion-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.champion-divider {
+  height: 0;
+  border-bottom: 2px dashed #F1BF94;
+  margin: 0;
 }
 
 .crop-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+  position: relative;
 }
 
 .crop-item {
@@ -59,7 +129,7 @@
 
 .crop-item-name {
   margin-top: 4px;
-  color: rgba(132, 49, 0, 1);
+  color: #843100;
   font-style: normal;
   font-size: 14px;
   font-weight: 700;

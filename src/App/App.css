@@ -6,7 +6,10 @@
 
 .app {
   height: 100vh;
-  background: rgba(255, 248, 220, 1);
+  background-image: url('https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   overflow: hidden;
   position: relative;
 }
@@ -28,8 +31,9 @@
   overflow-x: hidden;
 }
 
-/* 只给计算器页面添加 padding，不影响选择页面 */
-.page-calculator {
+/* 只给计算器和历史记录页面添加 padding，不影响选择页面 */
+.page-calculator,
+.page-history {
   padding: 2rem;
 }
 
@@ -89,10 +93,21 @@
   z-index: 1;
 }
 
-/* 计算器页面 - 默认在右侧不可见，覆盖在选择页面上方 */
-.page-calculator {
+/* 历史记录页面 - 默认在右侧不可见，覆盖在选择页面上方 */
+.page-history {
   transform: translateX(100%);
   z-index: 2;
+}
+
+/* 当历史记录激活时，从右侧滑到左侧可见 */
+.page-history.active {
+  transform: translateX(0);
+}
+
+/* 计算器页面 - 默认在右侧不可见，覆盖在历史记录页面上方 */
+.page-calculator {
+  transform: translateX(100%);
+  z-index: 3;
 }
 
 /* 当计算器激活时，从右侧滑到左侧可见 */
@@ -110,8 +125,9 @@
     padding: 0;
   }
   
-  /* 移动端计算器页面 padding */
-  .page-calculator {
+  /* 移动端计算器和历史记录页面 padding */
+  .page-calculator,
+  .page-history {
     padding: 12px;
   }
   

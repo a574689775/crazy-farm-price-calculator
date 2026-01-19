@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { LeftOutlined, ShareAltOutlined } from '@ant-design/icons'
-import type { CropConfig, WeatherMutation } from '@/types'
+import { LeftOutlined, ShareAltOutlined, SaveOutlined } from '@ant-design/icons'
+import type { CropConfig, WeatherMutation, HistoryRecord } from '@/types'
 import { weatherMutations, mutationColorConfig } from '@/data/weatherMutations'
 import { calculatePrice, formatPrice, parseFormattedPrice, convertToYuan } from '@/utils/priceCalculator'
 import { generateShareUrl, parseShareUrl } from '@/utils/shareEncoder'
@@ -8,11 +8,17 @@ import { crops } from '@/data/crops'
 import { Modal } from '@/components/Modal'
 import { PriceFeedback } from '@/components/PriceFeedback'
 import { SVGText } from '@/components/SVGText'
+import { GradientButton } from '@/components/GradientButton'
+import { addHistoryRecord } from '@/utils/historyStorage'
 import './PriceCalculator.css'
 
 interface PriceCalculatorProps {
   crop: CropConfig | null
   onBack?: () => void
+  prefillData?: {
+    weight: number
+    mutations: WeatherMutation[]
+  }
 }
 
 // 突变分组（品质从高到低排序）
@@ -111,7 +117,7 @@ const useAnimatedPrice = (targetPrice: string) => {
   return displayPrice
 }
 
-export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
+export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorProps) => {
   const [weight, setWeight] = useState<string>('')
   const [percentage, setPercentage] = useState<string>('')
   const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>(COMMON_MUTATIONS)
@@ -184,6 +190,52 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
       setSelectedMutations(COMMON_MUTATIONS)
     }
   }, [crop?.name, hasRestoredFromUrl])
+
+  // 从历史记录回填数据
+  useEffect(() => {
+    if (!crop || !prefillData) {
+      // 如果没有 prefillData，重置 hasRestoredFromUrl
+      if (!prefillData) {
+        setHasRestoredFromUrl(false)
+      }
+      return
+    }
+
+    // 只有当作物匹配时才回填
+    const formattedWeight = Number(prefillData.weight).toFixed(2).replace(/\.?0+$/, '')
+    setWeight(formattedWeight)
+    setPercentage('')
+    setSelectedMutations(prefillData.mutations.length ? prefillData.mutations : COMMON_MUTATIONS)
+    setHasRestoredFromUrl(true)
+  }, [prefillData, crop?.name])
+
+  // 保存到历史记录
+  const handleSaveToHistory = () => {
+    if (!crop || !isValidWeight || !result) {
+      setToastMessage('请先输入重量并选择突变')
+      setShowToast(true)
+      setTimeout(() => {
+        setShowToast(false)
+      }, 2000)
+      return
+    }
+
+    const record: HistoryRecord = {
+      id: Date.now().toString(),
+      cropName: crop.name,
+      weight: weightNum,
+      mutations: [...selectedMutations],
+      price: displayPrice,
+      timestamp: Date.now(),
+    }
+
+    addHistoryRecord(record)
+    setToastMessage('已保存到历史记录')
+    setShowToast(true)
+    setTimeout(() => {
+      setShowToast(false)
+    }, 2000)
+  }
 
   // 计算价格（必须在所有 hooks 之后，条件返回之前）
   const weightNum = parseFloat(weight) || 0
@@ -421,10 +473,30 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                 }}
                 onChange={() => handleGroupToggle(mutations, isExclusive)}
               />
-              <span className="mutation-group-label">{title}</span>
+              <span className="mutation-group-label">
+                <SVGText
+                  fillColor="#843100"
+                  strokeColor="#fff"
+                  strokeWidth={2}
+                  fontSize={14}
+                  fontWeight={700}
+                >
+                  {title}
+                </SVGText>
+              </span>
             </label>
           ) : (
-            <span className="mutation-group-label">{title}</span>
+            <span className="mutation-group-label">
+              <SVGText
+                fillColor="#843100"
+                strokeColor="#fff"
+                strokeWidth={2}
+                fontSize={14}
+                fontWeight={700}
+              >
+                {title}
+              </SVGText>
+            </span>
           )}
         </div>
         <div className="mutations-list">
@@ -518,7 +590,18 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
           <div className="input-group-row-with-image">
             <div className="input-fields-wrapper">
               <div className="input-group-row">
-                <label className="input-label">重量 (kg)</label>
+                <label className="input-label">
+                  <SVGText
+                    fillColor="#843100"
+                    strokeColor="#fff"
+                    strokeWidth={2}
+                    fontSize={14}
+                    fontWeight={700}
+                    textAlign="left"
+                  >
+                    重量 (kg)
+                  </SVGText>
+                </label>
                 <input
                   type="number"
                   className="input-field"
@@ -531,13 +614,24 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
                 />
               </div>
               <div className="input-group-row">
-                <label className="input-label">百分比 (%)</label>
+                <label className="input-label">
+                  <SVGText
+                    fillColor="#843100"
+                    strokeColor="#fff"
+                    strokeWidth={2}
+                    fontSize={14}
+                    fontWeight={700}
+                    textAlign="left"
+                  >
+                    百分比 (%)
+                  </SVGText>
+                </label>
                 <input
                   type="number"
                   className="input-field"
                   value={percentage}
                   onChange={(e) => handlePercentageChange(e.target.value)}
-                  placeholder="范围: 1-100%"
+                  placeholder="范围: 1-100"
                   min="1"
                   max="100"
                   step="1"
@@ -578,8 +672,7 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
 
       {/* 固定底部的价格展示区域 */}
       <div className="calculator-result-fixed">
-        <div
-          className="feedback-button"
+        <GradientButton
           onClick={() => {
             if (isValidWeight && result) {
               setShowFeedbackModal(true)
@@ -593,32 +686,16 @@ export const PriceCalculator = ({ crop, onBack }: PriceCalculatorProps) => {
           }}
         >
           反馈
-        </div>
+        </GradientButton>
         <div className="result-right">
-          <span className="result-label">
-            <SVGText
-              fillColor="rgba(132, 49, 0, 1)"
-              strokeColor="#fff"
-              strokeWidth={4}
-              fontSize={16}
-              fontWeight={700}
-              style={{ width: '100%', height: '100%' }}
-            >
-              价格:
-            </SVGText>
-          </span>
-          <span className="result-value-large">
-            <SVGText
-              fillColor="rgba(132, 49, 0, 1)"
-              strokeColor="#fff"
-              strokeWidth={4}
-              fontSize={24}
-              fontWeight={700}
-              style={{ width: '100%', height: '100%' }}
-            >
+          <button className="save-button" onClick={handleSaveToHistory}>
+            <SaveOutlined />
+          </button>
+          <div className="result-value-container">
+            <span className="result-value-large">
               {displayPrice}
-            </SVGText>
-          </span>
+            </span>
+          </div>
         </div>
       </div>
 

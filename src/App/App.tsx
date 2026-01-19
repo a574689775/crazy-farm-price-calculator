@@ -1,18 +1,25 @@
 import { useState, useEffect } from 'react'
-import type { CropConfig } from '@/types'
+import type { CropConfig, HistoryRecord, WeatherMutation } from '@/types'
 import { crops } from '@/data/crops'
 import { Footer } from '@/components/Footer'
 import { CropSelector } from '@/components/CropSelector'
 import { PriceCalculator } from '@/components/PriceCalculator'
+import { HistoryView } from '@/components/HistoryView'
 import { FeedbackDataView } from '@/components/FeedbackDataView'
 import { parseShareUrl } from '@/utils/shareEncoder'
 import './App.css'
 
 type Page = 'selector' | 'calculator' | 'feedback'
+interface PrefillData {
+  weight: number
+  mutations: WeatherMutation[]
+}
 
 export const App = () => {
   const [selectedCrop, setSelectedCrop] = useState<CropConfig | null>(null)
   const [currentPage, setCurrentPage] = useState<Page>('selector')
+  const [showHistory, setShowHistory] = useState(false)
+  const [prefillData, setPrefillData] = useState<PrefillData | null>(null)
 
   // 从URL参数恢复配置（仅在首次加载时）
   useEffect(() => {
@@ -69,7 +76,35 @@ export const App = () => {
       url.search = ''
       window.history.pushState({ page: 'selector' }, '', url.toString())
       setSelectedCrop(null)
+      setPrefillData(null)
     }, 300)
+  }
+
+  const handleShowHistory = () => {
+    setShowHistory(true)
+  }
+
+  const handleBackFromHistory = () => {
+    setShowHistory(false)
+  }
+
+  const handleSelectHistoryRecord = (record: HistoryRecord) => {
+    const crop = crops.find(c => c.name === record.cropName)
+    if (!crop) return
+
+    setSelectedCrop(crop)
+    setPrefillData({
+      weight: record.weight,
+      mutations: record.mutations,
+    })
+
+    const url = new URL(window.location.href)
+    url.searchParams.set('crop', crop.name)
+    window.history.pushState({ page: 'calculator', crop: crop.name }, '', url.toString())
+
+    setTimeout(() => {
+      setCurrentPage('calculator')
+    }, 0)
   }
 
   // 监听浏览器前进/后退
@@ -124,14 +159,28 @@ export const App = () => {
                   crops={crops}
                   selectedCrop={selectedCrop}
                   onSelectCrop={handleSelectCrop}
+                  onShowHistory={handleShowHistory}
                 />
                 <Footer />
               </div>
             </div>
             
+            {/* 历史记录页面 - 始终渲染，通过transform控制位置 */}
+            <div className={`page-wrapper page-history ${showHistory ? 'active' : ''}`}>
+              <HistoryView
+                onBack={handleBackFromHistory}
+                active={showHistory}
+                onSelectRecord={handleSelectHistoryRecord}
+              />
+            </div>
+            
             {/* 计算器页面 - 始终渲染，通过transform控制位置 */}
             <div className={`page-wrapper page-calculator ${currentPage === 'calculator' && selectedCrop ? 'active' : ''}`}>
-              <PriceCalculator crop={selectedCrop} onBack={handleBackToSelector} />
+              <PriceCalculator
+                crop={selectedCrop}
+                onBack={handleBackToSelector}
+                prefillData={prefillData ?? undefined}
+              />
             </div>
           </div>
         )}

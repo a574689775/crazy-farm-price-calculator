@@ -10,6 +10,7 @@ interface SVGTextProps {
   fontWeight?: number | string
   className?: string
   style?: React.CSSProperties
+  textAlign?: 'left' | 'center' | 'right'
 }
 
 export const SVGText: React.FC<SVGTextProps> = ({
@@ -21,6 +22,7 @@ export const SVGText: React.FC<SVGTextProps> = ({
   fontWeight = 'normal',
   className = '',
   style = {},
+  textAlign = 'center',
 }) => {
   const containerRef = useRef<HTMLSpanElement>(null)
   const placeholderRef = useRef<HTMLSpanElement>(null)
@@ -59,9 +61,9 @@ export const SVGText: React.FC<SVGTextProps> = ({
           }}
         >
           <text
-            x="50%"
+            x={textAlign === 'left' ? '0' : textAlign === 'right' ? '100%' : '50%'}
             y="50%"
-            textAnchor="middle"
+            textAnchor={textAlign === 'left' ? 'start' : textAlign === 'right' ? 'end' : 'middle'}
             dominantBaseline="central"
             fontSize={fontSize}
             fontWeight={fontWeight}
