@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.3.0',
+    date: '2026.1.20',
+    items: [
+      '增加每日查询量展示，并按热度排序',
+    ],
+  },
+  {
     version: 'V3.2.0',
     date: '2026.1.20',
     items: [

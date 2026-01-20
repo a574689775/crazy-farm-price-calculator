@@ -7,6 +7,7 @@ import { PriceCalculator } from '@/components/PriceCalculator'
 import { HistoryView } from '@/components/HistoryView'
 import { FeedbackDataView } from '@/components/FeedbackDataView'
 import { parseShareUrl } from '@/utils/shareEncoder'
+import { logCropQuery, fetchTodayQueryCounts } from '@/utils/supabase'
 import './App.css'
 
 type Page = 'selector' | 'calculator' | 'feedback'
@@ -20,6 +21,7 @@ export const App = () => {
   const [currentPage, setCurrentPage] = useState<Page>('selector')
   const [showHistory, setShowHistory] = useState(false)
   const [prefillData, setPrefillData] = useState<PrefillData | null>(null)
+  const [todayQueryCounts, setTodayQueryCounts] = useState<Record<string, number>>({})
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -100,7 +102,21 @@ export const App = () => {
 
     // 使用统一的状态恢复函数
     syncStateFromUrl()
+
+    // 初次进入选择页，静默刷新一次数据
+    fetchTodayQueryCounts()
+      .then(setTodayQueryCounts)
+      .catch(console.error)
   }, [])
+
+  // 每次进入选择页时静默刷新当日查询次数
+  useEffect(() => {
+    if (currentPage === 'selector' && !showHistory) {
+      fetchTodayQueryCounts()
+        .then(setTodayQueryCounts)
+        .catch(console.error)
+    }
+  }, [currentPage, showHistory])
 
   const handleSelectCrop = (crop: CropConfig) => {
     // 更新 URL，添加作物参数，支持浏览器前进/后退
@@ -117,6 +133,9 @@ export const App = () => {
     cancelClearCalculatorState()
     setSelectedCrop(crop)
     setCurrentPage('calculator')
+
+    // 记录查询次数（异步，不阻塞 UI）
+    logCropQuery(crop.name).catch(console.error)
   }
 
   const handleBackToSelector = () => {
@@ -135,6 +154,11 @@ export const App = () => {
     // 立即更新状态，动画结束后再清空数据
     setCurrentPage('selector')
     clearCalculatorState()
+
+    // 返回选择页时刷新当日查询次数
+    fetchTodayQueryCounts()
+      .then(setTodayQueryCounts)
+      .catch(console.error)
   }
 
   const handleShowHistory = () => {
@@ -161,6 +185,11 @@ export const App = () => {
     setShowHistory(false)
     setCurrentPage('selector')
     clearCalculatorState()
+
+    // 返回选择页时刷新当日查询次数
+    fetchTodayQueryCounts()
+      .then(setTodayQueryCounts)
+      .catch(console.error)
   }
 
   const handleSelectHistoryRecord = (record: HistoryRecord) => {
@@ -181,6 +210,9 @@ export const App = () => {
       mutations: record.mutations,
     })
     setCurrentPage('calculator')
+
+    // 记录查询次数（异步，不阻塞 UI）
+    logCropQuery(crop.name).catch(console.error)
   }
 
   // 监听浏览器前进/后退
@@ -215,6 +247,7 @@ export const App = () => {
                 selectedCrop={selectedCrop}
                 onSelectCrop={handleSelectCrop}
                 onShowHistory={handleShowHistory}
+                queryCounts={todayQueryCounts}
               />
               <Footer />
             </div>

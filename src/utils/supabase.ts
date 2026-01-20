@@ -62,3 +62,82 @@ export const deleteFeedback = async (id: number) => {
   return true
 }
 
+/**
+ * 记录作物当日查询次数（若已有记录则 +1，否则创建新记录）
+ */
+export const logCropQuery = async (cropName: string) => {
+  if (!supabase) {
+    throw new Error('Supabase client is not initialized. Please check your environment variables.')
+  }
+
+  // 使用 UTC 日期字符串，格式 YYYY-MM-DD
+  const todayDate = new Date().toISOString().slice(0, 10)
+
+  // 查询当日是否已有记录
+  const { data: existingData, error: queryError } = await supabase
+    .from('crop_daily_stats')
+    .select('id, query_count')
+    .eq('crop_name', cropName)
+    .eq('query_date', todayDate)
+    .maybeSingle()
+
+  if (queryError) {
+    // 不阻塞主流程，抛出可被上层捕获
+    throw queryError
+  }
+
+  if (existingData?.id) {
+    // 已有记录，query_count 自增
+    const { error: updateError } = await supabase
+      .from('crop_daily_stats')
+      .update({
+        query_count: (existingData.query_count ?? 0) + 1,
+      })
+      .eq('id', existingData.id)
+
+    if (updateError) {
+      throw updateError
+    }
+  } else {
+    // 无记录，创建新行
+    const { error: insertError } = await supabase
+      .from('crop_daily_stats')
+      .insert({
+        crop_name: cropName,
+        query_date: todayDate,
+        query_count: 1,
+      })
+
+    if (insertError) {
+      throw insertError
+    }
+  }
+}
+
+/**
+ * 获取当日所有作物的查询次数映射
+ */
+export const fetchTodayQueryCounts = async (): Promise<Record<string, number>> => {
+  if (!supabase) {
+    throw new Error('Supabase client is not initialized. Please check your environment variables.')
+  }
+
+  const todayDate = new Date().toISOString().slice(0, 10)
+  const { data, error } = await supabase
+    .from('crop_daily_stats')
+    .select('crop_name, query_count')
+    .eq('query_date', todayDate)
+
+  if (error) {
+    throw error
+  }
+
+  const map: Record<string, number> = {}
+  data?.forEach(row => {
+    if (row.crop_name) {
+      map[row.crop_name] = row.query_count ?? 0
+    }
+  })
+  return map
+}
+
