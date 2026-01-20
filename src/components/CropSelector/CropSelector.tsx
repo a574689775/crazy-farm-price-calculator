@@ -21,6 +21,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
   const prevPositionsRef = useRef(new Map<string, DOMRect>())
   const prevOrderRef = useRef<string>('')
   const clearTimersRef = useRef(new Map<string, number>())
+  const hasAnimatedRef = useRef(false)
 
   // 数据文件中的顺序即品质优先级（索引越小品质越高）
   const cropOrder = useMemo(() => new Map(crops.map((crop, index) => [crop.name, index])), [crops])
@@ -65,7 +66,8 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
       newPositions.set(key, node.getBoundingClientRect())
     })
 
-    if (isOrderChanged) {
+    // 首次有数据时跳过动画，避免初始卡顿
+    if (isOrderChanged && hasAnimatedRef.current) {
       const prevPositions = prevPositionsRef.current
 
       nodeRefs.current.forEach((node, key) => {
@@ -90,11 +92,11 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         void node.getBoundingClientRect()
 
         requestAnimationFrame(() => {
-          node.style.transition = 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)'
+          node.style.transition = 'transform 600ms cubic-bezier(0.22, 1, 0.36, 1)'
           node.style.transform = ''
           const timer = window.setTimeout(() => {
             node.style.transition = ''
-          }, 450)
+          }, 650)
           clearTimersRef.current.set(key, timer)
         })
       })
@@ -102,6 +104,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
 
     prevPositionsRef.current = newPositions
     prevOrderRef.current = orderKey
+    hasAnimatedRef.current = true
   }, [orderKey])
 
   const setNodeRef = (name: string) => (el: HTMLDivElement | null) => {

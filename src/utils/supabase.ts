@@ -62,56 +62,63 @@ export const deleteFeedback = async (id: number) => {
   return true
 }
 
+// 简单的每作物写入串行队列，避免快速点击导致写入丢失
+const logQueue: Record<string, Promise<unknown>> = {}
+
 /**
  * 记录作物当日查询次数（若已有记录则 +1，否则创建新记录）
  */
 export const logCropQuery = async (cropName: string) => {
-  if (!supabase) {
-    throw new Error('Supabase client is not initialized. Please check your environment variables.')
-  }
-
-  // 使用 UTC 日期字符串，格式 YYYY-MM-DD
-  const todayDate = new Date().toISOString().slice(0, 10)
-
-  // 查询当日是否已有记录
-  const { data: existingData, error: queryError } = await supabase
-    .from('crop_daily_stats')
-    .select('id, query_count')
-    .eq('crop_name', cropName)
-    .eq('query_date', todayDate)
-    .maybeSingle()
-
-  if (queryError) {
-    // 不阻塞主流程，抛出可被上层捕获
-    throw queryError
-  }
-
-  if (existingData?.id) {
-    // 已有记录，query_count 自增
-    const { error: updateError } = await supabase
-      .from('crop_daily_stats')
-      .update({
-        query_count: (existingData.query_count ?? 0) + 1,
-      })
-      .eq('id', existingData.id)
-
-    if (updateError) {
-      throw updateError
+  const enqueue = async () => {
+    if (!supabase) {
+      throw new Error('Supabase client is not initialized. Please check your environment variables.')
     }
-  } else {
-    // 无记录，创建新行
-    const { error: insertError } = await supabase
-      .from('crop_daily_stats')
-      .insert({
-        crop_name: cropName,
-        query_date: todayDate,
-        query_count: 1,
-      })
 
-    if (insertError) {
-      throw insertError
+    // 使用 UTC 日期字符串，格式 YYYY-MM-DD
+    const todayDate = new Date().toISOString().slice(0, 10)
+
+    // 查询当日是否已有记录
+    const { data: existingData, error: queryError } = await supabase
+      .from('crop_daily_stats')
+      .select('id, query_count')
+      .eq('crop_name', cropName)
+      .eq('query_date', todayDate)
+      .maybeSingle()
+
+    if (queryError) {
+      throw queryError
+    }
+
+    if (existingData?.id) {
+      const { error: updateError } = await supabase
+        .from('crop_daily_stats')
+        .update({
+          query_count: (existingData.query_count ?? 0) + 1,
+        })
+        .eq('id', existingData.id)
+
+      if (updateError) {
+        throw updateError
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from('crop_daily_stats')
+        .insert({
+          crop_name: cropName,
+          query_date: todayDate,
+          query_count: 1,
+        })
+
+      if (insertError) {
+        throw insertError
+      }
     }
   }
+
+  const prev = logQueue[cropName] ?? Promise.resolve()
+  const next = prev.then(enqueue).catch(console.error)
+  logQueue[cropName] = next
+  return next
 }
 
 /**
