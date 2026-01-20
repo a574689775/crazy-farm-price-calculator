@@ -66,6 +66,17 @@ export const deleteFeedback = async (id: number) => {
 const logQueue: Record<string, Promise<unknown>> = {}
 
 /**
+ * 获取本地时区的今日日期字符串（格式：YYYY-MM-DD）
+ */
+const getLocalTodayDate = (): string => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/**
  * 记录作物当日查询次数（若已有记录则 +1，否则创建新记录）
  */
 export const logCropQuery = async (cropName: string) => {
@@ -74,8 +85,8 @@ export const logCropQuery = async (cropName: string) => {
       throw new Error('Supabase client is not initialized. Please check your environment variables.')
     }
 
-    // 使用 UTC 日期字符串，格式 YYYY-MM-DD
-    const todayDate = new Date().toISOString().slice(0, 10)
+    // 使用本地时区日期字符串，格式 YYYY-MM-DD
+    const todayDate = getLocalTodayDate()
 
     // 查询当日是否已有记录
     const { data: existingData, error: queryError } = await supabase
@@ -129,7 +140,8 @@ export const fetchTodayQueryCounts = async (): Promise<Record<string, number>> =
     throw new Error('Supabase client is not initialized. Please check your environment variables.')
   }
 
-  const todayDate = new Date().toISOString().slice(0, 10)
+  // 使用本地时区日期字符串，格式 YYYY-MM-DD
+  const todayDate = getLocalTodayDate()
   const { data, error } = await supabase
     .from('crop_daily_stats')
     .select('crop_name, query_count')
