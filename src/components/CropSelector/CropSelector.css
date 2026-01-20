@@ -3,9 +3,6 @@
   border: none;
   border-radius: 20px;
   background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
-  margin-top: 40px;
-  margin-left: 12px;
-  margin-right: 12px;
   padding: 0;
   height: calc(100% - 40px);
   position: relative;
@@ -110,6 +107,31 @@
   position: relative;
 }
 
+/* 响应式布局：根据屏幕宽度动态调整每行作物数量 */
+/* 小屏幕（< 480px）：4列 */
+@media (max-width: 479px) {
+  .champion-grid,
+  .crop-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 中等屏幕（480px - 640px）：5列 */
+@media (min-width: 480px) and (max-width: 640px) {
+  .champion-grid,
+  .crop-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* 大屏幕（> 640px）：6列 */
+@media (min-width: 641px) {
+  .champion-grid,
+  .crop-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
 .crop-item {
   display: flex;
   flex-direction: column;
@@ -150,8 +172,3 @@
   transform: translateY(0);
 }
 
-@media (max-width: 768px) {
-  .crop-selector {
-    height: calc(100% - 40px);
-  }
-}

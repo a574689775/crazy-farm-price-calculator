@@ -415,6 +415,24 @@
   row-gap: 12px;
 }
 
+@media (max-width: 479px) {
+  .mutations-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 480px) and (max-width: 640px) {
+  .mutations-list {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 641px) {
+  .mutations-list {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
 .mutation-item {
   position: relative;
   width: 100%;

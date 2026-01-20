@@ -1,7 +1,7 @@
 .feedback-data-view {
   min-height: 100vh;
   background: var(--background-color, #fff8dc);
-  padding: 20px;
+  padding: 16px;
   box-sizing: border-box;
 }
 
@@ -382,9 +382,9 @@
 }
 
 @media (max-width: 768px) {
-  .feedback-data-view {
+  /* .feedback-data-view {
     padding: 16px;
-  }
+  } */
 
   .feedback-crop-list {
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));

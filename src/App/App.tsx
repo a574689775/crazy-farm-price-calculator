@@ -210,15 +210,13 @@ export const App = () => {
           <div className={`content-container ${currentPage === 'calculator' ? 'calculator-active' : ''}`}>
             {/* 选择作物页面 - 始终渲染，通过transform控制位置 */}
             <div className="page-wrapper page-selector">
-              <div className="selector-page-container">
-                <CropSelector
-                  crops={crops}
-                  selectedCrop={selectedCrop}
-                  onSelectCrop={handleSelectCrop}
-                  onShowHistory={handleShowHistory}
-                />
-                <Footer />
-              </div>
+              <CropSelector
+                crops={crops}
+                selectedCrop={selectedCrop}
+                onSelectCrop={handleSelectCrop}
+                onShowHistory={handleShowHistory}
+              />
+              <Footer />
             </div>
             
             {/* 历史记录页面 - 始终渲染，通过transform控制位置 */}

@@ -50,7 +50,7 @@
 /* 只给计算器和历史记录页面添加 padding，不影响选择页面 */
 .page-calculator,
 .page-history {
-  padding: 2rem;
+  padding: 12px;
 }
 
 .main::-webkit-scrollbar {
@@ -88,16 +88,7 @@
   max-width: 800px;
 }
 
-/* 选择页面容器 - 包含选择器和 Footer，使用 flex 布局 */
-.selector-page-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  max-width: 800px;
-}
-
-.selector-page-container > *:first-child {
+.page-selector  > *:first-child {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -107,6 +98,14 @@
 .page-selector {
   transform: translateX(0);
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 40px 12px 0 12px;
+  box-sizing: border-box;
 }
 
 /* 历史记录页面 - 默认在右侧不可见，覆盖在选择页面上方 */
@@ -139,12 +138,6 @@
   
   .main {
     padding: 0;
-  }
-  
-  /* 移动端计算器和历史记录页面 padding */
-  .page-calculator,
-  .page-history {
-    padding: 12px;
   }
   
   .content-container {
