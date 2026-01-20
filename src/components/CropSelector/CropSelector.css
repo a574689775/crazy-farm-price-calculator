@@ -142,6 +142,7 @@
   min-width: 0;
   overflow: visible;
   position: relative;
+  will-change: transform;
 }
 
 .crop-item-image {
@@ -165,12 +166,12 @@
 
 @media (hover: hover) and (pointer: fine) {
   .crop-item:hover {
-    transform: translateY(-2px);
+    filter: brightness(1.1);
   }
 }
 
 .crop-item:active {
-  transform: translateY(0);
+  filter: brightness(0.95);
 }
 
 .crop-item-count {

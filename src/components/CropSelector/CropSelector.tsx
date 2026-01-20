@@ -1,4 +1,5 @@
 import type { CropConfig } from '@/types'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import { ClockCircleOutlined } from '@ant-design/icons'
 import { SVGText } from '@/components/SVGText'
 import { GradientButton } from '@/components/GradientButton'
@@ -16,8 +17,13 @@ interface CropSelectorProps {
 const CHAMPION_CROPS = ['蟠桃', '葡萄', '西瓜', '番茄']
 
 export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts = {} }: CropSelectorProps) => {
+  const nodeRefs = useRef(new Map<string, HTMLDivElement>())
+  const prevPositionsRef = useRef(new Map<string, DOMRect>())
+  const prevOrderRef = useRef<string>('')
+  const clearTimersRef = useRef(new Map<string, number>())
+
   // 数据文件中的顺序即品质优先级（索引越小品质越高）
-  const cropOrder = new Map(crops.map((crop, index) => [crop.name, index]))
+  const cropOrder = useMemo(() => new Map(crops.map((crop, index) => [crop.name, index])), [crops])
 
   // 获取果王争霸的作物配置
   const sortByCountThenQuality = (a: CropConfig, b: CropConfig) => {
@@ -27,16 +33,84 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     return (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0)
   }
 
-  const championCrops = CHAMPION_CROPS.map(name => 
-    crops.find(crop => crop.name === name)
+  const championCrops = useMemo(() => 
+    CHAMPION_CROPS.map(name => 
+      crops.find(crop => crop.name === name)
+    )
+      .filter((crop): crop is CropConfig => crop !== undefined)
+      .sort(sortByCountThenQuality),
+    [crops, queryCounts, cropOrder]
   )
-    .filter((crop): crop is CropConfig => crop !== undefined)
-    .sort(sortByCountThenQuality)
 
   // 获取其他作物（排除果王争霸的作物）
-  const otherCrops = crops
-    .filter(crop => !CHAMPION_CROPS.includes(crop.name))
-    .sort(sortByCountThenQuality)
+  const otherCrops = useMemo(() =>
+    crops
+      .filter(crop => !CHAMPION_CROPS.includes(crop.name))
+      .sort(sortByCountThenQuality),
+    [crops, queryCounts, cropOrder]
+  )
+
+  const orderKey = useMemo(
+    () => [...championCrops, ...otherCrops].map(c => c.name).join(','),
+    [championCrops, otherCrops]
+  )
+
+  // FLIP 动画：仅在排序变化时触发，避免无关抖动
+  useLayoutEffect(() => {
+    const prevOrder = prevOrderRef.current
+    const isOrderChanged = prevOrder !== '' && prevOrder !== orderKey
+
+    const newPositions = new Map<string, DOMRect>()
+    nodeRefs.current.forEach((node, key) => {
+      newPositions.set(key, node.getBoundingClientRect())
+    })
+
+    if (isOrderChanged) {
+      const prevPositions = prevPositionsRef.current
+
+      nodeRefs.current.forEach((node, key) => {
+        const prev = prevPositions.get(key)
+        const next = newPositions.get(key)
+        if (!prev || !next) return
+
+        const dx = prev.left - next.left
+        const dy = prev.top - next.top
+
+        if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return
+
+        // 清理之前的定时器
+        const prevTimer = clearTimersRef.current.get(key)
+        if (prevTimer) {
+          window.clearTimeout(prevTimer)
+        }
+
+        node.style.transition = 'none'
+        node.style.transform = `translate(${dx}px, ${dy}px)`
+        // 强制回流，确保 transform 生效
+        void node.getBoundingClientRect()
+
+        requestAnimationFrame(() => {
+          node.style.transition = 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)'
+          node.style.transform = ''
+          const timer = window.setTimeout(() => {
+            node.style.transition = ''
+          }, 450)
+          clearTimersRef.current.set(key, timer)
+        })
+      })
+    }
+
+    prevPositionsRef.current = newPositions
+    prevOrderRef.current = orderKey
+  }, [orderKey])
+
+  const setNodeRef = (name: string) => (el: HTMLDivElement | null) => {
+    if (!el) {
+      nodeRefs.current.delete(name)
+      return
+    }
+    nodeRefs.current.set(name, el)
+  }
 
   const renderCropItem = (crop: CropConfig) => {
     const rawCount = queryCounts[crop.name] ?? 0
@@ -46,6 +120,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
       <div
         key={crop.name}
         className="crop-item"
+        ref={setNodeRef(crop.name)}
         onClick={() => onSelectCrop(crop)}
       >
         {rawCount > 0 && <div className="crop-item-count">{count}</div>}

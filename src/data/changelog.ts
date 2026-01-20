@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.4.0',
+    date: '2026.1.20',
+    items: [
+      '添加作物变化时的动画效果',
+      '调整部分作物重量和价格系数',
+    ],
+  },
+  {
     version: 'V3.3.0',
     date: '2026.1.20',
     items: [
