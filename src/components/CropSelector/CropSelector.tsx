@@ -126,12 +126,14 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         ref={setNodeRef(crop.name)}
         onClick={() => onSelectCrop(crop)}
       >
-        {rawCount > 0 && <div className="crop-item-count">{count}</div>}
-        <img 
-          src={`https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/${crop.name}.png`}
-          alt={crop.name}
-          className="crop-item-image"
-        />
+        <div className="crop-item-image-wrapper">
+          {rawCount > 0 && <div className="crop-item-count">{count}</div>}
+          <img 
+            src={`https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/${crop.name}.png`}
+            alt={crop.name}
+            className="crop-item-image"
+          />
+        </div>
         <div className="crop-item-name">{crop.name}</div>
       </div>
     )

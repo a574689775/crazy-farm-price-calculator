@@ -145,10 +145,16 @@
   will-change: transform;
 }
 
+.crop-item-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .crop-item-image {
   width: 60px;
   height: 60px;
   object-fit: contain;
+  display: block;
 }
 
 .crop-item-name {
