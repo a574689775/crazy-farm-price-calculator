@@ -59,7 +59,7 @@ export const Footer = () => {
         title="加入用户群"
       >
         <img
-          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/用户群1.15.png"
+          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/用户群1.21.jpg"
           alt="用户群二维码"
           className="modal-qrcode"
         />
