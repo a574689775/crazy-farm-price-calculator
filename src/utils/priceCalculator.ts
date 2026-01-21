@@ -36,7 +36,9 @@ export const calculatePrice = (
   })
 
   // 计算价格：基础价格 * 先天突变倍数 * (重量的1.5次方) * (天气突变总倍数 + 1) * 异形突变倍数
-  const price = crop.priceCoefficient * innateMultiplier * Math.pow(weight, 1.5) * (weatherMultiplierSum + 1) * specialMultiplier
+  const baseCoeff = Number(crop.priceCoefficient.toFixed(4))
+  const priceRaw = baseCoeff * innateMultiplier * Math.pow(weight, 1.5) * (weatherMultiplierSum + 1) * specialMultiplier
+  const price = Number(priceRaw.toFixed(4))
 
   return {
     // totalMultiplier 用于展示天气突变总倍数
@@ -157,7 +159,8 @@ export const calculateWeightFromPrice = (
   })
 
   // 计算分母：基础价格系数 × 先天突变倍数 × (天气突变总倍数 + 1) × 异形突变倍数
-  const denominator = crop.priceCoefficient * innateMultiplier * (weatherMultiplierSum + 1) * specialMultiplier
+  const baseCoeff = Number(crop.priceCoefficient.toFixed(4))
+  const denominator = baseCoeff * innateMultiplier * (weatherMultiplierSum + 1) * specialMultiplier
   
   if (denominator === 0 || priceInYuan <= 0) {
     return null
