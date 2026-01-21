@@ -21,7 +21,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
   const prevPositionsRef = useRef(new Map<string, DOMRect>())
   const prevOrderRef = useRef<string>('')
   const clearTimersRef = useRef(new Map<string, number>())
-  const hasAnimatedRef = useRef(false)
+  const isAnimatingRef = useRef(false)
 
   // 数据文件中的顺序即品质优先级（索引越小品质越高）
   const cropOrder = useMemo(() => new Map(crops.map((crop, index) => [crop.name, index])), [crops])
@@ -61,50 +61,98 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     const prevOrder = prevOrderRef.current
     const isOrderChanged = prevOrder !== '' && prevOrder !== orderKey
 
+    // 正在动画中，跳过但更新缓存
+    if (isAnimatingRef.current) {
+      const newPositions = new Map<string, DOMRect>()
+      nodeRefs.current.forEach((node, key) => {
+        newPositions.set(key, node.getBoundingClientRect())
+      })
+      prevPositionsRef.current = newPositions
+      prevOrderRef.current = orderKey
+      return
+    }
+
+    // 首次进入（无历史顺序）或顺序未变：仅更新缓存
+    if (!isOrderChanged) {
+      const newPositions = new Map<string, DOMRect>()
+      nodeRefs.current.forEach((node, key) => {
+        newPositions.set(key, node.getBoundingClientRect())
+      })
+      prevPositionsRef.current = newPositions
+      prevOrderRef.current = orderKey
+      return
+    }
+
+    // 获取新位置
     const newPositions = new Map<string, DOMRect>()
     nodeRefs.current.forEach((node, key) => {
       newPositions.set(key, node.getBoundingClientRect())
     })
 
-    // 首次有数据时跳过动画，避免初始卡顿
-    if (isOrderChanged && hasAnimatedRef.current) {
-      const prevPositions = prevPositionsRef.current
+    const prevPositions = prevPositionsRef.current
+    const elementsToAnimate: Array<{ node: HTMLDivElement; dx: number; dy: number }> = []
 
-      nodeRefs.current.forEach((node, key) => {
-        const prev = prevPositions.get(key)
-        const next = newPositions.get(key)
-        if (!prev || !next) return
+    // 收集所有需要动画的元素
+    nodeRefs.current.forEach((node, key) => {
+      const prev = prevPositions.get(key)
+      const next = newPositions.get(key)
+      if (!prev || !next) return
 
-        const dx = prev.left - next.left
-        const dy = prev.top - next.top
+      const dx = prev.left - next.left
+      const dy = prev.top - next.top
 
-        if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return
+      // 忽略微小移动
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return
 
-        // 清理之前的定时器
-        const prevTimer = clearTimersRef.current.get(key)
-        if (prevTimer) {
-          window.clearTimeout(prevTimer)
-        }
+      elementsToAnimate.push({ node, dx, dy })
+    })
 
-        node.style.transition = 'none'
-        node.style.transform = `translate(${dx}px, ${dy}px)`
-        // 强制回流，确保 transform 生效
-        void node.getBoundingClientRect()
-
-        requestAnimationFrame(() => {
-          node.style.transition = 'transform 600ms cubic-bezier(0.22, 1, 0.36, 1)'
-          node.style.transform = ''
-          const timer = window.setTimeout(() => {
-            node.style.transition = ''
-          }, 650)
-          clearTimersRef.current.set(key, timer)
-        })
-      })
+    // 如果没有需要动画的元素，直接更新缓存
+    if (elementsToAnimate.length === 0) {
+      prevPositionsRef.current = newPositions
+      prevOrderRef.current = orderKey
+      return
     }
 
+    // 设置动画锁定，防止动画过程中再次触发
+    isAnimatingRef.current = true
+
+    // 清理之前的定时器
+    clearTimersRef.current.forEach(timer => window.clearTimeout(timer))
+    clearTimersRef.current.clear()
+
+    // 第一步：设置初始位置（所有元素同时）
+    // 使用 requestAnimationFrame 确保在下一帧设置，避免与当前渲染冲突
+    requestAnimationFrame(() => {
+      elementsToAnimate.forEach(({ node, dx, dy }) => {
+        node.style.transition = 'none'
+        node.style.transform = `translate(${dx}px, ${dy}px)`
+      })
+
+      // 强制回流，确保 transform 生效
+      void document.body.offsetHeight
+
+      // 第二步：在下一帧启动动画（所有元素同时）
+      requestAnimationFrame(() => {
+        elementsToAnimate.forEach(({ node }) => {
+          node.style.transition = 'transform 600ms cubic-bezier(0.22, 1, 0.36, 1)'
+          node.style.transform = ''
+        })
+
+        // 动画结束后清理（600ms 动画 + 50ms 缓冲）
+        const timer = window.setTimeout(() => {
+          elementsToAnimate.forEach(({ node }) => {
+            node.style.transition = ''
+          })
+          isAnimatingRef.current = false
+        }, 650)
+        clearTimersRef.current.set('all', timer)
+      })
+    })
+
+    // 更新缓存
     prevPositionsRef.current = newPositions
     prevOrderRef.current = orderKey
-    hasAnimatedRef.current = true
   }, [orderKey])
 
   const setNodeRef = (name: string) => (el: HTMLDivElement | null) => {

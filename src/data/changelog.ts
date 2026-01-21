@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.4.4',
+    date: '2026.1.21',
+    items: [
+      '优化作物变化动画效果',
+    ],
+  },
+  {
     version: 'V3.4.3',
     date: '2026.1.20',
     items: [
@@ -17,13 +24,6 @@ export const changelog: ChangelogItem[] = [
     date: '2026.1.20',
     items: [
       '优化查询量角标定位',
-    ],
-  },
-  {
-    version: 'V3.4.1',
-    date: '2026.1.20',
-    items: [
-      '优化作物变化动画效果',
     ],
   },
   {

@@ -22,6 +22,8 @@ export const App = () => {
   const [showHistory, setShowHistory] = useState(false)
   const [prefillData, setPrefillData] = useState<PrefillData | null>(null)
   const [todayQueryCounts, setTodayQueryCounts] = useState<Record<string, number>>({})
+  const selectorFetchLockRef = useRef(false)
+  const selectorFetchTimerRef = useRef<number | null>(null)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -77,12 +79,16 @@ export const App = () => {
     }
   }
 
+  // 标记是否已初始化，避免首次加载时重复请求
+  const isInitializedRef = useRef(false)
+
   // 从URL参数恢复配置（仅在首次加载时）
   useEffect(() => {
     // 检查是否是反馈数据页面
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('page') === 'feedback') {
       setCurrentPage('feedback')
+      isInitializedRef.current = true
       return
     }
 
@@ -97,26 +103,50 @@ export const App = () => {
       const url = new URL(window.location.href)
       url.searchParams.set('crop', sharedCrop.name)
       window.history.replaceState({ page: 'calculator', crop: sharedCrop.name }, '', url.toString())
+      isInitializedRef.current = true
       return
     }
 
     // 使用统一的状态恢复函数
     syncStateFromUrl()
-
-    // 初次进入选择页，静默刷新一次数据
-    fetchTodayQueryCounts()
-      .then(setTodayQueryCounts)
-      .catch(console.error)
+    isInitializedRef.current = true
   }, [])
 
-  // 每次进入选择页时静默刷新当日查询次数
+  // 每次进入选择页时静默刷新当日查询次数（以 URL 为准：无 page 且无 crop 参数）
   useEffect(() => {
-    if (currentPage === 'selector' && !showHistory) {
-      fetchTodayQueryCounts()
-        .then(setTodayQueryCounts)
-        .catch(console.error)
+    // 清理可能存在的延迟请求
+    if (selectorFetchTimerRef.current) {
+      clearTimeout(selectorFetchTimerRef.current)
+      selectorFetchTimerRef.current = null
     }
-  }, [currentPage, showHistory])
+
+    if (currentPage !== 'selector' || showHistory) {
+      selectorFetchLockRef.current = false
+      return
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    const page = params.get('page')
+    const cropParam = params.get('crop')
+    const isSelectorUrl = !cropParam && (page === null || page === 'selector')
+
+    if (isSelectorUrl && isInitializedRef.current && !selectorFetchLockRef.current) {
+      selectorFetchLockRef.current = true
+      selectorFetchTimerRef.current = window.setTimeout(() => {
+        fetchTodayQueryCounts()
+          .then(setTodayQueryCounts)
+          .catch(console.error)
+      }, 350) // 略大于动画时长，确保动画完成后再更新
+
+      return () => {
+        if (selectorFetchTimerRef.current) {
+          clearTimeout(selectorFetchTimerRef.current)
+          selectorFetchTimerRef.current = null
+        }
+        selectorFetchLockRef.current = false
+      }
+    }
+  }, [currentPage, showHistory, selectedCrop])
 
   const handleSelectCrop = (crop: CropConfig) => {
     // 更新 URL，添加作物参数，支持浏览器前进/后退
@@ -154,11 +184,7 @@ export const App = () => {
     // 立即更新状态，动画结束后再清空数据
     setCurrentPage('selector')
     clearCalculatorState()
-
-    // 返回选择页时刷新当日查询次数
-    fetchTodayQueryCounts()
-      .then(setTodayQueryCounts)
-      .catch(console.error)
+    // 数据刷新由 useEffect 统一处理，避免重复请求
   }
 
   const handleShowHistory = () => {
@@ -185,11 +211,7 @@ export const App = () => {
     setShowHistory(false)
     setCurrentPage('selector')
     clearCalculatorState()
-
-    // 返回选择页时刷新当日查询次数
-    fetchTodayQueryCounts()
-      .then(setTodayQueryCounts)
-      .catch(console.error)
+    // 数据刷新由 useEffect 统一处理，避免重复请求
   }
 
   const handleSelectHistoryRecord = (record: HistoryRecord) => {
