@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import './Modal.css'
 
 interface ModalProps {
@@ -33,8 +34,6 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
     }
   }, [isOpen, shouldRender])
 
-  if (!shouldRender) return null
-
   const overlayClass = isOpen && isAnimating 
     ? 'modal-overlay-enter' 
     : isOpen && !isAnimating 
@@ -47,7 +46,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
     ? 'modal-content-initial' 
     : 'modal-content-exit'
 
-  return (
+  const modalContent = (
     <div 
       className={`modal-overlay ${overlayClass}`}
       onClick={onClose}
@@ -77,5 +76,10 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
       </div>
     </div>
   )
+
+  // 使用 Portal 将 Modal 渲染到 body，避免受业务 DOM 样式影响
+  if (!shouldRender) return null
+  
+  return createPortal(modalContent, document.body)
 }
 

@@ -4,12 +4,15 @@
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 12px;
   background: rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 12px;
   animation-duration: 0.3s;
   animation-timing-function: ease-out;
   animation-fill-mode: both;
