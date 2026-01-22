@@ -1,4 +1,3 @@
-import { SaveOutlined } from '@ant-design/icons'
 import { GradientButton } from '@/components/GradientButton'
 import type { CalculationMode } from './types'
 import './PriceCalculator.css'
@@ -36,9 +35,9 @@ export const ResultArea = ({
         反馈
       </GradientButton>
       <div className="result-right">
-        <button className="save-button" onClick={onSave}>
-          <SaveOutlined />
-        </button>
+        <GradientButton onClick={onSave}>
+          保存
+        </GradientButton>
         <div className="result-value-container">
           {isEditingPrice ? (
             <input
