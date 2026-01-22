@@ -78,8 +78,15 @@ const getLocalTodayDate = (): string => {
 
 /**
  * 记录作物当日查询次数（若已有记录则 +1，否则创建新记录）
+ * 本地开发环境不记录数据
  */
 export const logCropQuery = async (cropName: string) => {
+  // 只在非本地环境记录数据
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : ''
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0' || hostname === '') {
+    return Promise.resolve()
+  }
+
   const enqueue = async () => {
     if (!supabase) {
       throw new Error('Supabase client is not initialized. Please check your environment variables.')
