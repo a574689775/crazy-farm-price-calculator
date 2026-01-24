@@ -180,7 +180,9 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   // 注意：必须在所有 hooks 之后，条件返回之前
   
   const weightNum = parseFloat(weight) || 0
-  const isValidWeight = crop ? (weightNum > 0 && weightNum <= crop.maxWeight) : false
+  // 最小重量 = 最大重量 / 34
+  const minWeight = crop ? crop.maxWeight / 34 : 0
+  const isValidWeight = crop ? (weightNum >= minWeight && weightNum <= crop.maxWeight) : false
   
   /**
    * 根据计算模式计算价格或反推重量
@@ -199,7 +201,9 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
       const priceInYuan = convertToYuan(parsed.value, parsed.unit)
       if (priceInYuan > 0 && !isNaN(priceInYuan) && isFinite(priceInYuan)) {
         const calculatedWeight = calculateWeightFromPrice(crop, priceInYuan, selectedMutations)
-        if (calculatedWeight !== null && calculatedWeight >= 0) {
+        // 限制在最小重量和最大重量之间
+        const minWeight = crop.maxWeight / 34
+        if (calculatedWeight !== null && calculatedWeight >= minWeight && calculatedWeight <= crop.maxWeight) {
           // 反推成功，计算价格用于显示（应该和输入的价格一致或接近）
           result = calculatePrice(crop, calculatedWeight, selectedMutations)
         }
@@ -224,7 +228,9 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
         const priceInYuan = convertToYuan(parsed.value, parsed.unit)
         if (priceInYuan > 0 && !isNaN(priceInYuan) && isFinite(priceInYuan)) {
           const calculatedWeight = calculateWeightFromPrice(crop, priceInYuan, selectedMutations)
-          if (calculatedWeight !== null && calculatedWeight >= 0) {
+          // 限制在最小重量和最大重量之间
+          const minWeight = crop.maxWeight / 34
+          if (calculatedWeight !== null && calculatedWeight >= minWeight && calculatedWeight <= crop.maxWeight) {
             const formattedWeight = calculatedWeight.toFixed(2).replace(/\.?0+$/, '')
             setWeight(formattedWeight)
             // 计算百分比
@@ -238,18 +244,13 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     }
   }, [priceInput, calculationMode, crop, selectedMutations])
 
-  if (!crop) {
-    return null
-  }
-
   /**
    * 处理重量输入变化
    * - 自动切换到重量计算模式
-   * - 验证输入格式
-   * - 限制在最大重量范围内
+   * - InputNumber 会自动处理范围限制
    * - 自动计算百分比
    */
-  const handleWeightChange = (value: string) => {
+  const handleWeightChange = (value: number | null) => {
     // 切换到重量计算模式
     if (calculationMode !== 'weight') {
       setCalculationMode('weight')
@@ -257,45 +258,25 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
       setPriceInput('')
     }
     
-    if (value === '') {
+    if (value === null || value === undefined) {
       setWeight('')
       setPercentage('')
       return
     }
     
-    // 允许输入小数点和小数，保留用户输入的原始格式
-    // 只验证是否为有效数字格式
-    const isValidNumber = /^-?\d*\.?\d*$/.test(value)
-    if (!isValidNumber) {
-      return // 如果不是有效数字格式，不更新
-    }
+    // InputNumber 已经处理了范围限制，直接使用值
+    setWeight(value.toString())
     
-    const weightNum = parseFloat(value) || 0
-    // 限制不超过最大重量
-    const clampedWeight = Math.min(Math.max(weightNum, 0), crop.maxWeight)
-    
-    // 如果输入以小数点结尾（如"2."），保留原始格式
-    // 如果输入是有效数字，使用计算后的值，但保留小数部分
-    if (value.endsWith('.') || value.endsWith('.0') || value.endsWith('.00')) {
-      // 保留用户输入的格式
-      setWeight(value)
-    } else if (weightNum === clampedWeight) {
-      // 如果值没有超出范围，保留用户输入的格式（包括小数位）
-      setWeight(value)
-    } else {
-      // 如果超出范围，使用限制后的值
-      setWeight(clampedWeight.toString())
-    }
-    
-    // 计算百分比时使用数值
-    if (clampedWeight > 0) {
-      // 转换为百分比，不超过100%
-      const calculatedPercentage = (clampedWeight / crop.maxWeight) * 100
+    // 计算百分比
+    if (!crop) return
+    if (value > 0 && value <= crop.maxWeight) {
+      const calculatedPercentage = (value / crop.maxWeight) * 100
       setPercentage(Math.round(calculatedPercentage).toString())
     } else {
       setPercentage('')
     }
   }
+
 
   /**
    * 处理价格输入变化
@@ -338,10 +319,12 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   /**
    * 处理百分比输入变化
    * - 自动切换到重量计算模式
-   * - 限制在1-100之间
+   * - InputNumber 会自动处理范围限制
    * - 自动转换为重量
    */
-  const handlePercentageChange = (value: string) => {
+  const handlePercentageChange = (value: number | null) => {
+    if (!crop) return
+    
     // 切换到重量计算模式
     if (calculationMode !== 'weight') {
       setCalculationMode('weight')
@@ -349,20 +332,20 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
       setPriceInput('')
     }
     
-    if (value === '') {
+    if (value === null || value === undefined) {
       setPercentage('')
       setWeight('')
       return
     }
     
-    const percentageNum = parseFloat(value) || 0
-    // 限制在1-100之间
-    const clampedPercentage = Math.min(Math.max(percentageNum, 1), 100)
-    setPercentage(clampedPercentage.toString())
+    // InputNumber 已经处理了范围限制，直接使用值
+    setPercentage(value.toString())
     
-    // 转换为重量，不超过最大重量
-    const calculatedWeight = (clampedPercentage / 100) * crop.maxWeight
-    setWeight(calculatedWeight.toFixed(2))
+    // 转换为重量
+    const minWeight = crop.maxWeight / 34
+    const calculatedWeight = (value / 100) * crop.maxWeight
+    const clampedWeight = Math.min(Math.max(calculatedWeight, minWeight), crop.maxWeight)
+    setWeight(clampedWeight.toFixed(2).replace(/\.?0+$/, ''))
   }
 
   // ========== 事件处理辅助函数 ==========
@@ -378,6 +361,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     }
   }
 
+
   /**
    * 显示 Toast 提示
    */
@@ -391,10 +375,17 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
 
   // ========== UI 渲染 ==========
   
+  if (!crop) {
+    return null
+  }
+  
+  // 此时 crop 一定不为 null，使用非空断言
+  const safeCrop = crop
+  
   return (
     <div className="price-calculator">
       <CalculatorHeader
-        crop={crop}
+        crop={safeCrop}
         onBack={onBack}
         weight={weight}
         percentage={percentage}
@@ -408,17 +399,19 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
 
       <div className="calculator-inputs">
         <WeightInputGroup
-          crop={crop}
+          crop={safeCrop}
           weight={weight}
           percentage={percentage}
           calculationMode={calculationMode}
+          minWeight={minWeight}
+          minPercentage={Math.ceil((minWeight / safeCrop.maxWeight) * 100)}
           onWeightChange={handleWeightChange}
           onPercentageChange={handlePercentageChange}
           onFocus={handleInputFocus}
         />
 
         <MutationGroups
-          crop={crop}
+          crop={safeCrop}
           selectedMutations={selectedMutations}
           onMutationsChange={setSelectedMutations}
         />
@@ -448,7 +441,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
       <ShareModal
         isOpen={showShareModal}
         shareUrl={shareUrl}
-        crop={crop}
+        crop={safeCrop}
         selectedMutations={selectedMutations}
         onClose={() => setShowShareModal(false)}
         onCopy={showToastMessage}
@@ -458,7 +451,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
         <PriceFeedback
           isOpen={showFeedbackModal}
           onClose={() => setShowFeedbackModal(false)}
-          crop={crop}
+          crop={safeCrop}
           weight={weightNum}
           mutations={selectedMutations}
           calculatedPrice={result.price}

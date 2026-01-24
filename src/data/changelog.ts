@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.6.0',
+    date: '2026.1.24',
+    items: [
+      '限制作物重量输入范围',
+      '选择作物页面排序逻辑更新，移除果王争霸',
+      '热度角标更改为火苗图标，清晰数字含义',
+    ],
+  },
+  {
     version: 'V3.5.2',
     date: '2026.1.22',
     items: [

@@ -183,16 +183,26 @@
 .crop-item-count {
   position: absolute;
   top: -4px;
-  right: -4px;
+  right: -8px;
   padding: 2px 4px 3px;
   border-radius: 999px;
-  background: #E09758;
-  border: 1px solid #fff;
-  color: #fff;
+  background: #fff;
+  border: 1px solid;
   font-size: 12px;
   font-weight: 400;
   line-height: 1;
   text-align: center;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.crop-item-count-icon {
+  font-size: 12px;
+}
+
+.crop-item-count-text {
+  line-height: 1;
 }
 

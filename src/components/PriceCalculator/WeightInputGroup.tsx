@@ -1,3 +1,4 @@
+import { InputNumber } from 'antd'
 import type { CropConfig } from '@/types'
 import { SVGText } from '@/components/SVGText'
 import type { CalculationMode } from './types'
@@ -8,8 +9,10 @@ interface WeightInputGroupProps {
   weight: string
   percentage: string
   calculationMode: CalculationMode
-  onWeightChange: (value: string) => void
-  onPercentageChange: (value: string) => void
+  minWeight: number
+  minPercentage: number
+  onWeightChange: (value: number | null) => void
+  onPercentageChange: (value: number | null) => void
   onFocus: () => void
 }
 
@@ -21,11 +24,18 @@ export const WeightInputGroup = ({
   weight,
   percentage,
   calculationMode,
+  minWeight,
+  minPercentage,
   onWeightChange,
   onPercentageChange,
   onFocus,
 }: WeightInputGroupProps) => {
-  const weightNum = parseFloat(weight) || 0
+  // 格式化最小重量显示（保留2位小数，去除末尾0）
+  const formattedMinWeight = minWeight.toFixed(2).replace(/\.?0+$/, '')
+  const formattedMaxWeight = crop.maxWeight.toFixed(2).replace(/\.?0+$/, '')
+  
+  const weightValue = weight === '' ? null : parseFloat(weight) || null
+  const percentageValue = percentage === '' ? null : parseFloat(percentage) || null
 
   return (
     <div className="input-group">
@@ -44,17 +54,18 @@ export const WeightInputGroup = ({
                 重量 (kg)
               </SVGText>
             </label>
-            <input
-              type="number"
+            <InputNumber
               className="input-field"
-              value={weight}
-              onChange={(e) => onWeightChange(e.target.value)}
+              value={weightValue}
+              onChange={onWeightChange}
               onFocus={onFocus}
-              placeholder={`最大: ${crop.maxWeight}`}
-              min="0"
+              placeholder={`${formattedMinWeight}~${formattedMaxWeight}`}
+              min={minWeight}
               max={crop.maxWeight}
-              step="0.01"
+              step={0.01}
+              precision={2}
               readOnly={calculationMode === 'price'}
+              controls={false}
             />
           </div>
           <div className="input-group-row">
@@ -70,17 +81,18 @@ export const WeightInputGroup = ({
                 百分比 (%)
               </SVGText>
             </label>
-            <input
-              type="number"
+            <InputNumber
               className="input-field"
-              value={percentage}
-              onChange={(e) => onPercentageChange(e.target.value)}
+              value={percentageValue}
+              onChange={onPercentageChange}
               onFocus={onFocus}
-              placeholder="范围: 1-100"
-              min="1"
-              max="100"
-              step="1"
+              placeholder={`${minPercentage}~100`}
+              min={minPercentage}
+              max={100}
+              step={1}
+              precision={0}
               readOnly={calculationMode === 'price'}
+              controls={false}
             />
           </div>
         </div>
@@ -90,9 +102,6 @@ export const WeightInputGroup = ({
           className="crop-image"
         />
       </div>
-      {weightNum > crop.maxWeight && (
-        <span className="input-error">重量不能超过 {crop.maxWeight}kg</span>
-      )}
     </div>
   )
 }

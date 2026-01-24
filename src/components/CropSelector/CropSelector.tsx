@@ -1,6 +1,6 @@
 import type { CropConfig } from '@/types'
 import { useLayoutEffect, useMemo, useRef } from 'react'
-import { ClockCircleOutlined } from '@ant-design/icons'
+import { ClockCircleOutlined, FireFilled } from '@ant-design/icons'
 import { SVGText } from '@/components/SVGText'
 import { GradientButton } from '@/components/GradientButton'
 import './CropSelector.css'
@@ -13,9 +13,6 @@ interface CropSelectorProps {
   queryCounts?: Record<string, number>
 }
 
-// 本期果王争霸的作物
-const CHAMPION_CROPS = ['蟠桃', '葡萄', '西瓜', '番茄']
-
 export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts = {} }: CropSelectorProps) => {
   const nodeRefs = useRef(new Map<string, HTMLDivElement>())
   const prevPositionsRef = useRef(new Map<string, DOMRect>())
@@ -26,7 +23,28 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
   // 数据文件中的顺序即品质优先级（索引越小品质越高）
   const cropOrder = useMemo(() => new Map(crops.map((crop, index) => [crop.name, index])), [crops])
 
-  // 获取果王争霸的作物配置
+  // 计算最大查询量，用于颜色计算
+  const maxQueryCount = useMemo(() => {
+    const counts = Object.values(queryCounts)
+    return counts.length > 0 ? Math.max(...counts) : 1
+  }, [queryCounts])
+
+  // 根据查询量计算颜色（热度越高越红）
+  const getHeatColor = (count: number): string => {
+    if (count === 0 || maxQueryCount === 0) {
+      // 没有查询量时使用默认颜色
+      return '#fff'
+    }
+    // 计算热度比例（0-1）
+    const heatRatio = Math.min(count / maxQueryCount, 1)
+    // 从浅橙红色 (#FFA07A, rgb(255, 160, 122)) 到深红色 (#FF4500, rgb(255, 69, 0))
+    const r = 255 // 红色通道保持255
+    const g = Math.floor(160 - (160 - 69) * heatRatio)  // 从 160 到 69
+    const b = Math.floor(122 - (122 - 0) * heatRatio)   // 从 122 到 0
+    return `rgb(${r}, ${g}, ${b})`
+  }
+
+  // 排序函数：按查询量排序，查询量相同则按品质排序
   const sortByCountThenQuality = (a: CropConfig, b: CropConfig) => {
     const countDiff = (queryCounts[b.name] ?? 0) - (queryCounts[a.name] ?? 0)
     if (countDiff !== 0) return countDiff
@@ -34,26 +52,23 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     return (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0)
   }
 
-  const championCrops = useMemo(() => 
-    CHAMPION_CROPS.map(name => 
-      crops.find(crop => crop.name === name)
-    )
-      .filter((crop): crop is CropConfig => crop !== undefined)
-      .sort(sortByCountThenQuality),
-    [crops, queryCounts, cropOrder]
-  )
+  // 获取热门作物（查询量最多的前4个）
+  const hotCrops = useMemo(() => {
+    const sorted = [...crops].sort(sortByCountThenQuality)
+    return sorted.slice(0, 4)
+  }, [crops, queryCounts, cropOrder])
 
-  // 获取其他作物（排除果王争霸的作物）
-  const otherCrops = useMemo(() =>
-    crops
-      .filter(crop => !CHAMPION_CROPS.includes(crop.name))
-      .sort(sortByCountThenQuality),
-    [crops, queryCounts, cropOrder]
-  )
+  // 获取其他作物（排除热门作物的剩余作物）
+  const otherCrops = useMemo(() => {
+    const hotCropNames = new Set(hotCrops.map(c => c.name))
+    return crops
+      .filter(crop => !hotCropNames.has(crop.name))
+      .sort(sortByCountThenQuality)
+  }, [crops, hotCrops, queryCounts, cropOrder])
 
   const orderKey = useMemo(
-    () => [...championCrops, ...otherCrops].map(c => c.name).join(','),
-    [championCrops, otherCrops]
+    () => [...hotCrops, ...otherCrops].map(c => c.name).join(','),
+    [hotCrops, otherCrops]
   )
 
   // FLIP 动画：仅在排序变化时触发，避免无关抖动
@@ -167,6 +182,8 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     const rawCount = queryCounts[crop.name] ?? 0
     const count =
       rawCount >= 10000 ? `${(rawCount / 10000).toFixed(1)}万` : rawCount
+    const heatColor = getHeatColor(rawCount)
+    
     return (
       <div
         key={crop.name}
@@ -175,7 +192,21 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         onClick={() => onSelectCrop(crop)}
       >
         <div className="crop-item-image-wrapper">
-          {rawCount > 0 && <div className="crop-item-count">{count}</div>}
+          {rawCount > 0 && (
+            <div 
+              className="crop-item-count"
+              style={{ 
+                borderColor: heatColor,
+                color: heatColor
+              }}
+            >
+              <FireFilled 
+                className="crop-item-count-icon" 
+                style={{ color: heatColor }}
+              />
+              <span className="crop-item-count-text">{count}</span>
+            </div>
+          )}
           <img 
             src={`https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/${crop.name}.png`}
             alt={crop.name}
@@ -202,22 +233,22 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         </SVGText>
       </div>
       <div className="crop-selector-content">
-        {/* 本期果王争霸 */}
+        {/* 热门作物 */}
         <div className="champion-section">
           <div className="champion-title-row">
-            <div className="champion-title">本期果王争霸：</div>
+            <div className="champion-title">热门作物：</div>
             <GradientButton onClick={onShowHistory}>
               <ClockCircleOutlined style={{ marginRight: '4px', color: '#000' }} />
               计算历史
             </GradientButton>
           </div>
           <div className="champion-grid">
-            {championCrops.map(renderCropItem)}
+            {hotCrops.map(renderCropItem)}
           </div>
           <div className="champion-divider"></div>
         </div>
 
-        {/* 所有作物 */}
+        {/* 其他作物 */}
         <div className="crop-grid">
           {otherCrops.map(renderCropItem)}
         </div>
