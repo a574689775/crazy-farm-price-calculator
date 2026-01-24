@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V3.6.1',
+    date: '2026.1.24',
+    items: [
+      '控制全局input、button字体样式',
+    ],
+  },
+  {
     version: 'V3.6.0',
     date: '2026.1.24',
     items: [

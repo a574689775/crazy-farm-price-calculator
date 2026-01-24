@@ -41,6 +41,14 @@ body {
   color: #000 !important;
 }
 
+/* 全局控制 input 和 button 使用自定义字体 */
+input,
+button,
+textarea,
+select {
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+}
+
 /* 强制覆盖所有暗色模式的媒体查询 - 即使系统是暗色模式也强制使用浅色 */
 @media (prefers-color-scheme: dark) {
   :root {
