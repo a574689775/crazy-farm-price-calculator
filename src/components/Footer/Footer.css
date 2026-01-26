@@ -111,3 +111,176 @@
   scrollbar-width: none;
 }
 
+/* 联系我们选项样式 */
+.contact-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-option-button {
+  position: relative;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  box-sizing: border-box;
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.contact-option-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 12px;
+  background: linear-gradient(to bottom, #E19859, #D58D50);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.contact-option-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #843100;
+  line-height: 1.5;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.contact-option-desc {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(132, 49, 0, 0.7);
+  line-height: 1.4;
+  position: relative;
+  z-index: 1;
+}
+
+/* 反馈表单样式 */
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feedback-textarea-wrapper {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 200px;
+}
+
+.feedback-textarea-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 20px;
+  background: linear-gradient(to bottom, #E19859, #D58D50);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.feedback-textarea {
+  position: relative;
+  width: calc(100% - 4px);
+  height: 196px;
+  min-height: 196px;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  border: none;
+  border-radius: 20px;
+  color: rgba(132, 49, 0, 1);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+  z-index: 1;
+  margin: 2px;
+}
+
+.feedback-textarea:focus {
+  outline: none;
+}
+
+.feedback-textarea::placeholder {
+  color: rgba(132, 49, 0, 0.5);
+}
+
+.feedback-submit-button {
+  width: 100%;
+  padding: 14px 20px;
+  background: rgba(132, 49, 0, 1);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+}
+
+.feedback-submit-button:disabled {
+  background: rgba(132, 49, 0, 0.5);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .contact-options {
+    gap: 12px;
+  }
+
+  .contact-option-button {
+    padding: 14px 16px;
+  }
+
+  .contact-option-title {
+    font-size: 15px;
+  }
+
+  .contact-option-desc {
+    font-size: 13px;
+  }
+
+  .feedback-textarea {
+    min-height: 160px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .feedback-submit-button {
+    padding: 12px 18px;
+    font-size: 15px;
+  }
+}
+

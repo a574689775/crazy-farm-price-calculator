@@ -1,13 +1,72 @@
 import { useState } from 'react'
 import { Modal } from '../Modal'
 import { changelog } from '@/data/changelog'
+import { submitUserFeedback } from '@/utils/supabase'
+import { Toast } from '../PriceCalculator/Toast'
 import './Footer.css'
 
 export const Footer = () => {
-  const [showGroupModal, setShowGroupModal] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [showContactQRCode, setShowContactQRCode] = useState(false)
+  const [contactType, setContactType] = useState<'author' | 'assistant'>('author')
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
+  const [feedbackContent, setFeedbackContent] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showToast, setShowToast] = useState(false)
   const [showDonateModal, setShowDonateModal] = useState(false)
   const [showChangelogModal, setShowChangelogModal] = useState(false)
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
+  const [imageLoading, setImageLoading] = useState(true)
+
+  const handleBackToOptions = () => {
+    setShowContactQRCode(false)
+    setShowFeedbackForm(false)
+    setImageLoading(true) // 返回时重置加载状态
+    setContactType('author') // 重置为默认值
+  }
+
+  const handleShowAuthorQRCode = () => {
+    setContactType('author')
+    setShowContactQRCode(true)
+    setImageLoading(true)
+  }
+
+  const handleShowAssistantQRCode = () => {
+    setContactType('assistant')
+    setShowContactQRCode(true)
+    setImageLoading(true)
+  }
+
+  const handleImageLoad = () => {
+    setImageLoading(false)
+  }
+
+  const handleImageError = () => {
+    setImageLoading(false)
+  }
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackContent.trim()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await submitUserFeedback(feedbackContent.trim())
+      setFeedbackContent('')
+      setShowFeedbackForm(false)
+      setShowContactModal(false)
+      setShowToast(true)
+      setTimeout(() => {
+        setShowToast(false)
+      }, 2000)
+    } catch (error) {
+      console.error('提交反馈失败:', error)
+      alert('提交失败，请稍后重试')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <>
@@ -17,8 +76,8 @@ export const Footer = () => {
             {changelog[0].version}
           </div>
           <div className="footer-actions">
-            <div className="footer-link" onClick={() => setShowGroupModal(true)}>
-              用户群
+            <div className="footer-link" onClick={() => setShowContactModal(true)}>
+              联系我们
             </div>
             <div className="footer-link" onClick={() => setShowDonateModal(true)}>
               支持作者
@@ -52,19 +111,89 @@ export const Footer = () => {
         </div>
       </Modal>
 
-      {/* 用户群二维码模态框 */}
+      {/* 联系我们模态框 */}
       <Modal
-        isOpen={showGroupModal}
-        onClose={() => setShowGroupModal(false)}
-        title="加入用户群"
+        isOpen={showContactModal}
+        onClose={() => {
+          setShowContactModal(false)
+          setShowContactQRCode(false)
+          setShowFeedbackForm(false)
+          setFeedbackContent('')
+          setImageLoading(true)
+          setContactType('author')
+        }}
+        title={'联系我们'}
+        onBack={(showContactQRCode || showFeedbackForm) ? handleBackToOptions : undefined}
       >
-        <img
-          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/用户群1.21.jpg"
-          alt="用户群二维码"
-          className="modal-qrcode"
-        />
-        <p className="modal-hint">扫码加入用户群，一起交流讨论</p>
+        {showContactQRCode ? (
+          <>
+            <div className="modal-qrcode-wrapper">
+              {imageLoading && (
+                <div className="modal-qrcode-placeholder">
+                  <div className="modal-qrcode-loading"></div>
+                </div>
+              )}
+              <img
+                src={contactType === 'author' 
+                  ? 'https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/大脸猫vx.jpg'
+                  : 'https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/蓝皮鼠vx.jpg'
+                }
+                alt="联系方式"
+                className={`modal-qrcode ${imageLoading ? 'modal-qrcode-hidden' : ''}`}
+                onLoad={handleImageLoad}
+                onError={handleImageError}
+              />
+            </div>
+            <p className="modal-hint">扫码添加微信，我们会尽快回复</p>
+          </>
+        ) : showFeedbackForm ? (
+          <div className="feedback-form">
+            <div className="feedback-textarea-wrapper">
+              <textarea
+                className="feedback-textarea"
+                value={feedbackContent}
+                onChange={(e) => setFeedbackContent(e.target.value)}
+                placeholder="请输入您的反馈内容..."
+                rows={8}
+              />
+            </div>
+            <button
+              className="feedback-submit-button"
+              onClick={handleSubmitFeedback}
+              disabled={!feedbackContent.trim() || isSubmitting}
+            >
+              {isSubmitting ? '提交中...' : '提交反馈'}
+            </button>
+          </div>
+        ) : (
+          <div className="contact-options">
+            <button
+              className="contact-option-button"
+              onClick={handleShowAuthorQRCode}
+            >
+              <div className="contact-option-title">商业合作 / 技术贡献</div>
+              <div className="contact-option-desc">联系作者</div>
+            </button>
+            <button
+              className="contact-option-button"
+              onClick={handleShowAssistantQRCode}
+            >
+              <div className="contact-option-title">加入用户群 / 使用教程</div>
+              <div className="contact-option-desc">联系助理</div>
+            </button>
+            <button
+              className="contact-option-button"
+              onClick={() => setShowFeedbackForm(true)}
+            >
+              <div className="contact-option-title">我要反馈</div>
+              <div className="contact-option-desc">提交您的建议或问题</div>
+            </button>
+          </div>
+        )}
       </Modal>
+
+      {/* Toast 提示 */}
+      {showToast && <Toast message="反馈成功！感谢您的反馈" />}
 
       {/* 捐赠二维码模态框 */}
       <Modal

@@ -148,6 +148,21 @@
   margin: 0;
 }
 
+.modal-back-link {
+  position: absolute;
+  left: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #843100;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 20px;
+  z-index: 12;
+}
+
 .modal-close {
   position: absolute;
   top: 16px;
@@ -197,11 +212,53 @@
   opacity: 0.8;
 }
 
+.modal-qrcode-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.modal-qrcode-placeholder {
+  width: 100%;
+  padding-bottom: 135.18%; /* 1464/1083 ≈ 1.3518，即高度是宽度的 135.18% */
+  background: rgba(255, 234, 182, 0.3);
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-qrcode-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(132, 49, 0, 0.2);
+  border-top-color: rgba(132, 49, 0, 0.8);
+  border-radius: 50%;
+  animation: modalQrcodeSpin 0.8s linear infinite;
+}
+
+@keyframes modalQrcodeSpin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 .modal-qrcode {
   width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 1rem 0 1rem 0;
+  display: block;
+}
+
+.modal-qrcode-hidden {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .modal-text {

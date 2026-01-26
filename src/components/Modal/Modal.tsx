@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { LeftOutlined } from '@ant-design/icons'
 import './Modal.css'
 
 interface ModalProps {
@@ -7,9 +8,10 @@ interface ModalProps {
   onClose: () => void
   title?: string
   children: ReactNode
+  onBack?: () => void
 }
 
-export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+export const Modal = ({ isOpen, onClose, title, children, onBack }: ModalProps) => {
   const [isAnimating, setIsAnimating] = useState(false)
   const [shouldRender, setShouldRender] = useState(false)
 
@@ -57,6 +59,11 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
       >
         {title && (
           <div className="modal-header-fixed">
+            {onBack && (
+              <span className="modal-back-link" onClick={onBack}>
+                <LeftOutlined />
+              </span>
+            )}
             <div className="modal-title-wrapper">
               <img 
                 src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/田园阿公.png" 

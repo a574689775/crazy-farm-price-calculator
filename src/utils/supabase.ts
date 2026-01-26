@@ -167,3 +167,27 @@ export const fetchTodayQueryCounts = async (): Promise<Record<string, number>> =
   return map
 }
 
+/**
+ * 提交用户反馈
+ */
+export interface UserFeedback {
+  content: string
+  created_at?: string
+}
+
+export const submitUserFeedback = async (content: string): Promise<boolean> => {
+  if (!supabase) {
+    throw new Error('Supabase client is not initialized.')
+  }
+
+  const { error } = await supabase
+    .from('user_feedback')
+    .insert([{ content }])
+
+  if (error) {
+    throw error
+  }
+
+  return true
+}
+

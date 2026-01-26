@@ -730,6 +730,7 @@
   z-index: 10001;
   pointer-events: none;
   animation: toastFadeIn 0.3s ease-out;
+  width: fit-content;
 }
 
 .toast-content {
@@ -739,6 +740,10 @@
   border-radius: 8px;
   font-size: 0.875rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  display: inline-block;
+  width: fit-content;
+  box-sizing: border-box;
 }
 
 @keyframes toastFadeIn {
