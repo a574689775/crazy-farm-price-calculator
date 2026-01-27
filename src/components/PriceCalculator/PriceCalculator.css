@@ -740,7 +740,9 @@
   border-radius: 8px;
   font-size: 0.875rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  white-space: nowrap;
+  max-width: 300px;
+  word-wrap: break-word;
+  word-break: break-word;
   display: inline-block;
   width: fit-content;
   box-sizing: border-box;

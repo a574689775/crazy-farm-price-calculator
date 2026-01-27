@@ -191,3 +191,152 @@ export const submitUserFeedback = async (content: string): Promise<boolean> => {
   return true
 }
 
+/**
+ * 认证相关函数
+ */
+
+// 注册新用户
+export const signUp = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+// 登录
+export const signIn = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+// 登出
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    throw error
+  }
+}
+
+// 获取当前会话
+export const getSession = async () => {
+  const { data: { session } } = await supabase.auth.getSession()
+  return session
+}
+
+// 获取当前用户
+export const getCurrentUser = async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
+}
+
+// 监听认证状态变化
+export const onAuthStateChange = (callback: (event: string, session: any) => void) => {
+  return supabase.auth.onAuthStateChange(callback)
+}
+
+// 发送重置密码验证码
+// 注意：需要在 Supabase Dashboard 的 Email Templates 中配置为显示验证码而不是链接
+export const sendResetPasswordCode = async (email: string) => {
+  // 使用 signInWithOtp 发送验证码，然后用户输入验证码后可以重置密码
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false, // 不创建新用户，只用于找回密码
+    },
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return true
+}
+
+// 验证重置密码验证码并设置新密码
+export const verifyResetPasswordCode = async (email: string, token: string, newPassword: string) => {
+  // 先验证验证码
+  const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  })
+
+  if (verifyError) {
+    throw verifyError
+  }
+
+  // 验证成功后，更新密码
+  if (verifyData.user) {
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+
+    if (updateError) {
+      // 如果更新密码失败，登出用户（因为 verifyOtp 已经创建了会话）
+      await supabase.auth.signOut()
+      throw updateError
+    }
+  }
+
+  return verifyData
+}
+
+// 发送邮箱验证码（用于注册）
+// 注意：需要在 Supabase Dashboard 的 Email Templates 中配置为显示验证码而不是链接
+export const sendEmailOtp = async (email: string) => {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true, // 如果用户不存在则创建
+      emailRedirectTo: undefined, // 不使用重定向链接
+    },
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return true
+}
+
+// 验证邮箱验证码并注册
+export const verifyEmailOtp = async (email: string, token: string, password: string) => {
+  // 先验证验证码
+  const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  })
+
+  if (verifyError) {
+    throw verifyError
+  }
+
+  // 验证成功后，更新密码
+  if (verifyData.user) {
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: password,
+    })
+
+    if (updateError) {
+      throw updateError
+    }
+  }
+
+  return verifyData
+}
+

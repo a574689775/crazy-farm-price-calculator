@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Modal } from '../Modal'
 import { changelog } from '@/data/changelog'
-import { submitUserFeedback } from '@/utils/supabase'
+import { submitUserFeedback, signOut } from '@/utils/supabase'
 import { Toast } from '../PriceCalculator/Toast'
 import './Footer.css'
 
@@ -68,6 +68,17 @@ export const Footer = () => {
     }
   }
 
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      // 刷新页面，让 App 重新检查登录状态
+      window.location.reload()
+    } catch (error) {
+      console.error('登出失败:', error)
+      alert('登出失败，请稍后重试')
+    }
+  }
+
   return (
     <>
       <footer className="footer">
@@ -84,6 +95,9 @@ export const Footer = () => {
             </div>
             <div className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
               免责声明
+            </div>
+            <div className="footer-link" onClick={handleSignOut}>
+              退出登录
             </div>
           </div>
         </div>

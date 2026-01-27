@@ -6,8 +6,9 @@ import { CropSelector } from '@/components/CropSelector'
 import { PriceCalculator } from '@/components/PriceCalculator'
 import { HistoryView } from '@/components/HistoryView'
 import { FeedbackDataView } from '@/components/FeedbackDataView'
+import { Login } from '@/components/Login'
 import { parseShareUrl } from '@/utils/shareEncoder'
-import { logCropQuery, fetchTodayQueryCounts } from '@/utils/supabase'
+import { logCropQuery, fetchTodayQueryCounts, getSession, onAuthStateChange } from '@/utils/supabase'
 import './App.css'
 
 type Page = 'selector' | 'calculator' | 'feedback'
@@ -17,6 +18,7 @@ interface PrefillData {
 }
 
 export const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [selectedCrop, setSelectedCrop] = useState<CropConfig | null>(null)
   const [currentPage, setCurrentPage] = useState<Page>('selector')
   const [showHistory, setShowHistory] = useState(false)
@@ -81,6 +83,30 @@ export const App = () => {
 
   // 标记是否已初始化，避免首次加载时重复请求
   const isInitializedRef = useRef(false)
+
+  // 检查登录状态
+  useEffect(() => {
+    const checkAuth = async () => {
+      const session = await getSession()
+      setIsAuthenticated(!!session)
+    }
+    checkAuth()
+
+    // 监听认证状态变化
+    const { data: { subscription } } = onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  // 登录成功回调
+  const handleLoginSuccess = async () => {
+    const session = await getSession()
+    setIsAuthenticated(!!session)
+  }
 
   // 从URL参数恢复配置（仅在首次加载时）
   useEffect(() => {
@@ -255,6 +281,31 @@ export const App = () => {
     }
   }, [])
 
+  // 如果还在检查登录状态，显示加载中
+  if (isAuthenticated === null) {
+    return (
+      <div className="app">
+        <main className="main">
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <div>加载中...</div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // 如果未登录，显示登录页
+  if (!isAuthenticated) {
+    return (
+      <div className="app">
+        <main className="main">
+          <Login onLoginSuccess={handleLoginSuccess} />
+        </main>
+      </div>
+    )
+  }
+
+  // 已登录，显示主应用
   return (
     <div className="app">
       <main className={`main ${currentPage === 'feedback' ? 'feedback-mode' : ''}`}>
