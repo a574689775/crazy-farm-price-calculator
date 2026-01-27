@@ -248,9 +248,32 @@ export const onAuthStateChange = (callback: (event: string, session: any) => voi
   return supabase.auth.onAuthStateChange(callback)
 }
 
+// 验证邮箱格式
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+// 检查是否为开发环境
+const isDevelopment = (): boolean => {
+  if (typeof window === 'undefined') return false
+  const hostname = window.location.hostname
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0'
+}
+
 // 发送重置密码验证码
 // 注意：需要在 Supabase Dashboard 的 Email Templates 中配置为显示验证码而不是链接
 export const sendResetPasswordCode = async (email: string) => {
+  // 验证邮箱格式
+  if (!isValidEmail(email)) {
+    throw new Error('邮箱格式不正确')
+  }
+
+  // 开发环境提示（但不阻止，因为可能需要测试真实邮箱）
+  if (isDevelopment()) {
+    console.warn('⚠️ 开发环境：正在发送邮件，请使用真实有效的邮箱地址')
+  }
+
   // 使用 signInWithOtp 发送验证码，然后用户输入验证码后可以重置密码
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -298,6 +321,16 @@ export const verifyResetPasswordCode = async (email: string, token: string, newP
 // 发送邮箱验证码（用于注册）
 // 注意：需要在 Supabase Dashboard 的 Email Templates 中配置为显示验证码而不是链接
 export const sendEmailOtp = async (email: string) => {
+  // 验证邮箱格式
+  if (!isValidEmail(email)) {
+    throw new Error('邮箱格式不正确')
+  }
+
+  // 开发环境提示（但不阻止，因为可能需要测试真实邮箱）
+  if (isDevelopment()) {
+    console.warn('⚠️ 开发环境：正在发送邮件，请使用真实有效的邮箱地址')
+  }
+
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
