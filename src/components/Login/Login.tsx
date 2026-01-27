@@ -3,6 +3,7 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
 import { signIn, sendResetPasswordCode, verifyResetPasswordCode, sendEmailOtp, verifyEmailOtp } from '@/utils/supabase'
 import { translateSupabaseError } from '@/utils/errorMessages'
 import { Toast } from '../PriceCalculator/Toast'
+import { Footer } from '../Footer'
 import './Login.css'
 
 interface LoginProps {
@@ -504,6 +505,8 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
           </form>
         )}
       </div>
+
+      <Footer hideSignOut={true} />
 
       {showToast && <Toast message={toastMessage} />}
     </div>

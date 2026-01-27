@@ -5,7 +5,11 @@ import { submitUserFeedback, signOut } from '@/utils/supabase'
 import { Toast } from '../PriceCalculator/Toast'
 import './Footer.css'
 
-export const Footer = () => {
+interface FooterProps {
+  hideSignOut?: boolean
+}
+
+export const Footer = ({ hideSignOut = false }: FooterProps) => {
   const [showContactModal, setShowContactModal] = useState(false)
   const [showContactQRCode, setShowContactQRCode] = useState(false)
   const [contactType, setContactType] = useState<'author' | 'assistant'>('author')
@@ -96,9 +100,11 @@ export const Footer = () => {
             <div className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
               免责声明
             </div>
-            <div className="footer-link" onClick={handleSignOut}>
-              退出登录
-            </div>
+            {!hideSignOut && (
+              <div className="footer-link" onClick={handleSignOut}>
+                退出登录
+              </div>
+            )}
           </div>
         </div>
       </footer>
