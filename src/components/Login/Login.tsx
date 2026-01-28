@@ -69,7 +69,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
       await sendEmailOtp(email)
       setCodeSent(true)
       setCountdown(60)
-      setToastMessage('验证码已发送，请查收邮箱')
+      setToastMessage('验证码已发送，请查收邮箱，若未收到，请检查垃圾邮件')
       setShowToast(true)
       setTimeout(() => {
         setShowToast(false)
@@ -152,7 +152,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
       await sendResetPasswordCode(email)
       setResetCodeSent(true)
       setResetCountdown(60)
-      setToastMessage('验证码已发送，请查收邮箱')
+      setToastMessage('验证码已发送，请查收邮箱，若未收到，请检查垃圾邮件')
       setShowToast(true)
       setTimeout(() => {
         setShowToast(false)

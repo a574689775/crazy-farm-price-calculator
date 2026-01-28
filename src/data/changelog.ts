@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.0.3',
+    date: '2026.1.27',
+    items: [
+      '增加垃圾邮件提醒',
+    ],
+  },
+  {
     version: 'V4.0.2',
     date: '2026.1.27',
     items: [
