@@ -390,6 +390,15 @@
   font-family: 'ResourceHanRoundedCN Medium', sans-serif;
 }
 
+.login-limit-hint {
+  margin-top: 4px;
+  margin-bottom: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(132, 49, 0, 0.6);
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+}
+
 @media (max-width: 768px) {
   .login-box {
     padding: 24px 20px;

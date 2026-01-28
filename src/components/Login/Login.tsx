@@ -69,7 +69,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
       await sendEmailOtp(email)
       setCodeSent(true)
       setCountdown(60)
-      setToastMessage('验证码已发送，请查收邮箱，若未收到，请检查垃圾邮件')
+      setToastMessage('验证码已发送，请查收邮箱')
       setShowToast(true)
       setTimeout(() => {
         setShowToast(false)
@@ -152,7 +152,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
       await sendResetPasswordCode(email)
       setResetCodeSent(true)
       setResetCountdown(60)
-      setToastMessage('验证码已发送，请查收邮箱，若未收到，请检查垃圾邮件')
+      setToastMessage('验证码已发送，请查收邮箱')
       setShowToast(true)
       setTimeout(() => {
         setShowToast(false)
@@ -280,6 +280,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                   {sendingCode ? '发送中...' : resetCountdown > 0 ? `${resetCountdown}秒后重发` : resetCodeSent ? '重新发送' : '发送验证码'}
                 </button>
               </div>
+              <p className="login-limit-hint">若长时间未收到验证码，请先检查垃圾邮箱或广告邮件。</p>
             </div>
 
             <div className="login-input-group">
@@ -401,6 +402,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                     {sendingCode ? '发送中...' : countdown > 0 ? `${countdown}秒后重发` : codeSent ? '重新发送' : '发送验证码'}
                   </button>
                 </div>
+                <p className="login-limit-hint">若长时间未收到验证码，请先检查垃圾邮箱或广告邮件</p>
               </div>
             )}
 
