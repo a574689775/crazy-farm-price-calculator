@@ -196,6 +196,13 @@
   flex: 0 0 auto;
 }
 
+.growth-time-value {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  margin-left: 12px;
+}
+
 /* 突变组作为独立模块，与input-group同级 */
 .mutation-group {
   display: flex;

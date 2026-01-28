@@ -36,6 +36,7 @@ export interface CropConfig {
   name: string
   priceCoefficient: number  // 售价系数
   maxWeight: number  // 极限重量 (kg)
+  growthSpeed: number  // 生长速度 (s/kg)
   specialMutations?: WeatherMutation[]  // 异形突变列表（只有部分作物有）
 }
 
