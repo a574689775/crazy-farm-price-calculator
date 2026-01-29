@@ -183,6 +183,8 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     const count =
       rawCount >= 10000 ? `${(rawCount / 10000).toFixed(1)}万` : rawCount
     const heatColor = getHeatColor(rawCount)
+    // 只有热度最高的前4个作物才显示热度值
+    const isHotCrop = hotCrops.some(hotCrop => hotCrop.name === crop.name)
     
     return (
       <div
@@ -192,7 +194,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         onClick={() => onSelectCrop(crop)}
       >
         <div className="crop-item-image-wrapper">
-          {rawCount > 0 && (
+          {rawCount > 0 && isHotCrop && (
             <div 
               className="crop-item-count"
               style={{ 

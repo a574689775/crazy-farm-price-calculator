@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.3.1',
+    date: '2026.1.29',
+    items: [
+      '只展示热门作物的热度值，避免遮挡月球标识',
+    ],
+  },
+  {
     version: 'V4.3.0',
     date: '2026.1.29',
     items: [
