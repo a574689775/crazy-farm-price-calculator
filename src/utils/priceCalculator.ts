@@ -13,7 +13,7 @@ export const calculatePrice = (
   weight: number,
   selectedMutations: WeatherMutation[]
 ): CalculationResult => {
-  const INNATE_MUTATIONS = new Set<WeatherMutation>(['银', '金', '水晶', '流光'])
+  const INNATE_MUTATIONS = new Set<WeatherMutation>(['银', '金', '水晶', '流光', '星空'])
   const SPECIAL_MUTATIONS = new Set<WeatherMutation>(['薯片', '方形', '糖葫芦', '连体', '黄瓜蛇', '万圣夜', '香蕉猴', '笑日葵'])
 
   let innateMultiplier = 1 // 先天突变倍数，取最大值
@@ -138,7 +138,7 @@ export const calculateWeightFromPrice = (
   priceInYuan: number,
   selectedMutations: WeatherMutation[]
 ): number | null => {
-  const INNATE_MUTATIONS = new Set<WeatherMutation>(['银', '金', '水晶', '流光'])
+  const INNATE_MUTATIONS = new Set<WeatherMutation>(['银', '金', '水晶', '流光', '星空'])
   const SPECIAL_MUTATIONS = new Set<WeatherMutation>(['薯片', '方形', '糖葫芦', '连体', '黄瓜蛇', '万圣夜', '香蕉猴', '笑日葵'])
 
   let innateMultiplier = 1 // 先天突变倍数，取最大值

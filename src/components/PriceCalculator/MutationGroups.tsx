@@ -1,6 +1,7 @@
 import type { CropConfig, WeatherMutation } from '@/types'
 import {
   QUALITY_MUTATIONS,
+  MOON_COMMON_MUTATIONS,
   COMMON_MUTATIONS,
   RARE_MUTATIONS,
   PAST_MUTATIONS,
@@ -115,19 +116,24 @@ export const MutationGroups = ({
     }
   }
 
+  // 根据作物类型过滤品质突变（星空只有月球作物才有）
+  const qualityMutations = crop.type === '月球' 
+    ? QUALITY_MUTATIONS 
+    : QUALITY_MUTATIONS.filter(m => m !== '星空')
+
   return (
     <>
       {/* 品质突变（互斥，不显示checkbox） */}
       <MutationGroup
         title="品质"
-        mutations={QUALITY_MUTATIONS}
+        mutations={qualityMutations}
         selectedMutations={selectedMutations}
         isExclusive={true}
         showCheckbox={false}
-        groupState={getGroupState(QUALITY_MUTATIONS)}
-        onToggleGroup={() => handleGroupToggle(QUALITY_MUTATIONS, true)}
+        groupState={getGroupState(qualityMutations)}
+        onToggleGroup={() => handleGroupToggle(qualityMutations, true)}
         onToggleMutation={toggleMutation}
-        onToggleExclusiveMutation={(name) => toggleExclusiveMutation(name, QUALITY_MUTATIONS)}
+        onToggleExclusiveMutation={(name) => toggleExclusiveMutation(name, qualityMutations)}
       />
       
       {/* 异形突变（根据作物显示，不互斥） */}
@@ -142,6 +148,21 @@ export const MutationGroups = ({
           onToggleGroup={() => handleGroupToggle(crop.specialMutations!, false)}
           onToggleMutation={toggleMutation}
           onToggleExclusiveMutation={(name) => toggleExclusiveMutation(name, crop.specialMutations!)}
+        />
+      )}
+      
+      {/* 月球突变（只有月球作物才有，显示在常见突变上面） */}
+      {crop.type === '月球' && (
+        <MutationGroup
+          title="月球突变"
+          mutations={MOON_COMMON_MUTATIONS}
+          selectedMutations={selectedMutations}
+          isExclusive={false}
+          showCheckbox={true}
+          groupState={getGroupState(MOON_COMMON_MUTATIONS)}
+          onToggleGroup={() => handleGroupToggle(MOON_COMMON_MUTATIONS, false)}
+          onToggleMutation={toggleMutation}
+          onToggleExclusiveMutation={(name) => toggleExclusiveMutation(name, MOON_COMMON_MUTATIONS)}
         />
       )}
       

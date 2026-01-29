@@ -3,15 +3,17 @@ import { crops } from '@/data/crops'
 
 /**
  * 所有突变的固定顺序（用于位图编码）
- * 顺序：品质(4) + 异形(8) + 常见(10) + 罕见(5) + 往期(2) + 中间(4) = 33个
+ * 顺序：品质(5) + 异形(8) + 常见(9) + 月球(1) + 罕见(5) + 往期(3) + 中间(4) = 35个
  */
 const ALL_MUTATIONS_ORDER: WeatherMutation[] = [
-  // 品质突变 (4个)
-  '银', '金', '水晶', '流光',
+  // 品质突变 (5个)
+  '银', '金', '水晶', '星空', '流光',
   // 异形突变 (8个)
   '薯片', '方形', '糖葫芦', '连体', '黄瓜蛇', '万圣夜', '香蕉猴', '笑日葵',
   // 常见突变 (9个)
   '潮湿', '生机', '覆雪', '迷雾', '颤栗', '落雷', '冰冻', '瓷化', '亮晶晶',
+  // 月球突变 (1个)
+  '陨石',
   // 罕见突变 (5个)
   '血月', '彩虹', '荧光', '星环', '霓虹',
   // 往期突变 (3个)
@@ -152,7 +154,7 @@ export function encodeShareData(data: ShareData): string {
   // 百分比 (1字节，1-100)
   bytes[3] = percentage
   
-  // 突变位图 (5字节，40位，足够33个突变)
+  // 突变位图 (5字节，40位，足够34个突变)
   const mutationBytes = encodeMutations(mutations)
   for (let i = 0; i < 5 && i < mutationBytes.length; i++) {
     bytes[4 + i] = mutationBytes[i]

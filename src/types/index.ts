@@ -13,11 +13,11 @@ export type MutationColor = '灰色' | '绿色' | '蓝色' | '紫色' | '金色'
  */
 export type WeatherMutation = 
   | '颤栗' | '潮湿' | '覆雪' | '灼热' | '迷雾' | '生机' | '沙尘' | '结霜'  // 灰色
-  | '银' | '落雷' | '冰冻' | '陶化'  // 绿色
+  | '银' | '落雷' | '冰冻' | '陶化' | '陨石'  // 绿色
   | '金' | '血月' | '幽魂' | '惊魂夜' | '彩虹' | '荧光' | '极光'  // 蓝色
   | '瓷化' | '星环' | '亮晶晶'  // 紫色
   | '水晶'  // 金色
-  | '流光' | '霓虹'  // 彩色
+  | '流光' | '霓虹' | '星空'  // 彩色
   | '薯片' | '方形' | '糖葫芦' | '连体' | '黄瓜蛇' | '万圣夜' | '香蕉猴' | '笑日葵'  // 异形突变
 
 /**
@@ -30,6 +30,11 @@ export interface WeatherMutationConfig {
 }
 
 /**
+ * 作物类型
+ */
+export type CropType = '普通' | '月球'
+
+/**
  * 作物配置
  */
 export interface CropConfig {
@@ -37,6 +42,7 @@ export interface CropConfig {
   priceCoefficient: number  // 售价系数
   maxWeight: number  // 极限重量 (kg)
   growthSpeed: number  // 生长速度 (s/kg)
+  type: CropType  // 作物类型
   specialMutations?: WeatherMutation[]  // 异形突变列表（只有部分作物有）
 }
 

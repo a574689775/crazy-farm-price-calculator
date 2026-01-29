@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.3.0',
+    date: '2026.1.29',
+    items: [
+      '添加星空品质、陨石突变',
+    ],
+  },
+  {
     version: 'V4.2.0',
     date: '2026.1.29',
     items: [

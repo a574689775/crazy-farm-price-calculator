@@ -4,7 +4,10 @@ import type { WeatherMutation } from '@/types'
  * 突变分组定义
  */
 // 品质突变（互斥，只能选一个）
-export const QUALITY_MUTATIONS: WeatherMutation[] = ['流光', '水晶', '金', '银']
+export const QUALITY_MUTATIONS: WeatherMutation[] = ['星空', '流光', '水晶', '金', '银']
+
+// 月球突变（只有月球作物才有）
+export const MOON_COMMON_MUTATIONS: WeatherMutation[] = ['陨石']
 
 // 常见突变
 export const COMMON_MUTATIONS: WeatherMutation[] = ['瓷化', '亮晶晶', '落雷', '冰冻', '颤栗', '覆雪', '潮湿', '迷雾', '生机']

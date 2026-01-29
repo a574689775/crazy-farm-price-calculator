@@ -6,7 +6,6 @@ import { crops } from '@/data/crops'
 import { PriceFeedback } from '@/components/PriceFeedback'
 import { addHistoryRecord } from '@/utils/historyStorage'
 import { useAnimatedPrice } from './hooks'
-import { COMMON_MUTATIONS } from './constants'
 import { CalculatorHeader } from './CalculatorHeader'
 import { WeightInputGroup } from './WeightInputGroup'
 import { MutationGroups } from './MutationGroups'
@@ -31,7 +30,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   // 输入相关
   const [weight, setWeight] = useState<string>('')
   const [percentage, setPercentage] = useState<string>('')
-  const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>(COMMON_MUTATIONS)
+  const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>([])
   
   // 计算模式相关
   const [calculationMode, setCalculationMode] = useState<CalculationMode>('weight')
@@ -79,7 +78,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (!crop) {
       setWeight('')
       setPercentage('')
-      setSelectedMutations(COMMON_MUTATIONS)
+      setSelectedMutations([])
       setPriceInput('')
       setIsEditingPrice(false)
       setCalculationMode('weight')
@@ -89,7 +88,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   }, [crop])
 
   /**
-   * 当作物切换时，清空重量和突变，默认选中常见突变
+   * 当作物切换时，清空重量和突变
    * 如果已经从URL恢复过配置，则不再重置
    */
   useEffect(() => {
@@ -101,7 +100,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (!shareData || crops[shareData.cropIndex]?.name !== crop?.name) {
       setWeight('')
       setPercentage('')
-      setSelectedMutations(COMMON_MUTATIONS)
+      setSelectedMutations([])
       // 重置价格相关状态
       setPriceInput('')
       setIsEditingPrice(false)
@@ -136,7 +135,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     } else {
       setPercentage('')
     }
-    setSelectedMutations(prefillData.mutations.length ? prefillData.mutations : COMMON_MUTATIONS)
+    setSelectedMutations(prefillData.mutations.length ? prefillData.mutations : [])
     setHasRestoredFromUrl(true)
     // 重置价格相关状态
     setPriceInput('')
