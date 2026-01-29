@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.2.0',
+    date: '2026.1.29',
+    items: [
+      '添加月光草、灰壤豆、月灯草、月番茄价格',
+    ],
+  },
+  {
     version: 'V4.1.0',
     date: '2026.1.28',
     items: [
