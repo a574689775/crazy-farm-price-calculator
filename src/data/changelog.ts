@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.5.0',
+    date: '2026.1.29',
+    items: [
+      '添加月环树、银灰苔月球作物',
+    ],
+  },
+  {
     version: 'V4.4.0',
     date: '2026.1.29',
     items: [
