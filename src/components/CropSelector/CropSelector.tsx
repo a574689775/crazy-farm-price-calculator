@@ -58,13 +58,13 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     return sorted.slice(0, 4)
   }, [crops, queryCounts, cropOrder])
 
-  // 获取其他作物（排除热门作物的剩余作物）
+  // 获取其他作物（排除热门作物的剩余作物，按数据定义顺序倒序展示）
   const otherCrops = useMemo(() => {
     const hotCropNames = new Set(hotCrops.map(c => c.name))
     return crops
       .filter(crop => !hotCropNames.has(crop.name))
-      .sort(sortByCountThenQuality)
-  }, [crops, hotCrops, queryCounts, cropOrder])
+      .sort((a, b) => (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0))
+  }, [crops, hotCrops, cropOrder])
 
   const orderKey = useMemo(
     () => [...hotCrops, ...otherCrops].map(c => c.name).join(','),
