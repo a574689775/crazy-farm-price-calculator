@@ -29,6 +29,8 @@ export const weatherMutations: WeatherMutationConfig[] = [
   { name: '彩虹', color: '蓝色', multiplier: 5 },
   { name: '荧光', color: '蓝色', multiplier: 5 },
   { name: '极光', color: '蓝色', multiplier: 5 },
+  { name: '暗雾', color: '蓝色', multiplier: 6 },
+  { name: '太阳耀斑', color: '蓝色', multiplier: 5 },
   
   // 紫色突变
   { name: '瓷化', color: '紫色', multiplier: 8 },
@@ -37,6 +39,7 @@ export const weatherMutations: WeatherMutationConfig[] = [
   
   // 金色突变
   { name: '水晶', color: '金色', multiplier: 20 },
+  { name: '流火', color: '金色', multiplier: 15 },
   
   // 彩色突变
   { name: '流光', color: '彩色', multiplier: 30 },

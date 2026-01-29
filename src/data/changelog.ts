@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.4.0',
+    date: '2026.1.29',
+    items: [
+      '添加流火、太阳耀斑、暗雾突变',
+    ],
+  },
+  {
     version: 'V4.3.2',
     date: '2026.1.29',
     items: [
