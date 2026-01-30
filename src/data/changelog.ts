@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.8.2',
+    date: '2026.1.30',
+    items: [
+      '热门作物展示数量自适应视口宽度',
+    ],
+  },
+  {
     version: 'V4.8.1',
     date: '2026.1.30',
     items: [

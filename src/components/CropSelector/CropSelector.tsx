@@ -1,5 +1,5 @@
 import type { CropConfig } from '@/types'
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { ClockCircleOutlined, FireFilled } from '@ant-design/icons'
 import { SVGText } from '@/components/SVGText'
 import { GradientButton } from '@/components/GradientButton'
@@ -19,6 +19,23 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
   const prevOrderRef = useRef<string>('')
   const clearTimersRef = useRef(new Map<string, number>())
   const isAnimatingRef = useRef(false)
+
+  // 根据视口宽度计算每行列数（与 CSS 断点一致：<480 为 4，480–640 为 5，>640 为 6）
+  const [columns, setColumns] = useState(() => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 375
+    if (w < 480) return 4
+    if (w <= 640) return 5
+    return 6
+  })
+  useEffect(() => {
+    const onResize = () => {
+      const w = window.innerWidth
+      setColumns(w < 480 ? 4 : w <= 640 ? 5 : 6)
+    }
+    window.addEventListener('resize', onResize)
+    onResize()
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // 数据文件中的顺序即品质优先级（索引越小品质越高）
   const cropOrder = useMemo(() => new Map(crops.map((crop, index) => [crop.name, index])), [crops])
@@ -52,11 +69,11 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     return (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0)
   }
 
-  // 获取热门作物（查询量最多的前4个）
+  // 获取热门作物（查询量最多的前 N 个，N = 当前每行列数，占满第一行）
   const hotCrops = useMemo(() => {
     const sorted = [...crops].sort(sortByCountThenQuality)
-    return sorted.slice(0, 4)
-  }, [crops, queryCounts, cropOrder])
+    return sorted.slice(0, columns)
+  }, [crops, queryCounts, cropOrder, columns])
 
   // 获取其他作物（排除热门作物的剩余作物，按热度排序）
   const otherCrops = useMemo(() => {
