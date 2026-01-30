@@ -167,6 +167,66 @@ export const fetchTodayQueryCounts = async (): Promise<Record<string, number>> =
   return map
 }
 
+/** Realtime 变更行类型（crop_daily_stats 表） */
+type CropDailyStatsRow = { crop_name: string; query_date: string; query_count: number }
+
+/**
+ * 订阅当日作物查询次数（Supabase Realtime）
+ * - 首次会拉取当日数据并回调
+ * - 之后表 crop_daily_stats 有 INSERT/UPDATE/DELETE 时，仅当行属于「当日」则合并到本地并回调
+ *
+ * Supabase 里需要做的设置（否则收不到实时推送）：
+ * 1. 打开 Supabase 控制台 → Database → Replication
+ * 2. 在 Publication「supabase_realtime」里，把表 crop_daily_stats 勾选上（ADD TABLE）
+ * 或执行 SQL：ALTER PUBLICATION supabase_realtime ADD TABLE crop_daily_stats;
+ *
+ * @returns 取消订阅函数
+ */
+export const subscribeCropDailyStats = (
+  onCounts: (counts: Record<string, number>) => void
+): (() => void) => {
+  if (!supabase) return () => {}
+
+  const todayDate = getLocalTodayDate()
+  let currentMap: Record<string, number> = {}
+
+  const applyRow = (row: CropDailyStatsRow | null, isDelete: boolean) => {
+    if (!row || row.query_date !== todayDate) return
+    if (isDelete) {
+      delete currentMap[row.crop_name]
+    } else {
+      currentMap[row.crop_name] = row.query_count ?? 0
+    }
+    onCounts({ ...currentMap })
+  }
+
+  fetchTodayQueryCounts()
+    .then((map) => {
+      currentMap = { ...map }
+      onCounts(map)
+    })
+    .catch(console.error)
+
+  const ch = supabase.channel('crop_daily_stats_realtime')
+  // postgres_changes 在部分 @supabase/supabase-js 版本的类型里未正确暴露
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(ch as any).on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'crop_daily_stats' },
+    (payload: { eventType: string; new?: CropDailyStatsRow; old?: CropDailyStatsRow }) => {
+      if (payload.eventType === 'DELETE' && payload.old) {
+        applyRow(payload.old, true)
+      } else if ((payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') && payload.new) {
+        applyRow(payload.new, false)
+      }
+    }
+  ).subscribe()
+
+  return () => {
+    supabase.removeChannel(ch)
+  }
+}
+
 /**
  * 提交用户反馈
  */

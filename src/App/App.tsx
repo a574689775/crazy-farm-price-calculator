@@ -8,7 +8,7 @@ import { HistoryView } from '@/components/HistoryView'
 import { FeedbackDataView } from '@/components/FeedbackDataView'
 import { Login } from '@/components/Login'
 import { parseShareUrl } from '@/utils/shareEncoder'
-import { logCropQuery, fetchTodayQueryCounts, getSession, onAuthStateChange } from '@/utils/supabase'
+import { logCropQuery, subscribeCropDailyStats, getSession, onAuthStateChange } from '@/utils/supabase'
 import './App.css'
 
 type Page = 'selector' | 'calculator' | 'feedback'
@@ -24,8 +24,6 @@ export const App = () => {
   const [showHistory, setShowHistory] = useState(false)
   const [prefillData, setPrefillData] = useState<PrefillData | null>(null)
   const [todayQueryCounts, setTodayQueryCounts] = useState<Record<string, number>>({})
-  const selectorFetchLockRef = useRef(false)
-  const selectorFetchTimerRef = useRef<number | null>(null)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -138,41 +136,12 @@ export const App = () => {
     isInitializedRef.current = true
   }, [])
 
-  // 每次进入选择页时静默刷新当日查询次数（以 URL 为准：无 page 且无 crop 参数）
+  // 登录后一直订阅当日作物热度（Supabase Realtime），有变更即更新；订阅时会先拉一次当日数据
   useEffect(() => {
-    // 清理可能存在的延迟请求
-    if (selectorFetchTimerRef.current) {
-      clearTimeout(selectorFetchTimerRef.current)
-      selectorFetchTimerRef.current = null
-    }
-
-    if (currentPage !== 'selector' || showHistory) {
-      selectorFetchLockRef.current = false
-      return
-    }
-
-    const params = new URLSearchParams(window.location.search)
-    const page = params.get('page')
-    const cropParam = params.get('crop')
-    const isSelectorUrl = !cropParam && (page === null || page === 'selector')
-
-    if (isSelectorUrl && isInitializedRef.current && !selectorFetchLockRef.current) {
-      selectorFetchLockRef.current = true
-      selectorFetchTimerRef.current = window.setTimeout(() => {
-        fetchTodayQueryCounts()
-          .then(setTodayQueryCounts)
-          .catch(console.error)
-      }, 350) // 略大于动画时长，确保动画完成后再更新
-
-      return () => {
-        if (selectorFetchTimerRef.current) {
-          clearTimeout(selectorFetchTimerRef.current)
-          selectorFetchTimerRef.current = null
-        }
-        selectorFetchLockRef.current = false
-      }
-    }
-  }, [currentPage, showHistory, selectedCrop])
+    if (!isAuthenticated) return
+    const unsubscribe = subscribeCropDailyStats(setTodayQueryCounts)
+    return () => unsubscribe()
+  }, [isAuthenticated])
 
   const handleSelectCrop = (crop: CropConfig) => {
     // 更新 URL，添加作物参数，支持浏览器前进/后退
