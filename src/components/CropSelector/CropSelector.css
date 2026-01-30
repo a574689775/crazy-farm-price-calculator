@@ -206,3 +206,16 @@
   line-height: 1;
 }
 
+/* 热度变化时标签抖一抖 */
+@keyframes heat-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-2px) rotate(-4deg); }
+  40% { transform: translateX(2px) rotate(4deg); }
+  60% { transform: translateX(-1px) rotate(-2deg); }
+  80% { transform: translateX(1px) rotate(2deg); }
+}
+
+.crop-item-count.heat-shake {
+  animation: heat-shake 0.4s ease-in-out;
+}
+

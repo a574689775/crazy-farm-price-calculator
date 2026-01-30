@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.10.1',
+    date: '2026.1.30',
+    items: [
+      '热度标签增加抖一抖特效',
+    ],
+  },
+  {
     version: 'V4.10.0',
     date: '2026.1.30',
     items: [

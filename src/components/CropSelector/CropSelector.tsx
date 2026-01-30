@@ -13,12 +13,17 @@ interface CropSelectorProps {
   queryCounts?: Record<string, number>
 }
 
+const SHAKE_DURATION_MS = 400
+
 export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts = {} }: CropSelectorProps) => {
   const nodeRefs = useRef(new Map<string, HTMLDivElement>())
   const prevPositionsRef = useRef(new Map<string, DOMRect>())
   const prevOrderRef = useRef<string>('')
   const clearTimersRef = useRef(new Map<string, number>())
   const isAnimatingRef = useRef(false)
+  const prevQueryCountsRef = useRef<Record<string, number>>({})
+  const [shakeCrops, setShakeCrops] = useState<Set<string>>(new Set())
+  const shakeTimersRef = useRef(new Map<string, number>())
 
   // 根据视口宽度计算每行列数（与 CSS 断点一致：<480 为 4，480–640 为 5，>640 为 6）
   const [columns, setColumns] = useState(() => {
@@ -82,6 +87,43 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
       .filter(crop => !hotCropNames.has(crop.name))
       .sort(sortByCountThenQuality)
   }, [crops, hotCrops, queryCounts, cropOrder])
+
+  // 谁的热度变了，那个热度标签抖一抖
+  useEffect(() => {
+    const prev = prevQueryCountsRef.current
+    const toShake: string[] = []
+    crops.forEach(crop => {
+      const name = crop.name
+      const curr = queryCounts[name] ?? 0
+      const prevCount = prev[name] ?? 0
+      if (curr !== prevCount && curr > 0) toShake.push(name)
+    })
+    if (toShake.length === 0) {
+      prevQueryCountsRef.current = { ...queryCounts }
+      return
+    }
+    setShakeCrops(s => new Set([...s, ...toShake]))
+    toShake.forEach(name => {
+      const captured = queryCounts[name] ?? 0
+      const existing = shakeTimersRef.current.get(name)
+      if (existing) window.clearTimeout(existing)
+      const timer = window.setTimeout(() => {
+        shakeTimersRef.current.delete(name)
+        setShakeCrops(s => {
+          const next = new Set(s)
+          next.delete(name)
+          return next
+        })
+        prevQueryCountsRef.current = { ...prevQueryCountsRef.current, [name]: captured }
+      }, SHAKE_DURATION_MS)
+      shakeTimersRef.current.set(name, timer)
+    })
+  }, [queryCounts, crops])
+
+  useEffect(() => () => {
+    shakeTimersRef.current.forEach(t => window.clearTimeout(t))
+    shakeTimersRef.current.clear()
+  }, [])
 
   const orderKey = useMemo(
     () => [...hotCrops, ...otherCrops].map(c => c.name).join(','),
@@ -211,7 +253,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         <div className="crop-item-image-wrapper">
           {rawCount > 0 && (
             <div 
-              className="crop-item-count"
+              className={`crop-item-count${shakeCrops.has(crop.name) ? ' heat-shake' : ''}`}
               style={{ 
                 borderColor: heatColor,
                 color: heatColor
