@@ -90,6 +90,13 @@ export const isMutationDisabled = (
     return false
   }
   
+  // 特殊处理：灼热是流火(太阳耀斑+灼热)和瓷化(陶化+灼热)的共同原料，只有流火和瓷化都存在时才禁用灼热
+  if (mutationName === '灼热') {
+    const hasLiuhuo = selectedMutations.includes('流火')
+    const hasCihua = selectedMutations.includes('瓷化')
+    return hasLiuhuo && hasCihua
+  }
+  
   // 特殊处理："沙尘"不能和"潮湿"共存（因为会合成"陶化"）
   // 但是只有当"陶化"或"瓷化"已存在时，才禁用"沙尘"（说明已经合成了，不能再选择原料）
   // 如果"陶化"和"瓷化"都不存在，允许选择"沙尘"（即使"潮湿"已存在，让用户自己选择是否合成）

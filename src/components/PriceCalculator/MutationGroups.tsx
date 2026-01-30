@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { CropConfig, WeatherMutation } from '@/types'
 import {
   QUALITY_MUTATIONS,
@@ -116,6 +117,12 @@ export const MutationGroups = ({
     }
   }
 
+  // 中间状态突变（月球作物时包含太阳耀斑，太阳耀斑+灼热=流火）
+  const intermediateMutations: WeatherMutation[] = useMemo(
+    () => crop.type === '月球' ? ['太阳耀斑' as WeatherMutation, ...INTERMEDIATE_MUTATIONS] : INTERMEDIATE_MUTATIONS,
+    [crop.type]
+  )
+
   // 根据作物类型过滤品质突变（星空只有月球作物才有）
   const qualityMutations = crop.type === '月球' 
     ? QUALITY_MUTATIONS 
@@ -179,17 +186,17 @@ export const MutationGroups = ({
         onToggleExclusiveMutation={(name) => toggleExclusiveMutation(name, COMMON_MUTATIONS)}
       />
       
-      {/* 中间状态突变（不显示checkbox） */}
+      {/* 中间状态突变（不显示checkbox；月球作物时包含太阳耀斑，太阳耀斑+灼热=流火） */}
       <MutationGroup
         title="中间状态突变"
-        mutations={INTERMEDIATE_MUTATIONS}
+        mutations={intermediateMutations}
         selectedMutations={selectedMutations}
         isExclusive={false}
         showCheckbox={false}
-        groupState={getGroupState(INTERMEDIATE_MUTATIONS)}
-        onToggleGroup={() => handleGroupToggle(INTERMEDIATE_MUTATIONS, false)}
+        groupState={getGroupState(intermediateMutations)}
+        onToggleGroup={() => handleGroupToggle(intermediateMutations, false)}
         onToggleMutation={toggleMutation}
-        onToggleExclusiveMutation={(name) => toggleExclusiveMutation(name, INTERMEDIATE_MUTATIONS)}
+        onToggleExclusiveMutation={(name) => toggleExclusiveMutation(name, intermediateMutations)}
       />
       
       {/* 罕见突变 */}

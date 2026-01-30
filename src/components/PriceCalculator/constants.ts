@@ -6,8 +6,8 @@ import type { WeatherMutation } from '@/types'
 // 品质突变（互斥，只能选一个）
 export const QUALITY_MUTATIONS: WeatherMutation[] = ['星空', '流光', '水晶', '金', '银']
 
-// 月球突变（只有月球作物才有）
-export const MOON_COMMON_MUTATIONS: WeatherMutation[] = ['流火', '日蚀', '太阳耀斑', '暗雾', '陨石']
+// 月球突变（只有月球作物才有，太阳耀斑在中间状态突变里）
+export const MOON_COMMON_MUTATIONS: WeatherMutation[] = ['流火', '日蚀', '暗雾', '陨石']
 
 // 常见突变
 export const COMMON_MUTATIONS: WeatherMutation[] = ['瓷化', '亮晶晶', '落雷', '冰冻', '颤栗', '覆雪', '潮湿', '迷雾', '生机']
@@ -34,4 +34,5 @@ export const COMBINATION_RULES: Array<{
   { ingredients: ['沙尘', '潮湿'], result: '陶化' },
   { ingredients: ['陶化', '灼热'], result: '瓷化' },
   { ingredients: ['潮湿', '结霜'], result: '冰冻' },
+  { ingredients: ['太阳耀斑', '灼热'], result: '流火' },
 ]

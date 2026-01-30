@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.8.1',
+    date: '2026.1.30',
+    items: [
+      '太阳耀斑修改为中间状态突变，太阳耀斑+灼热=流火',
+    ],
+  },
+  {
     version: 'V4.8.0',
     date: '2026.1.30',
     items: [
