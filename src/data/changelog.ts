@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.9.0',
+    date: '2026.1.30',
+    items: [
+      '添加按照生长速度推算重量功能',
+    ],
+  },
+  {
     version: 'V4.8.3',
     date: '2026.1.30',
     items: [

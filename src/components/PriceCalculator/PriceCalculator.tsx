@@ -30,6 +30,8 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   // 输入相关
   const [weight, setWeight] = useState<string>('')
   const [percentage, setPercentage] = useState<string>('')
+  /** 生长速度：生长 1% 需要多少秒（秒/%），用户实测填或由重量自动算出 */
+  const [growthSpeed, setGrowthSpeed] = useState<string>('')
   const [selectedMutations, setSelectedMutations] = useState<WeatherMutation[]>([])
   
   // 计算模式相关
@@ -78,6 +80,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (!crop) {
       setWeight('')
       setPercentage('')
+      setGrowthSpeed('')
       setSelectedMutations([])
       setPriceInput('')
       setIsEditingPrice(false)
@@ -100,6 +103,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (!shareData || crops[shareData.cropIndex]?.name !== crop?.name) {
       setWeight('')
       setPercentage('')
+      setGrowthSpeed('')
       setSelectedMutations([])
       // 重置价格相关状态
       setPriceInput('')
@@ -132,8 +136,12 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (weightNum > 0 && crop) {
       const percentageNum = Math.round((weightNum / crop.maxWeight) * 100)
       setPercentage(percentageNum.toString())
+      // 生长速度 = 生长耗时的 1%（秒）
+      const secPerPercent = 0.01 * weightNum * crop.growthSpeed
+      setGrowthSpeed(secPerPercent > 0 ? secPerPercent.toFixed(2).replace(/\.?0+$/, '') : '')
     } else {
       setPercentage('')
+      setGrowthSpeed('')
     }
     setSelectedMutations(prefillData.mutations.length ? prefillData.mutations : [])
     setHasRestoredFromUrl(true)
@@ -260,6 +268,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (value === null || value === undefined) {
       setWeight('')
       setPercentage('')
+      setGrowthSpeed('')
       return
     }
     
@@ -271,11 +280,55 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (value > 0 && value <= crop.maxWeight) {
       const calculatedPercentage = (value / crop.maxWeight) * 100
       setPercentage(Math.round(calculatedPercentage).toString())
+      // 生长速度 = 生长耗时的 1%（秒），生长耗时 = value * crop.growthSpeed
+      const secPerPercent = 0.01 * value * crop.growthSpeed
+      setGrowthSpeed(secPerPercent > 0 ? secPerPercent.toFixed(2).replace(/\.?0+$/, '') : '')
     } else {
       setPercentage('')
+      setGrowthSpeed('')
     }
   }
 
+  /**
+   * 处理生长速度输入变化（生长耗时的 1%，单位秒，用户可实测填写）
+   * 先填生长速度时：反推重量 = 生长速度×100 / crop.growthSpeed，并更新百分比
+   */
+  const handleGrowthSpeedChange = (value: number | null) => {
+    const str = value === null || value === undefined ? '' : value.toString()
+    setGrowthSpeed(str)
+    if (!crop || crop.growthSpeed <= 0) return
+    const speedNum = value === null || value === undefined ? 0 : Number(value)
+    if (speedNum <= 0) return
+    // 生长速度 = 生长耗时×1% = 0.01×重量×crop.growthSpeed => 重量 = 生长速度×100 / crop.growthSpeed
+    const minW = crop.maxWeight / 34
+    const calculatedWeight = (speedNum * 100) / crop.growthSpeed
+    const clampedWeight = Math.min(Math.max(calculatedWeight, minW), crop.maxWeight)
+    setWeight(clampedWeight.toFixed(2).replace(/\.?0+$/, ''))
+    const percentageNum = Math.round((clampedWeight / crop.maxWeight) * 100)
+    setPercentage(percentageNum.toString())
+  }
+
+  /**
+   * 生长速度失焦时：若超出有效范围则自动修正为边界值，并同步重量、百分比
+   * 有效范围：生长速度 = 生长耗时的 1%，对应重量 [minWeight, maxWeight]
+   */
+  const handleGrowthSpeedBlur = () => {
+    if (!crop || crop.growthSpeed <= 0) return
+    const speedNum = parseFloat(growthSpeed)
+    if (Number.isNaN(speedNum) || speedNum <= 0) return
+    const minW = crop.maxWeight / 34
+    const minSpeed = 0.01 * minW * crop.growthSpeed
+    const maxSpeed = 0.01 * crop.maxWeight * crop.growthSpeed
+    if (speedNum < minSpeed) {
+      setGrowthSpeed(minSpeed.toFixed(2).replace(/\.?0+$/, ''))
+      setWeight(minW.toFixed(2).replace(/\.?0+$/, ''))
+      setPercentage(Math.round((minW / crop.maxWeight) * 100).toString())
+    } else if (speedNum > maxSpeed) {
+      setGrowthSpeed(maxSpeed.toFixed(2).replace(/\.?0+$/, ''))
+      setWeight(crop.maxWeight.toFixed(2).replace(/\.?0+$/, ''))
+      setPercentage('100')
+    }
+  }
 
   /**
    * 处理价格输入变化
@@ -334,6 +387,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (value === null || value === undefined) {
       setPercentage('')
       setWeight('')
+      setGrowthSpeed('')
       return
     }
     
@@ -345,6 +399,9 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     const calculatedWeight = (value / 100) * crop.maxWeight
     const clampedWeight = Math.min(Math.max(calculatedWeight, minWeight), crop.maxWeight)
     setWeight(clampedWeight.toFixed(2).replace(/\.?0+$/, ''))
+    // 生长速度 = 生长耗时的 1%（秒）
+    const secPerPercent = 0.01 * clampedWeight * crop.growthSpeed
+    setGrowthSpeed(secPerPercent > 0 ? secPerPercent.toFixed(2).replace(/\.?0+$/, '') : '')
   }
 
   // ========== 事件处理辅助函数 ==========
@@ -401,11 +458,14 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
           crop={safeCrop}
           weight={weight}
           percentage={percentage}
+          growthSpeed={growthSpeed}
           calculationMode={calculationMode}
           minWeight={minWeight}
           minPercentage={Math.ceil((minWeight / safeCrop.maxWeight) * 100)}
           onWeightChange={handleWeightChange}
           onPercentageChange={handlePercentageChange}
+          onGrowthSpeedChange={handleGrowthSpeedChange}
+          onGrowthSpeedBlur={handleGrowthSpeedBlur}
           onFocus={handleInputFocus}
         />
 

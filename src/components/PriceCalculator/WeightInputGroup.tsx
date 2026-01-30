@@ -8,11 +8,15 @@ interface WeightInputGroupProps {
   crop: CropConfig
   weight: string
   percentage: string
+  /** 生长速度：生长耗时的 1%，单位秒。用户可实测填写，或由重量自动算出 */
+  growthSpeed: string
   calculationMode: CalculationMode
   minWeight: number
   minPercentage: number
   onWeightChange: (value: number | null) => void
   onPercentageChange: (value: number | null) => void
+  onGrowthSpeedChange: (value: number | null) => void
+  onGrowthSpeedBlur?: () => void
   onFocus: () => void
 }
 
@@ -49,11 +53,14 @@ export const WeightInputGroup = ({
   crop,
   weight,
   percentage,
+  growthSpeed,
   calculationMode,
   minWeight,
   minPercentage,
   onWeightChange,
   onPercentageChange,
+  onGrowthSpeedChange,
+  onGrowthSpeedBlur,
   onFocus,
 }: WeightInputGroupProps) => {
   // 格式化最小重量显示（保留2位小数，去除末尾0）
@@ -62,10 +69,16 @@ export const WeightInputGroup = ({
   
   const weightValue = weight === '' ? null : parseFloat(weight) || null
   const percentageValue = percentage === '' ? null : parseFloat(percentage) || null
+  const growthSpeedValue = growthSpeed === '' ? null : parseFloat(growthSpeed) || null
   
-  // 计算预计生长时间
+  // 生长速度 = 生长耗时的 1%，单位秒。故 生长耗时 = 用户填了生长速度 ? 生长速度×100 : 重量×crop.growthSpeed
   const weightNum = parseFloat(weight) || 0
-  const growthTimeSeconds = weightNum > 0 ? weightNum * crop.growthSpeed : 0
+  const growthTimeSeconds =
+    growthSpeedValue != null && growthSpeedValue > 0
+      ? growthSpeedValue * 100
+      : weightNum > 0 && crop.growthSpeed > 0
+        ? weightNum * crop.growthSpeed
+        : 0
   const formattedGrowthTime = growthTimeSeconds > 0 ? formatGrowthTime(growthTimeSeconds) : ''
 
   return (
@@ -136,6 +149,33 @@ export const WeightInputGroup = ({
                 fontWeight={700}
                 textAlign="left"
               >
+                生长速度
+              </SVGText>
+            </label>
+            <InputNumber
+              className="input-field"
+              value={growthSpeedValue}
+              onChange={onGrowthSpeedChange}
+              onBlur={onGrowthSpeedBlur}
+              onFocus={onFocus}
+              placeholder={weightNum > 0 ? `${(weightNum * crop.growthSpeed * 0.01).toFixed(2)}` : '秒 / 百分比'}
+              min={0}
+              step={0.1}
+              precision={2}
+              readOnly={calculationMode === 'price'}
+              controls={false}
+            />
+          </div>
+          <div className="input-group-row">
+            <label className="input-label">
+              <SVGText
+                fillColor="#843100"
+                strokeColor="#fff"
+                strokeWidth={2}
+                fontSize={14}
+                fontWeight={700}
+                textAlign="left"
+              >
                 生长耗时
               </SVGText>
             </label>
@@ -148,7 +188,7 @@ export const WeightInputGroup = ({
                 fontWeight={600}
                 textAlign="left"
               >
-                {formattedGrowthTime || '--'}
+                {formattedGrowthTime ? formattedGrowthTime : '--'}
               </SVGText>
             </div>
           </div>
