@@ -58,13 +58,13 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     return sorted.slice(0, 4)
   }, [crops, queryCounts, cropOrder])
 
-  // 获取其他作物（排除热门作物的剩余作物，按数据定义顺序倒序展示）
+  // 获取其他作物（排除热门作物的剩余作物，按热度排序）
   const otherCrops = useMemo(() => {
     const hotCropNames = new Set(hotCrops.map(c => c.name))
     return crops
       .filter(crop => !hotCropNames.has(crop.name))
-      .sort((a, b) => (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0))
-  }, [crops, hotCrops, cropOrder])
+      .sort(sortByCountThenQuality)
+  }, [crops, hotCrops, queryCounts, cropOrder])
 
   const orderKey = useMemo(
     () => [...hotCrops, ...otherCrops].map(c => c.name).join(','),
@@ -183,8 +183,6 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
     const count =
       rawCount >= 10000 ? `${(rawCount / 10000).toFixed(1)}万` : rawCount
     const heatColor = getHeatColor(rawCount)
-    // 只有热度最高的前4个作物才显示热度值
-    const isHotCrop = hotCrops.some(hotCrop => hotCrop.name === crop.name)
     
     return (
       <div
@@ -194,7 +192,7 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         onClick={() => onSelectCrop(crop)}
       >
         <div className="crop-item-image-wrapper">
-          {rawCount > 0 && isHotCrop && (
+          {rawCount > 0 && (
             <div 
               className="crop-item-count"
               style={{ 

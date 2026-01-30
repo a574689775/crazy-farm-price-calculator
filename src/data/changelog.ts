@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.7.1',
+    date: '2026.1.30',
+    items: [
+      '恢复作物排序规则，热度移动到左上角展示',
+    ],
+  },
+  {
     version: 'V4.7.0',
     date: '2026.1.30',
     items: [

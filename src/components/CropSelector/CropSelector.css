@@ -183,7 +183,7 @@
 .crop-item-count {
   position: absolute;
   top: -4px;
-  right: -8px;
+  left: -4px;
   padding: 2px 4px 3px;
   border-radius: 999px;
   background: #fff;
