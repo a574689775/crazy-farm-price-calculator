@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.11.2',
+    date: '2026.2.3',
+    items: [
+      '更新月核树、液光藤生长速度',
+    ],
+  },
+  {
     version: 'V4.11.1',
     date: '2026.2.3',
     items: [
