@@ -25,23 +25,6 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
   const [shakeCrops, setShakeCrops] = useState<Set<string>>(new Set())
   const shakeTimersRef = useRef(new Map<string, number>())
 
-  // 根据视口宽度计算每行列数（与 CSS 断点一致：<480 为 4，480–640 为 5，>640 为 6）
-  const [columns, setColumns] = useState(() => {
-    const w = typeof window !== 'undefined' ? window.innerWidth : 375
-    if (w < 480) return 4
-    if (w <= 640) return 5
-    return 6
-  })
-  useEffect(() => {
-    const onResize = () => {
-      const w = window.innerWidth
-      setColumns(w < 480 ? 4 : w <= 640 ? 5 : 6)
-    }
-    window.addEventListener('resize', onResize)
-    onResize()
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
   // 数据文件中的顺序即品质优先级（索引越小品质越高）
   const cropOrder = useMemo(() => new Map(crops.map((crop, index) => [crop.name, index])), [crops])
 
@@ -70,23 +53,17 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
   const sortByCountThenQuality = (a: CropConfig, b: CropConfig) => {
     const countDiff = (queryCounts[b.name] ?? 0) - (queryCounts[a.name] ?? 0)
     if (countDiff !== 0) return countDiff
-    // 品质高（原数据顺序靠前）排前
     return (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0)
   }
 
-  // 获取热门作物（查询量最多的前 N 个，N = 当前每行列数，占满第一行）
-  const hotCrops = useMemo(() => {
-    const sorted = [...crops].sort(sortByCountThenQuality)
-    return sorted.slice(0, columns)
-  }, [crops, queryCounts, cropOrder, columns])
+  // 月球作物、普通作物分开，各自按热度排序
+  const moonCrops = useMemo(() => {
+    return crops.filter(c => c.type === '月球').sort(sortByCountThenQuality)
+  }, [crops, queryCounts, cropOrder])
 
-  // 获取其他作物（排除热门作物的剩余作物，按热度排序）
-  const otherCrops = useMemo(() => {
-    const hotCropNames = new Set(hotCrops.map(c => c.name))
-    return crops
-      .filter(crop => !hotCropNames.has(crop.name))
-      .sort(sortByCountThenQuality)
-  }, [crops, hotCrops, queryCounts, cropOrder])
+  const normalCrops = useMemo(() => {
+    return crops.filter(c => c.type === '普通').sort(sortByCountThenQuality)
+  }, [crops, queryCounts, cropOrder])
 
   // 谁的热度变了，那个热度标签抖一抖
   useEffect(() => {
@@ -126,8 +103,8 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
   }, [])
 
   const orderKey = useMemo(
-    () => [...hotCrops, ...otherCrops].map(c => c.name).join(','),
-    [hotCrops, otherCrops]
+    () => [...moonCrops, ...normalCrops].map(c => c.name).join(','),
+    [moonCrops, normalCrops]
   )
 
   // FLIP 动画：仅在排序变化时触发，避免无关抖动
@@ -292,24 +269,26 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         </SVGText>
       </div>
       <div className="crop-selector-content">
-        {/* 热门作物 */}
+        {/* 月球作物 */}
         <div className="champion-section">
           <div className="champion-title-row">
-            <div className="champion-title">热门作物：</div>
+            <div className="champion-title">月球作物：</div>
             <GradientButton onClick={onShowHistory}>
               <ClockCircleOutlined style={{ marginRight: '4px', color: '#000' }} />
               计算历史
             </GradientButton>
           </div>
           <div className="champion-grid">
-            {hotCrops.map(renderCropItem)}
+            {moonCrops.map(renderCropItem)}
           </div>
           <div className="champion-divider"></div>
         </div>
 
-        {/* 其他作物 */}
-        <div className="crop-grid">
-          {otherCrops.map(renderCropItem)}
+        {/* 普通作物 */}
+        <div className="champion-section">
+          <div className="champion-grid">
+            {normalCrops.map(renderCropItem)}
+          </div>
         </div>
       </div>
     </div>

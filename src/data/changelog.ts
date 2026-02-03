@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V4.11.0',
+    date: '2026.2.3',
+    items: [
+      '增加月核树、液光藤月球作物',
+      '调整月球作物排序规则，月球作物单独分类',
+    ],
+  },
+  {
     version: 'V4.10.1',
     date: '2026.1.30',
     items: [
