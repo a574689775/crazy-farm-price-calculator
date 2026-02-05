@@ -22,7 +22,13 @@ interface PrefillData {
 const isAllowedDomain = (): boolean => {
   if (typeof window === 'undefined') return true
   const h = window.location.hostname
-  return h === ALLOWED_HOST || h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0'
+  return (
+    h === ALLOWED_HOST ||
+    h === `www.${ALLOWED_HOST}` ||
+    h === 'localhost' ||
+    h === '127.0.0.1' ||
+    h === '0.0.0.0'
+  )
 }
 
 export const App = () => {
