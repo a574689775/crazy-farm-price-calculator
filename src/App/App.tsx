@@ -298,16 +298,12 @@ export const App = () => {
     )
   }
 
-  // 如果未登录，显示登录页
+  // 如果未登录，显示登录页（不展示备案号/公安号）
   if (!isAuthenticated) {
     return (
       <div className="app">
         <main className="main main-login">
           <Login onLoginSuccess={handleLoginSuccess} />
-          <div className="footer-beian">
-            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">冀ICP备2024055698号-3</a>
-            <a href="https://beian.mps.gov.cn/" target="_blank" rel="noopener noreferrer">京公网安备11040102700068号</a>
-          </div>
         </main>
       </div>
     )
@@ -331,10 +327,6 @@ export const App = () => {
                 queryCounts={todayQueryCounts}
               />
               <Footer />
-              <div className="footer-beian">
-                {/* <a href="https://beian.mps.gov.cn/" target="_blank" rel="noopener noreferrer">京公网安备11040102700068号</a> */}
-                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">冀ICP备2024055698号-3</a>
-              </div>
             </div>
             
             {/* 历史记录页面 - 始终渲染，通过transform控制位置 */}

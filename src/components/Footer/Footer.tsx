@@ -108,6 +108,10 @@ export const Footer = ({ hideSignOut = false }: FooterProps) => {
           </div>
         </div>
       </footer>
+      <div className="footer-beian">
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">冀ICP备2024055698号-3</a>
+        {/* <a href="https://beian.mps.gov.cn/" target="_blank" rel="noopener noreferrer">京公网安备11040102700068号</a> */}
+      </div>
 
       {/* 更新日志模态框 */}
       <Modal

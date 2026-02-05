@@ -126,11 +126,6 @@
   min-height: 0;
 }
 
-.main-login > .footer-beian {
-  flex-shrink: 0;
-  margin-bottom: 12px;
-}
-
 /* 只给计算器和历史记录页面添加 padding，不影响选择页面 */
 .page-calculator,
 .page-history {
@@ -212,28 +207,6 @@
 /* 当计算器激活时，从右侧滑到左侧可见 */
 .page-calculator.active {
   transform: translateX(0);
-}
-
-/* 选择作物页面底部备案号（在 Footer 下方，距 footer 10px，两链接间距 8px） */
-.footer-beian {
-  flex-shrink: 0;
-  text-align: center;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.footer-beian a {
-  font-size: 12px;
-  color: #a35d15;
-  text-decoration: none;
-}
-
-.footer-beian a:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 768px) {

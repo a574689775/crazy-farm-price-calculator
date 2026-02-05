@@ -6,12 +6,29 @@ import { Toast } from '../PriceCalculator/Toast'
 import { Footer } from '../Footer'
 import './Login.css'
 
+const LOGIN_EMAIL_KEY = 'crazy-farm-login-email'
+
+function getStoredEmail(): string {
+  try {
+    return localStorage.getItem(LOGIN_EMAIL_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+function setStoredEmail(value: string) {
+  try {
+    if (value) localStorage.setItem(LOGIN_EMAIL_KEY, value)
+    else localStorage.removeItem(LOGIN_EMAIL_KEY)
+  } catch {}
+}
+
 interface LoginProps {
   onLoginSuccess: () => void
 }
 
 export const Login = ({ onLoginSuccess }: LoginProps) => {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(getStoredEmail)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
@@ -119,10 +136,12 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
         setShowToast(true)
         setTimeout(() => {
           setShowToast(false)
+          setStoredEmail(email)
           onLoginSuccess()
         }, 1500)
       } else {
         await signIn(email, password)
+        setStoredEmail(email)
         onLoginSuccess()
       }
     } catch (err: any) {
@@ -211,6 +230,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
       setShowToast(true)
       setTimeout(() => {
         setShowToast(false)
+        setStoredEmail(email)
         onLoginSuccess()
       }, 1500)
     } catch (err: any) {

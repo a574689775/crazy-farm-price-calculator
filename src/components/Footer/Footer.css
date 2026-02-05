@@ -52,6 +52,28 @@
   opacity: 0.6;
 }
 
+/* 备案号、公安号（在 Footer 下方，距 footer 10px，两链接间距 8px） */
+.footer-beian {
+  flex-shrink: 0;
+  text-align: center;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-beian a {
+  font-size: 12px;
+  color: #a35d15;
+  text-decoration: none;
+}
+
+.footer-beian a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .footer {
     padding: 0.75rem 1rem;

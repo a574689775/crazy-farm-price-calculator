@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V5.0.1',
+    date: '2026.2.5',
+    items: [
+      '修复登录页意外展示网备公安号的bug',
+      '添加保存账号到本地的功能，避免每次登录重复输入账号'
+    ],
+  },
+  {
     version: 'V5.0.0',
     date: '2026.2.5',
     items: [
