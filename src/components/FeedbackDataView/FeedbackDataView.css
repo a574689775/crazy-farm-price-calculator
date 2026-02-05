@@ -239,6 +239,28 @@
   white-space: nowrap;
 }
 
+.feedback-th-accuracy {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feedback-sort-btn {
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1;
+  background: rgba(132, 49, 0, 0.12);
+  border: 1px solid rgba(132, 49, 0, 0.3);
+  border-radius: 4px;
+  color: rgba(132, 49, 0, 1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.feedback-sort-btn:hover {
+  background: rgba(132, 49, 0, 0.2);
+}
+
 .feedback-data-table td {
   padding: 10px 12px;
   color: rgba(132, 49, 0, 1);
