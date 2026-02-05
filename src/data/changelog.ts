@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V5.0.0',
+    date: '2026.2.5',
+    items: [
+      '域名全面切换至fknc.top',
+    ],
+  },
+  {
     version: 'V4.12.1',
     date: '2026.2.4',
     items: [

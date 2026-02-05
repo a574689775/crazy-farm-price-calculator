@@ -17,6 +17,73 @@
   color-scheme: only light;
 }
 
+/* 非 fknc.top 域名时的全屏提醒（域名迁移通知） */
+.app.domain-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.domain-reminder__card {
+  max-width: 420px;
+  width: 100%;
+  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 8px 32px rgba(132, 49, 0, 0.2);
+  border: 2px solid rgba(225, 152, 89, 0.6);
+  text-align: left;
+}
+
+.domain-reminder__title {
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #843100;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.domain-reminder__para {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b2d00;
+  line-height: 1.65;
+}
+
+.domain-reminder__para:last-of-type {
+  margin-bottom: 20px;
+}
+
+.domain-reminder__cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.domain-reminder__cta-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #843100;
+}
+
+.domain-reminder__link {
+  font-size: 16px;
+  font-weight: 600;
+  color: #a35d15;
+  text-decoration: underline;
+  transition: color 0.15s;
+}
+
+.domain-reminder__link:hover {
+  color: #c45c26;
+}
+
 /* 强制覆盖暗色模式 */
 @media (prefers-color-scheme: dark) {
   .app {
@@ -46,6 +113,22 @@
 .main.feedback-mode {
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* 登录页：main 为 flex 列，备案块在底部，样式与选择页一致 */
+.main-login {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-login > *:first-child {
+  flex: 1;
+  min-height: 0;
+}
+
+.main-login > .footer-beian {
+  flex-shrink: 0;
+  margin-bottom: 12px;
 }
 
 /* 只给计算器和历史记录页面添加 padding，不影响选择页面 */
@@ -131,6 +214,27 @@
   transform: translateX(0);
 }
 
+/* 选择作物页面底部备案号（在 Footer 下方，距 footer 10px，两链接间距 8px） */
+.footer-beian {
+  flex-shrink: 0;
+  text-align: center;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footer-beian a {
+  font-size: 12px;
+  color: #a35d15;
+  text-decoration: none;
+}
+
+.footer-beian a:hover {
+  text-decoration: underline;
+}
 
 @media (max-width: 768px) {
   .app {
