@@ -1,12 +1,32 @@
 # 🌾 疯狂农场价格计算器
 
-一个简单的 React 价格计算器 demo，用于测试 GitHub Pages 功能。
+专为《蛋仔派对》疯狂农场玩法设计的在线价格计算工具。支持月球作物与普通作物，根据重量、品质与突变自动计算作物价格，支持计算历史、价格反馈与基数校准。
+
+**访问地址**：https://fknc.top
+
+---
 
 ## ✨ 功能
 
-- 选择不同农产品的数量
-- 实时计算总价
-- 响应式设计，支持移动端
+- **作物选择**：月球作物 / 普通作物分类展示，按热度分别排序
+- **价格计算**：按重量、品质（银/金/水晶/流光）及天气/异形突变计算价格；支持按价格反推重量
+- **计算历史**：保存与查看历史记录，支持从历史快速回填
+- **分享**：生成分享链接，他人打开可复现当前作物与配置
+- **价格反馈**：用户可标记计算是否准确并填写实际价格，用于校准基数
+- **反馈数据页**（需登录）：查看反馈列表、按作物筛选；支持「自动计算最优基数」（加权中位数使误差和最小），可手动调整基数并查看调整后误差与准确率，支持按准确率排序
+- **登录与账号**：邮箱登录/注册，支持验证码；登录后账号自动保存到本地
+- **备案信息**：页脚展示 ICP 与公安备案号
+
+---
+
+## 🛠️ 技术栈
+
+- **前端**：React 18、TypeScript、Vite
+- **UI**：Ant Design、自研组件（SVG 标题、渐变按钮等）
+- **后端/数据**：Supabase（认证、价格反馈表、作物每日统计、Realtime 热度推送）
+- **包管理**：pnpm
+
+---
 
 ## 🚀 本地开发
 
@@ -19,55 +39,30 @@ pnpm install
 ### 启动开发服务器
 
 ```bash
-pnpm run dev
+pnpm dev
 ```
 
-访问 http://localhost:5173 查看应用
+浏览器访问 http://localhost:5173。  
+本地环境不会上报作物查询统计；如需联调 Supabase，请配置好环境或使用线上接口。
 
 ### 构建生产版本
 
 ```bash
-pnpm run build
+pnpm build
 ```
+
+产物在 `dist/`，可交给 Nginx 等静态托管。
+
+---
 
 ## 📦 部署
 
-### 部署到服务器（推荐 - 国内可访问）
+- **推荐**：部署到自己的服务器（国内访问更稳定），通过 GitHub Actions 在 push 时自动构建并部署。
+- **GitHub Pages**：可启用仓库的 GitHub Actions 构建，将 `dist` 部署到 Pages；国内访问可能不稳定。
 
-使用 GitHub Actions 自动部署到自己的服务器，通过 IP 访问。
+生产环境请使用域名 **fknc.top**（或 www.fknc.top），其他域名会展示「域名迁移」提示页。
 
-**快速开始**：查看 [快速部署指南](./docs/QUICK_START.md)
-
-**详细文档**：查看 [完整部署指南](./docs/DEPLOY_SERVER.md)
-
-主要步骤：
-1. 购买服务器（阿里云/腾讯云/Vultr 等）
-2. 配置服务器环境（安装 Nginx）
-3. 配置 GitHub Secrets（SSH 密钥、服务器信息）
-4. 推送代码自动部署
-
-### 部署到 GitHub Pages
-
-1. 确保你的仓库名称是 `crazy-farm-price-calculator`
-2. 如果仓库名称不同，请修改 `package.json` 中的 `homepage` 字段和 `vite.config.ts` 中的 `base` 字段
-3. 在 GitHub 仓库设置中启用 Pages：
-   - 进入仓库 Settings → Pages
-   - Source 选择 "GitHub Actions"
-4. 推送代码到 `main` 分支，GitHub Actions 会自动构建并部署
-
-**注意**：GitHub Pages 在国内可能无法访问，建议使用服务器部署。
-
-## 🔗 访问地址
-
-- **服务器部署**：`http://你的服务器IP`
-- **GitHub Pages**：`https://a574689775.github.io/crazy-farm-price-calculator/`
-
-## 🛠️ 技术栈
-
-- React 18
-- Vite
-- pnpm
-- CSS3
+---
 
 ## 📝 许可证
 

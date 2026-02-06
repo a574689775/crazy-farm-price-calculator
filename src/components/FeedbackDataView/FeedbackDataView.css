@@ -70,6 +70,19 @@
   background: rgba(132, 49, 0, 0.2);
 }
 
+.feedback-clear-filter:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedback-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .feedback-data-display {
   background: rgba(255, 252, 239, 1);
   border: 4px solid rgba(255, 212, 176, 1);
@@ -175,6 +188,18 @@
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
+}
+
+.feedback-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 32px;
+}
+
+.feedback-stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .feedback-stat-item {
@@ -423,6 +448,10 @@
     gap: 12px;
   }
 
+  .feedback-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
   .feedback-data-table-wrapper {
     overflow-x: scroll;
     -webkit-overflow-scrolling: touch;
@@ -437,5 +466,89 @@
   .feedback-data-table td {
     padding: 8px 6px;
   }
+}
+
+/* 一键计算全部最优基数 - 结果弹窗（突破默认 modal 最大宽度） */
+.feedback-batch-modal-content {
+  max-width: 92vw;
+  width: 92vw;
+}
+
+.feedback-batch-result {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.feedback-batch-empty {
+  margin: 0;
+  color: rgba(132, 49, 0, 0.7);
+  font-size: 14px;
+}
+
+.feedback-batch-copy-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.feedback-batch-copy-ok {
+  font-size: 13px;
+  color: #0a7c42;
+  font-weight: 600;
+}
+
+.feedback-batch-copy {
+  padding: 8px 14px;
+  background: rgba(132, 49, 0, 0.1);
+  border: 2px solid rgba(132, 49, 0, 0.3);
+  border-radius: 6px;
+  color: rgba(132, 49, 0, 1);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feedback-batch-copy:hover {
+  background: rgba(132, 49, 0, 0.2);
+}
+
+/* 表格内准确率/误差变化列红绿样式，需高于 .feedback-batch-table td 的 color */
+.feedback-batch-table td.feedback-batch-acc-up {
+  color: #0a7c42;
+  font-weight: 600;
+}
+
+.feedback-batch-table td.feedback-batch-acc-down {
+  color: #c23030;
+  font-weight: 600;
+}
+
+.feedback-batch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.feedback-batch-table th,
+.feedback-batch-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 212, 176, 0.5);
+  color: rgba(132, 49, 0, 1);
+}
+
+.feedback-batch-table th {
+  font-weight: 700;
+  background: rgba(255, 212, 176);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 0 rgba(255, 212, 176, 0.5);
+}
+
+.feedback-batch-table tbody tr:hover {
+  background: rgba(255, 212, 176, 0.1);
 }
 

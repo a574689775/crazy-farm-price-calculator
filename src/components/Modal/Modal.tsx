@@ -9,9 +9,11 @@ interface ModalProps {
   title?: string
   children: ReactNode
   onBack?: () => void
+  /** 可选：给 modal 内容容器追加的 class，用于覆盖宽度等样式 */
+  contentClassName?: string
 }
 
-export const Modal = ({ isOpen, onClose, title, children, onBack }: ModalProps) => {
+export const Modal = ({ isOpen, onClose, title, children, onBack, contentClassName }: ModalProps) => {
   const [isAnimating, setIsAnimating] = useState(false)
   const [shouldRender, setShouldRender] = useState(false)
 
@@ -54,7 +56,7 @@ export const Modal = ({ isOpen, onClose, title, children, onBack }: ModalProps) 
       onClick={onClose}
     >
       <div 
-        className={`modal-content ${contentClass}`}
+        className={`modal-content ${contentClass}${contentClassName ? ` ${contentClassName}` : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (

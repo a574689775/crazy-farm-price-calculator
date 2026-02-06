@@ -52,9 +52,9 @@ export const calculatePrice = (
  * 格式化价格
  * 输入单位：元（原始计算结果）
  * 逻辑：
- *  - >= 1亿：转为“亿”
- *  - >= 1万：转为“万”
- *  - 其他：保留元，四舍五入到整数或2位小数
+ *  - >= 1亿：转为“亿”，保留 2 位小数
+ *  - >= 1万：转为“万”，保留 2 位小数
+ *  - < 1万：单位为元，四舍五入保留个位数（整数）
  */
 export const formatPrice = (price: number): string => {
   const WAN = 10_000
@@ -70,8 +70,8 @@ export const formatPrice = (price: number): string => {
     return val % 1 === 0 ? `${val}万` : `${val.toFixed(2)}万`
   }
 
-  // < 1万：显示纯数字（不带单位）
-  return price % 1 === 0 ? `${price}` : `${price.toFixed(2)}`
+  // < 1万：元，四舍五入保留个位数
+  return `${Math.round(price)}`
 }
 
 /**
@@ -123,6 +123,16 @@ export const convertToYuan = (value: number, unit: '元' | '万' | '亿'): numbe
     return value * 10_000
   }
   return value
+}
+
+/**
+ * 将价格按显示单位四舍五入后转成元（与 formatPrice 规则一致）
+ * 用于误差计算：计算值四舍五入到单位，再与实际价格比较
+ */
+export const roundedPriceToYuan = (price: number): number => {
+  const formatted = formatPrice(price)
+  const { value, unit } = parseFormattedPrice(formatted)
+  return convertToYuan(value, unit)
 }
 
 /**
