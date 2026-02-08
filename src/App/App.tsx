@@ -437,7 +437,7 @@ export const App = () => {
         title="今日免费次数已用完"
       >
         <div className="modal-text">
-          <p>开通会员可无限查询，支持周卡 0.99 元、月卡 1.99 元、季卡 4.99 元、年卡 9.99 元。</p>
+          <p>开通会员可无限查询，支持日卡 0.19 元、周卡 0.99 元、月卡 1.99 元、季卡 4.99 元、年卡 9.99 元、三年 19.9 元。</p>
           <button
             type="button"
             className="paywall-cta-button"

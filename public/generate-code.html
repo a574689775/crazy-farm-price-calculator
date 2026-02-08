@@ -49,12 +49,14 @@
   <div class="row">
     <label for="days">有效天数</label>
     <div class="days-row">
-      <input type="number" id="days" min="1" max="3660" value="7" />
+      <input type="number" id="days" min="1" value="7" />
       <div class="quick-days">
+        <button type="button" class="quick-btn" data-days="1">日卡（1 天）</button>
         <button type="button" class="quick-btn" data-days="7">周卡（7 天）</button>
         <button type="button" class="quick-btn" data-days="30">月卡（30 天）</button>
         <button type="button" class="quick-btn" data-days="90">季卡（90 天）</button>
         <button type="button" class="quick-btn" data-days="365">年卡（365 天）</button>
+        <button type="button" class="quick-btn" data-days="1095">三年（1095 天）</button>
       </div>
     </div>
     <div class="hint">可填具体天数，或点上方快捷选项。</div>
@@ -139,11 +141,11 @@
         outEl.textContent = '请粘贴完整的私钥 PEM（含 -----BEGIN PRIVATE KEY-----）'
         return
       }
-      if (days < 1 || days > 3660) {
+      if (days < 1) {
         outWrap.style.display = 'block'
         copyBtn.style.display = 'none'
         outEl.className = 'out err'
-        outEl.textContent = '有效天数请填 1～3660'
+        outEl.textContent = '有效天数请填至少 1 天'
         return
       }
       try {

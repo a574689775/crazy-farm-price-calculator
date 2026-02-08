@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.2.1',
+    date: '2026.2.8',
+    items: [
+      '增加日卡、三年卡选项',
+    ],
+  },
+  {
     version: 'V6.2.0',
     date: '2026.2.8',
     items: [

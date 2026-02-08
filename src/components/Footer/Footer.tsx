@@ -301,7 +301,15 @@ export const Footer = ({
             </div>
           )}
           <div className="modal-text subscription-plans">
-            <p className="subscription-plans-title">周卡 0.99 元 / 月卡 1.99 元 / 季卡 4.99 元 / 年卡 9.99 元</p>
+            <p className="subscription-plans-title">会员档位与价格</p>
+            <ul className="subscription-plans-list">
+              <li><span className="subscription-plan-name">日卡</span><span className="subscription-plan-price">0.19 元</span></li>
+              <li><span className="subscription-plan-name">周卡</span><span className="subscription-plan-price">0.99 元</span></li>
+              <li><span className="subscription-plan-name">月卡</span><span className="subscription-plan-price">1.99 元</span></li>
+              <li><span className="subscription-plan-name">季卡</span><span className="subscription-plan-price">4.99 元</span></li>
+              <li><span className="subscription-plan-name">年卡</span><span className="subscription-plan-price">9.99 元</span></li>
+              <li><span className="subscription-plan-name">三年</span><span className="subscription-plan-price">19.9 元</span></li>
+            </ul>
             <a href="https://pay.ldxp.cn/shop/TX7BUFYY/cb2cs2" target="_blank" rel="noopener noreferrer" className="subscription-plan-btn subscription-plan-btn-single">
               去购买 →
             </a>
