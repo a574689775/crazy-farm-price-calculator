@@ -48,6 +48,11 @@ export const Footer = ({
 
   const subscriptionActive = subscriptionState?.isActive ?? false
   const subscriptionEnd = subscriptionState?.subscriptionEndAt ?? null
+  // 剩余天数（仅当已过期时为 0，未过期为大于 0 的整数）
+  const subscriptionDaysLeft =
+    subscriptionEnd != null
+      ? Math.max(0, Math.ceil((subscriptionEnd - Date.now()) / (24 * 60 * 60 * 1000)))
+      : null
 
   const handleBackToOptions = () => {
     setShowContactQRCode(false)
@@ -113,6 +118,7 @@ export const Footer = ({
         setActivationCode('')
         setActivationError('')
         onSubscriptionActivated?.()
+        setShowSubscriptionModal(false)
       } else {
         setActivationError(error || '激活失败')
       }
@@ -147,7 +153,7 @@ export const Footer = ({
             </div>
             {!hideSubscription && (
               <div className="footer-link" onClick={() => setShowSubscriptionModal(true)}>
-                {subscriptionActive ? '会员' : '开通会员'}
+                {subscriptionActive ? '续费会员' : '开通会员'}
               </div>
             )}
             <div className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
@@ -272,7 +278,7 @@ export const Footer = ({
       {/* Toast 提示 */}
       {showToast && <Toast message="反馈成功！感谢您的反馈" />}
 
-      {/* 会员 / 激活码模态框 */}
+      {/* 会员 / 续费 / 激活码模态框 */}
       <Modal
         isOpen={showSubscriptionModal}
         onClose={() => {
@@ -280,46 +286,52 @@ export const Footer = ({
           setActivationCode('')
           setActivationError('')
         }}
-        title={subscriptionActive ? '会员' : '开通会员'}
+        title={subscriptionActive ? '续费会员' : '开通会员'}
       >
-        {subscriptionActive ? (
-          <div className="modal-text subscription-status">
-            <p>会员有效期至：<strong>{subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : '--'}</strong></p>
-            <p className="subscription-tip">会员状态已同步到账号，换设备登录同一账号即可。</p>
-          </div>
-        ) : (
-          <div className="subscription-modal-content">
-            <div className="modal-text subscription-plans">
-              <p className="subscription-plans-title">周卡 0.99 元 / 月卡 1.99 元 / 季卡 4.99 元 / 年卡 9.99 元</p>
-              <a href="https://pay.ldxp.cn/shop/TX7BUFYY/cb2cs2" target="_blank" rel="noopener noreferrer" className="subscription-plan-btn subscription-plan-btn-single">
-                去购买 →
-              </a>
-              <p className="subscription-plans-hint">购买后在下方输入激活码即可开通，有效期自激活之日起按档位计算。</p>
+        <div className="subscription-modal-content">
+          {subscriptionActive && subscriptionEnd != null && (
+            <div className="modal-text subscription-status subscription-status-inline">
+              <p>
+                会员有效期至：<strong>{new Date(subscriptionEnd).toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: 'long', day: 'numeric' })}</strong>
+                {subscriptionDaysLeft != null && (
+                  <span className="subscription-days-left">（剩余 {subscriptionDaysLeft} 天）</span>
+                )}
+              </p>
+              <p className="subscription-tip">续费后将在当前到期时间上顺延，不会缩短已有时长。</p>
             </div>
-            <div className="activation-code-form">
-              <input
-                type="text"
-                className="activation-code-input"
-                value={activationCode}
-                onChange={(e) => {
-                  setActivationCode(e.target.value)
-                  setActivationError('')
-                }}
-                placeholder="请输入 CF- 开头的激活码"
-                disabled={activationLoading}
-              />
-              {activationError && <p className="activation-code-error">{activationError}</p>}
-              <button
-                type="button"
-                className="activation-code-submit"
-                onClick={handleActivationSubmit}
-                disabled={activationLoading || !activationCode.trim()}
-              >
-                {activationLoading ? '验证中...' : '激活'}
-              </button>
-            </div>
+          )}
+          <div className="modal-text subscription-plans">
+            <p className="subscription-plans-title">周卡 0.99 元 / 月卡 1.99 元 / 季卡 4.99 元 / 年卡 9.99 元</p>
+            <a href="https://pay.ldxp.cn/shop/TX7BUFYY/cb2cs2" target="_blank" rel="noopener noreferrer" className="subscription-plan-btn subscription-plan-btn-single">
+              去购买 →
+            </a>
+            <p className="subscription-plans-hint">
+              {subscriptionActive ? '购买后在下方输入激活码即可续费，时长将累加至当前到期日之后。' : '购买后在下方输入激活码即可开通，有效期自激活之日起按档位计算。'}
+            </p>
           </div>
-        )}
+          <div className="activation-code-form">
+            <input
+              type="text"
+              className="activation-code-input"
+              value={activationCode}
+              onChange={(e) => {
+                setActivationCode(e.target.value)
+                setActivationError('')
+              }}
+              placeholder="请输入 CF- 开头的激活码"
+              disabled={activationLoading}
+            />
+            {activationError && <p className="activation-code-error">{activationError}</p>}
+            <button
+              type="button"
+              className="activation-code-submit"
+              onClick={handleActivationSubmit}
+              disabled={activationLoading || !activationCode.trim()}
+            >
+              {activationLoading ? '验证中...' : subscriptionActive ? '续费' : '激活'}
+            </button>
+          </div>
+        </div>
       </Modal>
 
       {/* 免责声明模态框 */}

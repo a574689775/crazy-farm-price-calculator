@@ -30,12 +30,12 @@ begin
     return json_build_object('ok', false, 'error', 'code_already_used');
   end if;
 
-  v_new_end := now() + p_days * interval '1 day';
+  -- 续费：在当前到期日之后顺延 p_days 天；若已过期或没有记录则从 now() 起算
   select subscription_end_at into v_current_end from user_subscriptions where user_id = v_user_id;
-  if v_current_end is not null and v_current_end > v_new_end then
-    v_final_end := v_current_end;
+  if v_current_end is not null and v_current_end > now() then
+    v_final_end := v_current_end + p_days * interval '1 day';
   else
-    v_final_end := v_new_end;
+    v_final_end := now() + p_days * interval '1 day';
   end if;
 
   insert into user_subscriptions (user_id, subscription_end_at)

@@ -1,0 +1,12 @@
+-- 与数据库交互统一使用北京时间（Supabase 默认 UTC）
+-- 在需要「今日」日期的 RPC 中，用下面方式取北京时间的日期，与前端 getLocalTodayDate() 一致。
+--
+-- 北京时间的「今天」日期（date 类型，用于与 query_date、daily 等字段比较）：
+--   (now() at time zone 'Asia/Shanghai')::date
+--
+-- 示例（在 use_free_query、按日统计等 RPC 中）：
+--   where user_id = auth.uid()
+--     and query_date = (now() at time zone 'Asia/Shanghai')::date
+--
+-- 若 RPC 需要返回「当前北京时间」的 timestamp：
+--   now() at time zone 'Asia/Shanghai'

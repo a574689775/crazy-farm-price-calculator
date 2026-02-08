@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, FunctionsHttpError } from '@supabase/supabase-js'
 
 // Supabase 配置 - ANON KEY 是安全的，设计用于前端暴露
 // 配合 RLS (Row Level Security) 策略，只允许匿名用户插入数据
@@ -65,15 +65,14 @@ export const deleteFeedback = async (id: number) => {
 // 简单的每作物写入串行队列，避免快速点击导致写入丢失
 const logQueue: Record<string, Promise<unknown>> = {}
 
+/** 与数据库交互统一使用北京时间（Asia/Shanghai） */
+const BEIJING_TZ = 'Asia/Shanghai'
+
 /**
- * 获取本地时区的今日日期字符串（格式：YYYY-MM-DD）
+ * 获取北京时间的今日日期字符串（格式：YYYY-MM-DD），用于 crop_daily_stats.query_date 等
  */
 const getLocalTodayDate = (): string => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return new Date().toLocaleDateString('en-CA', { timeZone: BEIJING_TZ }) // en-CA => YYYY-MM-DD
 }
 
 /**
@@ -342,6 +341,27 @@ export const getMySubscription = async (): Promise<MySubscription> => {
   return { subscriptionEndAt, isActive }
 }
 
+/** 将 Edge Function 返回的 error 码映射为对用户展示的文案 */
+function mapActivationErrorCode(err: string | undefined): string {
+  return err === 'invalid_format' || err === 'invalid_encoding'
+    ? '激活码格式不正确'
+    : err === 'invalid_payload' || err === 'invalid_version_or_exp'
+      ? '激活码内容无效'
+      : err === 'invalid_signature'
+        ? '激活码无效或已被篡改'
+        : err === 'code_already_used'
+          ? '该激活码已被使用'
+          : err === 'missing_code'
+            ? '请输入激活码'
+            : err === 'unauthorized'
+              ? '请先登录'
+              : err === 'server_config'
+                ? '服务未配置，请稍后重试'
+                : err === 'db_error'
+                  ? '写入失败，请重试'
+                  : err || '激活失败'
+}
+
 /**
  * 通过 Edge Function 后端验证激活码并写入会员，无浏览器兼容问题。
  * 需部署 activate-subscription 并设置 ACTIVATION_PUBLIC_KEY（见 scripts/edge-function-activate-subscription.ts）。
@@ -353,6 +373,8 @@ export const activateSubscriptionWithCode = async (activationCode: string): Prom
   const { data, error } = await supabase.functions.invoke('activate-subscription', {
     body: { activation_code: raw },
   })
+
+  // 4xx 时 Supabase 把响应体放在 error 里，需从 error.context 解析出 body 再映射文案
   if (error) {
     const msg = error.message || ''
     if (msg.includes('Failed to send') || msg.includes('fetch') || msg.includes('network')) {
@@ -361,29 +383,23 @@ export const activateSubscriptionWithCode = async (activationCode: string): Prom
         error: '无法连接激活服务，请检查网络后重试。若在 Supabase 已创建 Edge Function「activate-subscription」，请确认已部署且配置了 ACTIVATION_PUBLIC_KEY。',
       }
     }
-    return { ok: false, error: error.message }
+    let errCode: string | undefined
+    if (error instanceof FunctionsHttpError && error.context) {
+      try {
+        const ctx = error.context as { json?: () => Promise<unknown>; body?: string }
+        const body = ctx.json ? await ctx.json() : (typeof ctx.body === 'string' ? JSON.parse(ctx.body) : null)
+        if (body && typeof body === 'object' && typeof (body as { error?: string }).error === 'string') {
+          errCode = (body as { error: string }).error
+        }
+      } catch {
+        // 解析失败则用下面 message
+      }
+    }
+    return { ok: false, error: mapActivationErrorCode(errCode) || msg }
   }
+
   if (data?.ok === true) return { ok: true }
-  const err = data?.error
-  const message =
-    err === 'invalid_format' || err === 'invalid_encoding'
-      ? '激活码格式不正确'
-      : err === 'invalid_payload' || err === 'invalid_version_or_exp'
-        ? '激活码内容无效'
-        : err === 'invalid_signature'
-          ? '激活码无效或已被篡改'
-          : err === 'code_already_used'
-            ? '该激活码已被使用'
-            : err === 'missing_code'
-              ? '请输入激活码'
-              : err === 'unauthorized'
-                ? '请先登录'
-                : err === 'server_config'
-                  ? '服务未配置，请稍后重试'
-                  : err === 'db_error'
-                    ? '写入失败，请重试'
-                    : err || '激活失败'
-  return { ok: false, error: message }
+  return { ok: false, error: mapActivationErrorCode(data?.error) }
 }
 
 // 监听认证状态变化
