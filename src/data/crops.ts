@@ -48,7 +48,7 @@ const rawCrops: CropConfig[] = [
   { name: '月核树', priceCoefficient: 3388.0833, maxWeight: 17, growthSpeed: 460, type: '月球' },
   { name: '液光藤', priceCoefficient: 3518.5141, maxWeight: 20.4, growthSpeed: 520, type: '月球' },
   { name: '幻月花', priceCoefficient: 8368.9716, maxWeight: 23.8, growthSpeed: 1142.5, type: '月球' },
-  { name: '星空玫瑰', priceCoefficient: 33156.5707, maxWeight: 10.2, growthSpeed: 2680, type: '月球' },
+  { name: '星空玫瑰', priceCoefficient: 33156.5707, maxWeight: 10.2, growthSpeed: 2966.6, type: '月球' },
 ]
 
 /**
