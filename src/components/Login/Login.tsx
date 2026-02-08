@@ -528,7 +528,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
         )}
       </div>
 
-      <Footer hideSignOut={true} />
+      <Footer hideSignOut={true} hideSubscription={true} />
 
       {showToast && <Toast message={toastMessage} />}
     </div>

@@ -8,6 +8,8 @@ import './Footer.css'
 
 interface FooterProps {
   hideSignOut?: boolean
+  /** 登录页不显示会员入口，未登录只能先登录 */
+  hideSubscription?: boolean
   /** 由父组件控制会员弹窗时传入 */
   subscriptionModalOpen?: boolean
   onSubscriptionModalChange?: (open: boolean) => void
@@ -19,6 +21,7 @@ interface FooterProps {
 
 export const Footer = ({
   hideSignOut = false,
+  hideSubscription = false,
   subscriptionModalOpen,
   onSubscriptionModalChange,
   subscriptionState,
@@ -142,9 +145,11 @@ export const Footer = ({
             <div className="footer-link" onClick={() => setShowContactModal(true)}>
               联系我们
             </div>
-            <div className="footer-link" onClick={() => setShowSubscriptionModal(true)}>
-              {subscriptionActive ? '会员' : '开通会员'}
-            </div>
+            {!hideSubscription && (
+              <div className="footer-link" onClick={() => setShowSubscriptionModal(true)}>
+                {subscriptionActive ? '会员' : '开通会员'}
+              </div>
+            )}
             <div className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
               免责声明
             </div>

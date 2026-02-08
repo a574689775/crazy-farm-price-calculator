@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.1.1',
+    date: '2026.2.8',
+    items: [
+      '登录页不显示会员入口',
+    ],
+  },
+  {
     version: 'V6.1.0',
     date: '2026.2.8',
     items: [
