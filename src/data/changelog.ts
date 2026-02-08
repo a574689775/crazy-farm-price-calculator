@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.0.1',
+    date: '2026.2.8',
+    items: [
+      '验证会员码兼容旧浏览器',
+    ],
+  },
+  {
     version: 'V6.0.0',
     date: '2026.2.8',
     items: [

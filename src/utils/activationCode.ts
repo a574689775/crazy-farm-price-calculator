@@ -1,7 +1,10 @@
 /**
  * 激活码校验（Ed25519 签名，仅前端验证）
  * 公钥来自 scripts/generate-keypair.cjs 生成后填入，私钥仅用于本地生成脚本，不暴露
+ * 优先使用原生 Web Crypto API，不支持时回退到 @noble/ed25519（兼容旧版/微信等浏览器）
  */
+
+import * as ed25519 from '@noble/ed25519'
 
 // 运行 node scripts/generate-keypair.cjs 后，将输出的「公钥 Base64」替换下面占位符
 // 也可通过环境变量 VITE_ACTIVATION_PUBLIC_KEY 注入（构建时）
@@ -22,13 +25,23 @@ function base64UrlDecode(str: string): Uint8Array {
   return bytes
 }
 
-async function getPublicKey(): Promise<CryptoKey> {
-  if (!PUBLIC_KEY_BASE64 || PUBLIC_KEY_BASE64.includes('REPLACE')) {
-    throw new Error('激活码公钥未配置，无法验证')
-  }
+function isEd25519Unsupported(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err)
+  return /unrecognized|ed25519|algorithm/i.test(msg)
+}
+
+async function verifyWithNative(sigBytes: Uint8Array, payloadBytes: Uint8Array): Promise<boolean> {
   const raw = base64UrlDecode(PUBLIC_KEY_BASE64)
-  const rawCopy = new Uint8Array(raw)
-  return crypto.subtle.importKey('raw', rawCopy.buffer as ArrayBuffer, { name: 'Ed25519' }, false, ['verify'])
+  const rawBuf = raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength) as ArrayBuffer
+  const key = await crypto.subtle.importKey('raw', rawBuf, { name: 'Ed25519' }, false, ['verify'])
+  const sigBuf = sigBytes.buffer.slice(sigBytes.byteOffset, sigBytes.byteOffset + sigBytes.byteLength) as ArrayBuffer
+  const payloadBuf = payloadBytes.buffer.slice(payloadBytes.byteOffset, payloadBytes.byteOffset + payloadBytes.byteLength) as ArrayBuffer
+  return crypto.subtle.verify('Ed25519', key, sigBuf, payloadBuf)
+}
+
+async function verifyWithNoble(sigBytes: Uint8Array, payloadBytes: Uint8Array): Promise<boolean> {
+  const pubKeyBytes = base64UrlDecode(PUBLIC_KEY_BASE64)
+  return ed25519.verifyAsync(sigBytes, payloadBytes, pubKeyBytes)
 }
 
 export interface ActivationResult {
@@ -72,15 +85,24 @@ export async function verifyActivationCode(code: string): Promise<ActivationResu
     return { valid: false, error: '激活码版本不支持或格式无效' }
   }
   const days = Math.floor(payloadObj.days)
-  const key = await getPublicKey()
-  const sigCopy = new Uint8Array(sigBytes)
-  const payloadCopy = new Uint8Array(payloadBytes)
-  const valid = await crypto.subtle.verify(
-    'Ed25519',
-    key,
-    sigCopy as unknown as ArrayBuffer,
-    payloadCopy as unknown as ArrayBuffer
-  )
+  if (!PUBLIC_KEY_BASE64 || PUBLIC_KEY_BASE64.includes('REPLACE')) {
+    return { valid: false, error: '激活码公钥未配置，无法验证' }
+  }
+
+  let valid: boolean
+  try {
+    valid = await verifyWithNative(sigBytes, payloadBytes)
+  } catch (e) {
+    if (isEd25519Unsupported(e)) {
+      try {
+        valid = await verifyWithNoble(sigBytes, payloadBytes)
+      } catch {
+        return { valid: false, error: '激活码验证失败，请更新浏览器后重试' }
+      }
+    } else {
+      throw e
+    }
+  }
   if (!valid) {
     return { valid: false, error: '激活码无效或已被篡改' }
   }
