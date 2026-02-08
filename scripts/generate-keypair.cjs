@@ -3,7 +3,7 @@
  * 运行：node scripts/generate-keypair.cjs
  *
  * 输出：
- * - 公钥（Base64）：复制到 src/utils/activationCode.ts 的 PUBLIC_KEY_BASE64
+ * - 公钥（Base64）：复制到 Supabase Edge Function 的 ACTIVATION_PUBLIC_KEY
  * - 私钥（PEM）：复制到项目根目录 .env 中的 ACTIVATION_PRIVATE_KEY（不要提交 .env）
  */
 
@@ -30,7 +30,7 @@ const publicKeyBase64 = base64url(rawPub)
 const privateKeyPem = privateKey
 
 console.log('========== 请妥善保存，不要泄露 ==========\n')
-console.log('【公钥 Base64】复制到 src/utils/activationCode.ts 的 PUBLIC_KEY_BASE64：')
+console.log('【公钥 Base64】复制到 Supabase Edge Function 的 ACTIVATION_PUBLIC_KEY：')
 console.log(publicKeyBase64)
 console.log('\n【私钥 PEM】复制到项目根目录 .env 文件中（若没有 .env 请新建）：')
 console.log('ACTIVATION_PRIVATE_KEY="' + privateKeyPem.replace(/\n/g, '\\n') + '"')

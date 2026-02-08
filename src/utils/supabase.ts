@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { verifyActivationCode } from '@/utils/activationCode'
 
 // Supabase 配置 - ANON KEY 是安全的，设计用于前端暴露
 // 配合 RLS (Row Level Security) 策略，只允许匿名用户插入数据
@@ -343,47 +342,47 @@ export const getMySubscription = async (): Promise<MySubscription> => {
   return { subscriptionEndAt, isActive }
 }
 
-async function sha256Hex(text: string): Promise<string> {
-  const data = new TextEncoder().encode(text)
-  const buf = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-}
-
 /**
- * 前端验证激活码并写入会员。验证通过后调用 RPC activate_subscription 写入 user_subscriptions。
- * 激活码一次性使用：code_hash 存入 used_activation_codes，重复使用会返回 code_already_used。
- * 需在 Supabase 执行 scripts/sql/used_activation_codes.sql 和 activate_subscription_rpc.sql。
+ * 通过 Edge Function 后端验证激活码并写入会员，无浏览器兼容问题。
+ * 需部署 activate-subscription 并设置 ACTIVATION_PUBLIC_KEY（见 scripts/edge-function-activate-subscription.ts）。
  */
 export const activateSubscriptionWithCode = async (activationCode: string): Promise<{ ok: boolean; error?: string }> => {
   const raw = (activationCode || '').trim()
   if (!raw) return { ok: false, error: '请输入激活码' }
 
-  const result = await verifyActivationCode(raw)
-  if (!result.valid || result.days == null) {
-    return { ok: false, error: result.error ?? '激活码无效' }
-  }
-
-  const codeHash = await sha256Hex(raw)
-  const { data, error } = await supabase.rpc('activate_subscription', {
-    p_code_hash: codeHash,
-    p_days: result.days,
+  const { data, error } = await supabase.functions.invoke('activate-subscription', {
+    body: { activation_code: raw },
   })
   if (error) {
-    if (error.code === 'PGRST202' || error.message?.includes('activate_subscription')) {
-      return { ok: false, error: '请先在 Supabase 创建 activate_subscription RPC 与 used_activation_codes 表' }
+    const msg = error.message || ''
+    if (msg.includes('Failed to send') || msg.includes('fetch') || msg.includes('network')) {
+      return {
+        ok: false,
+        error: '无法连接激活服务，请检查网络后重试。若在 Supabase 已创建 Edge Function「activate-subscription」，请确认已部署且配置了 ACTIVATION_PUBLIC_KEY。',
+      }
     }
     return { ok: false, error: error.message }
   }
   if (data?.ok === true) return { ok: true }
   const err = data?.error
   const message =
-    err === 'code_already_used'
-      ? '该激活码已被使用'
-      : err === 'unauthorized'
-        ? '请先登录'
-        : err ?? '激活失败'
+    err === 'invalid_format' || err === 'invalid_encoding'
+      ? '激活码格式不正确'
+      : err === 'invalid_payload' || err === 'invalid_version_or_exp'
+        ? '激活码内容无效'
+        : err === 'invalid_signature'
+          ? '激活码无效或已被篡改'
+          : err === 'code_already_used'
+            ? '该激活码已被使用'
+            : err === 'missing_code'
+              ? '请输入激活码'
+              : err === 'unauthorized'
+                ? '请先登录'
+                : err === 'server_config'
+                  ? '服务未配置，请稍后重试'
+                  : err === 'db_error'
+                    ? '写入失败，请重试'
+                    : err || '激活失败'
   return { ok: false, error: message }
 }
 

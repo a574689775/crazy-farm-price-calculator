@@ -155,7 +155,11 @@
           false,
           ['sign']
         )
-        const payload = JSON.stringify({ days: days, v: 2 })
+        // 加入随机 nonce，保证同一档位每次生成不同的码（避免“已被使用”）
+        const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('')
+        const payload = JSON.stringify({ days: days, v: 2, n: nonce })
         const payloadBytes = new TextEncoder().encode(payload)
         const sig = await crypto.subtle.sign('Ed25519', key, payloadBytes)
         const code = 'CF-' + base64url(payloadBytes) + '.' + base64url(sig)

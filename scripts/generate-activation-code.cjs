@@ -56,7 +56,8 @@ const privateKey = crypto.createPrivateKey({
   type: 'pkcs8',
 })
 
-const payload = JSON.stringify({ days, v: 2 })
+const nonce = crypto.randomBytes(16).toString('hex')
+const payload = JSON.stringify({ days, v: 2, n: nonce })
 const payloadBuffer = Buffer.from(payload, 'utf-8')
 
 const signature = crypto.sign(null, payloadBuffer, privateKey)

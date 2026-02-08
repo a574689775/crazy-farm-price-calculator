@@ -2,7 +2,6 @@ lockfileVersion: 5.4
 
 specifiers:
   '@ant-design/icons': ^6.1.0
-  '@noble/ed25519': ^2.1.0
   '@supabase/supabase-js': ^2.90.1
   '@types/node': ^20.10.6
   '@types/react': ^18.2.43
@@ -17,7 +16,6 @@ specifiers:
 
 dependencies:
   '@ant-design/icons': 6.1.0_nnrd3gsncyragczmpvfhocinkq
-  '@noble/ed25519': 2.3.0
   '@supabase/supabase-js': 2.90.1
   antd: 6.2.0_nnrd3gsncyragczmpvfhocinkq
   react: 18.3.1
@@ -533,10 +531,6 @@ packages:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
     dev: true
-
-  /@noble/ed25519/2.3.0:
-    resolution: {integrity: sha512-M7dvXL2B92/M7dw9+gzuydL8qn/jiqNHaoR3Q+cb1q1GHV7uwE17WCyFMG+Y+TZb5izcaXk5TdJRrDUxHXL78A==}
-    dev: false
 
   /@rc-component/async-validator/5.1.0:
     resolution: {integrity: sha512-n4HcR5siNUXRX23nDizbZBQPO0ZM/5oTtmKZ6/eqL0L2bo747cklFdZGRN2f+c9qWGICwDzrhW0H7tE9PptdcA==}

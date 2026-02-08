@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.1.0',
+    date: '2026.2.8',
+    items: [
+      '后端验证激活码，解决浏览器兼容问题',
+    ],
+  },
+  {
     version: 'V6.0.1',
     date: '2026.2.8',
     items: [
