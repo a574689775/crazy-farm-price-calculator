@@ -11,6 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
+
+# 批量生成的卡密（勿提交）
+周卡.txt
+月卡.txt
+季卡.txt
+年卡.txt
 
 # Editor directories and files
 .vscode/*

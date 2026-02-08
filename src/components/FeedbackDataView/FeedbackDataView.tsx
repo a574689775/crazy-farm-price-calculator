@@ -67,12 +67,6 @@ export const FeedbackDataView = () => {
         throw fetchError
       }
 
-      console.log('Query result:', { 
-        dataLength: data?.length, 
-        error: fetchError,
-        cropName
-      })
-
       setFeedbackData(data || [])
     } catch (err: any) {
       console.error('Error fetching feedback data:', err)

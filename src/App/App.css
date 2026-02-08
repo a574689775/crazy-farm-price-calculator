@@ -209,6 +209,28 @@
   transform: translateX(0);
 }
 
+/* 免费次数用尽弹窗中的「开通会员」按钮 */
+.paywall-cta-button {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 12px 20px;
+  background: rgba(132, 49, 0, 1);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.paywall-cta-button:hover {
+  opacity: 0.9;
+}
+.paywall-cta-button:active {
+  opacity: 0.8;
+}
+
 @media (max-width: 768px) {
   .app {
     height: 100dvh;

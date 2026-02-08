@@ -1,15 +1,29 @@
 import { useState } from 'react'
 import { Modal } from '../Modal'
 import { changelog } from '@/data/changelog'
-import { submitUserFeedback, signOut } from '@/utils/supabase'
+import { submitUserFeedback, signOut, activateSubscriptionWithCode } from '@/utils/supabase'
+import type { MySubscription } from '@/utils/supabase'
 import { Toast } from '../PriceCalculator/Toast'
 import './Footer.css'
 
 interface FooterProps {
   hideSignOut?: boolean
+  /** 由父组件控制会员弹窗时传入 */
+  subscriptionModalOpen?: boolean
+  onSubscriptionModalChange?: (open: boolean) => void
+  /** 服务端会员状态（换设备同步、服务端判断是否过期） */
+  subscriptionState?: MySubscription | null
+  /** 激活成功后由父组件刷新会员状态 */
+  onSubscriptionActivated?: () => void
 }
 
-export const Footer = ({ hideSignOut = false }: FooterProps) => {
+export const Footer = ({
+  hideSignOut = false,
+  subscriptionModalOpen,
+  onSubscriptionModalChange,
+  subscriptionState,
+  onSubscriptionActivated,
+}: FooterProps) => {
   const [showContactModal, setShowContactModal] = useState(false)
   const [showContactQRCode, setShowContactQRCode] = useState(false)
   const [contactType, setContactType] = useState<'author' | 'assistant'>('author')
@@ -17,10 +31,20 @@ export const Footer = ({ hideSignOut = false }: FooterProps) => {
   const [feedbackContent, setFeedbackContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showToast, setShowToast] = useState(false)
-  const [showDonateModal, setShowDonateModal] = useState(false)
   const [showChangelogModal, setShowChangelogModal] = useState(false)
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
+  const [internalSubscriptionModal, setInternalSubscriptionModal] = useState(false)
+  const showSubscriptionModal =
+    onSubscriptionModalChange !== undefined ? (subscriptionModalOpen ?? false) : internalSubscriptionModal
+  const setShowSubscriptionModal =
+    onSubscriptionModalChange !== undefined ? (open: boolean) => onSubscriptionModalChange(open) : setInternalSubscriptionModal
   const [imageLoading, setImageLoading] = useState(true)
+  const [activationCode, setActivationCode] = useState('')
+  const [activationLoading, setActivationLoading] = useState(false)
+  const [activationError, setActivationError] = useState('')
+
+  const subscriptionActive = subscriptionState?.isActive ?? false
+  const subscriptionEnd = subscriptionState?.subscriptionEndAt ?? null
 
   const handleBackToOptions = () => {
     setShowContactQRCode(false)
@@ -72,6 +96,30 @@ export const Footer = ({ hideSignOut = false }: FooterProps) => {
     }
   }
 
+  const handleActivationSubmit = async () => {
+    const code = activationCode.trim()
+    if (!code) {
+      setActivationError('请输入激活码')
+      return
+    }
+    setActivationLoading(true)
+    setActivationError('')
+    try {
+      const { ok, error } = await activateSubscriptionWithCode(code)
+      if (ok) {
+        setActivationCode('')
+        setActivationError('')
+        onSubscriptionActivated?.()
+      } else {
+        setActivationError(error || '激活失败')
+      }
+    } catch (e) {
+      setActivationError((e as Error).message || '网络错误，请重试')
+    } finally {
+      setActivationLoading(false)
+    }
+  }
+
   const handleSignOut = async () => {
     try {
       await signOut()
@@ -94,8 +142,8 @@ export const Footer = ({ hideSignOut = false }: FooterProps) => {
             <div className="footer-link" onClick={() => setShowContactModal(true)}>
               联系我们
             </div>
-            <div className="footer-link" onClick={() => setShowDonateModal(true)}>
-              支持作者
+            <div className="footer-link" onClick={() => setShowSubscriptionModal(true)}>
+              {subscriptionActive ? '会员' : '开通会员'}
             </div>
             <div className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
               免责声明
@@ -219,24 +267,54 @@ export const Footer = ({ hideSignOut = false }: FooterProps) => {
       {/* Toast 提示 */}
       {showToast && <Toast message="反馈成功！感谢您的反馈" />}
 
-      {/* 捐赠二维码模态框 */}
+      {/* 会员 / 激活码模态框 */}
       <Modal
-        isOpen={showDonateModal}
-        onClose={() => setShowDonateModal(false)}
-        title="支持作者"
+        isOpen={showSubscriptionModal}
+        onClose={() => {
+          setShowSubscriptionModal(false)
+          setActivationCode('')
+          setActivationError('')
+        }}
+        title={subscriptionActive ? '会员' : '开通会员'}
       >
-        <div className="modal-text">
-          <p>本工具完全免费，但维持运行需要成本。</p>
-          <p>如果你觉得它帮到了你，欢迎扫码支持，</p>
-          <p>帮助它活下去、变得更好。</p>
-          <p>感谢每一位支持的小伙伴，你们让更新更有意义✨</p>
-        </div>
-        <img
-          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/收款码1.15.png"
-          alt="捐赠二维码"
-          className="modal-qrcode"
-        />
-        <p className="modal-hint">无论是否支持，都感谢你的使用 ❤️</p>
+        {subscriptionActive ? (
+          <div className="modal-text subscription-status">
+            <p>会员有效期至：<strong>{subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : '--'}</strong></p>
+            <p className="subscription-tip">会员状态已同步到账号，换设备登录同一账号即可。</p>
+          </div>
+        ) : (
+          <div className="subscription-modal-content">
+            <div className="modal-text subscription-plans">
+              <p className="subscription-plans-title">周卡 0.99 元 / 月卡 1.99 元 / 季卡 4.99 元 / 年卡 9.99 元</p>
+              <a href="https://pay.ldxp.cn/shop/TX7BUFYY/cb2cs2" target="_blank" rel="noopener noreferrer" className="subscription-plan-btn subscription-plan-btn-single">
+                去购买 →
+              </a>
+              <p className="subscription-plans-hint">购买后在下方输入激活码即可开通，有效期自激活之日起按档位计算。</p>
+            </div>
+            <div className="activation-code-form">
+              <input
+                type="text"
+                className="activation-code-input"
+                value={activationCode}
+                onChange={(e) => {
+                  setActivationCode(e.target.value)
+                  setActivationError('')
+                }}
+                placeholder="请输入 CF- 开头的激活码"
+                disabled={activationLoading}
+              />
+              {activationError && <p className="activation-code-error">{activationError}</p>}
+              <button
+                type="button"
+                className="activation-code-submit"
+                onClick={handleActivationSubmit}
+                disabled={activationLoading || !activationCode.trim()}
+              >
+                {activationLoading ? '验证中...' : '激活'}
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* 免责声明模态框 */}

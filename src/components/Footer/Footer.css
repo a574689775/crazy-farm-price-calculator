@@ -306,3 +306,133 @@
   }
 }
 
+/* 会员 / 激活码弹窗 */
+.subscription-status p {
+  margin-bottom: 0.75rem;
+  color: rgba(132, 49, 0, 0.85);
+}
+.subscription-status p:last-child {
+  margin-bottom: 0;
+}
+.subscription-tip {
+  font-size: 12px;
+  color: rgba(132, 49, 0, 0.6);
+  margin-top: 0.5rem;
+}
+
+.subscription-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.subscription-modal-content .modal-text {
+  margin: 0;
+}
+.subscription-modal-content .modal-text p {
+  margin-bottom: 0.5rem;
+  color: rgba(132, 49, 0, 0.85);
+  font-size: 14px;
+}
+.subscription-modal-content .modal-text p:last-child {
+  margin-bottom: 0;
+}
+
+.subscription-plans-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem !important;
+}
+.subscription-plans-desc {
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.7);
+  margin-bottom: 0.75rem !important;
+}
+.subscription-plans-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.subscription-plan-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #FFF7DC;
+  border: 1px solid rgba(132, 49, 0, 0.35);
+  border-radius: 10px;
+  color: rgba(132, 49, 0, 1);
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.subscription-plan-btn:hover {
+  background: #FFEBC4;
+  border-color: #E19859;
+  box-shadow: 0 2px 8px rgba(132, 49, 0, 0.15);
+}
+.subscription-plan-label {
+  font-weight: 600;
+}
+.subscription-plan-price {
+  font-weight: 700;
+  color: rgba(132, 49, 0, 1);
+}
+.subscription-plan-cta {
+  font-size: 12px;
+  color: #E19859;
+  font-weight: 600;
+}
+.subscription-plan-btn-single {
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+.subscription-plans-hint {
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.7);
+}
+
+.activation-code-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.activation-code-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(132, 49, 0, 0.35);
+  background: #FFF7DC;
+  color: rgba(132, 49, 0, 1);
+  font-size: 14px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.activation-code-input:focus {
+  outline: none;
+  border-color: #E19859;
+}
+.activation-code-input::placeholder {
+  color: rgba(132, 49, 0, 0.5);
+}
+.activation-code-error {
+  margin: 0;
+  font-size: 12px;
+  color: #c41e3a;
+}
+.activation-code-submit {
+  padding: 12px 20px;
+  background: rgba(132, 49, 0, 1);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.activation-code-submit:disabled {
+  background: rgba(132, 49, 0, 0.5);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+

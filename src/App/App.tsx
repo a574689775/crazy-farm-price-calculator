@@ -8,7 +8,9 @@ import { HistoryView } from '@/components/HistoryView'
 import { FeedbackDataView } from '@/components/FeedbackDataView'
 import { Login } from '@/components/Login'
 import { parseShareUrl } from '@/utils/shareEncoder'
-import { logCropQuery, subscribeCropDailyStats, getSession, onAuthStateChange } from '@/utils/supabase'
+import { logCropQuery, subscribeCropDailyStats, getSession, onAuthStateChange, useFreeQuery, getMySubscription } from '@/utils/supabase'
+import type { MySubscription } from '@/utils/supabase'
+import { Modal } from '@/components/Modal'
 import './App.css'
 
 const ALLOWED_HOST = 'fknc.top'
@@ -38,6 +40,9 @@ export const App = () => {
   const [showHistory, setShowHistory] = useState(false)
   const [prefillData, setPrefillData] = useState<PrefillData | null>(null)
   const [todayQueryCounts, setTodayQueryCounts] = useState<Record<string, number>>({})
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
+  const [showPaywallModal, setShowPaywallModal] = useState(false)
+  const [subscriptionState, setSubscriptionState] = useState<MySubscription | null>(null)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -95,6 +100,8 @@ export const App = () => {
 
   // 标记是否已初始化，避免首次加载时重复请求
   const isInitializedRef = useRef(false)
+  // 从选择页点击进入计算器时已做过免费次数校验，避免重复扣减；从 URL/分享链接进入时未做，需在 effect 中补检
+  const calculatorEntryCheckedRef = useRef(false)
 
   // 检查登录状态
   useEffect(() => {
@@ -150,6 +157,55 @@ export const App = () => {
     isInitializedRef.current = true
   }, [])
 
+  // 登录后拉取会员状态（服务端判断是否有效，换设备同步）
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSubscriptionState(null)
+      return
+    }
+    getMySubscription().then(setSubscriptionState)
+  }, [isAuthenticated])
+
+  // 从 URL/分享链接直接进入计算器时补做免费次数校验，防止绕过选择页白嫖
+  useEffect(() => {
+    if (
+      currentPage !== 'calculator' ||
+      !selectedCrop ||
+      !isAuthenticated ||
+      subscriptionState === null ||
+      subscriptionState.isActive ||
+      calculatorEntryCheckedRef.current
+    ) {
+      return
+    }
+    let cancelled = false
+    useFreeQuery().then(({ allowed }) => {
+      if (cancelled) return
+      calculatorEntryCheckedRef.current = true
+      if (!allowed) {
+        setShowPaywallModal(true)
+        setCurrentPage('selector')
+        clearCalculatorState()
+        const url = new URL(window.location.href)
+        url.searchParams.delete('crop')
+        url.searchParams.delete('s')
+        window.history.replaceState({ page: 'selector' }, '', url.toString())
+      }
+    }).catch((e) => {
+      if (!cancelled) {
+        console.error('useFreeQuery failed (URL entry)', e)
+        setShowPaywallModal(true)
+        setCurrentPage('selector')
+        clearCalculatorState()
+      }
+    })
+    return () => { cancelled = true }
+  }, [currentPage, selectedCrop, isAuthenticated, subscriptionState])
+
+  const refreshSubscription = () => {
+    if (isAuthenticated) getMySubscription().then(setSubscriptionState)
+  }
+
   // 登录后一直订阅当日作物热度（Supabase Realtime），有变更即更新；订阅时会先拉一次当日数据
   useEffect(() => {
     if (!isAuthenticated) return
@@ -157,27 +213,43 @@ export const App = () => {
     return () => unsubscribe()
   }, [isAuthenticated])
 
-  const handleSelectCrop = (crop: CropConfig) => {
-    // 更新 URL，添加作物参数，支持浏览器前进/后退
-    // 如果历史记录页面已经打开，保留 page=history 参数
+  const handleSelectCrop = async (crop: CropConfig) => {
+    if (subscriptionState?.isActive) {
+      calculatorEntryCheckedRef.current = true
+      doOpenCalculator(crop, null)
+      logCropQuery(crop.name).catch(console.error)
+      return
+    }
+    try {
+      const { allowed } = await useFreeQuery()
+      if (!allowed) {
+        setShowPaywallModal(true)
+        return
+      }
+      calculatorEntryCheckedRef.current = true
+      doOpenCalculator(crop, null)
+      logCropQuery(crop.name).catch(console.error)
+    } catch (e) {
+      console.error('useFreeQuery failed', e)
+      setShowPaywallModal(true)
+    }
+  }
+
+  const doOpenCalculator = (crop: CropConfig, prefill: PrefillData | null) => {
     const url = new URL(window.location.href)
     url.searchParams.set('crop', crop.name)
-    // 从当前 URL 检查历史记录状态，如果已经打开则保留
     if (url.searchParams.get('page') === 'history' || showHistory) {
       url.searchParams.set('page', 'history')
     }
     window.history.pushState({ page: 'calculator', crop: crop.name }, '', url.toString())
-    
-    // 立即更新状态
     cancelClearCalculatorState()
     setSelectedCrop(crop)
+    setPrefillData(prefill ?? null)
     setCurrentPage('calculator')
-
-    // 记录查询次数（异步，不阻塞 UI）
-    logCropQuery(crop.name).catch(console.error)
   }
 
   const handleBackToSelector = () => {
+    calculatorEntryCheckedRef.current = false
     // 更新 URL
     const url = new URL(window.location.href)
     url.searchParams.delete('crop')
@@ -223,27 +295,30 @@ export const App = () => {
     // 数据刷新由 useEffect 统一处理，避免重复请求
   }
 
-  const handleSelectHistoryRecord = (record: HistoryRecord) => {
+  const handleSelectHistoryRecord = async (record: HistoryRecord) => {
     const crop = crops.find(c => c.name === record.cropName)
     if (!crop) return
 
-    // 从历史记录选择作物时，保留 page=history 参数，同时添加 crop 参数
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', 'history')
-    url.searchParams.set('crop', crop.name)
-    window.history.pushState({ page: 'history', crop: crop.name }, '', url.toString())
-
-    // 立即更新状态
-    cancelClearCalculatorState()
-    setSelectedCrop(crop)
-    setPrefillData({
-      weight: record.weight,
-      mutations: record.mutations,
-    })
-    setCurrentPage('calculator')
-
-    // 记录查询次数（异步，不阻塞 UI）
-    logCropQuery(crop.name).catch(console.error)
+    const prefill = { weight: record.weight, mutations: record.mutations }
+    if (subscriptionState?.isActive) {
+      calculatorEntryCheckedRef.current = true
+      doOpenCalculator(crop, prefill)
+      logCropQuery(crop.name).catch(console.error)
+      return
+    }
+    try {
+      const { allowed } = await useFreeQuery()
+      if (!allowed) {
+        setShowPaywallModal(true)
+        return
+      }
+      calculatorEntryCheckedRef.current = true
+      doOpenCalculator(crop, prefill)
+      logCropQuery(crop.name).catch(console.error)
+    } catch (e) {
+      console.error('useFreeQuery failed', e)
+      setShowPaywallModal(true)
+    }
   }
 
   // 监听浏览器前进/后退
@@ -326,7 +401,12 @@ export const App = () => {
                 onShowHistory={handleShowHistory}
                 queryCounts={todayQueryCounts}
               />
-              <Footer />
+              <Footer
+                subscriptionModalOpen={showSubscriptionModal}
+                onSubscriptionModalChange={setShowSubscriptionModal}
+                subscriptionState={subscriptionState}
+                onSubscriptionActivated={refreshSubscription}
+              />
             </div>
             
             {/* 历史记录页面 - 始终渲染，通过transform控制位置 */}
@@ -349,6 +429,27 @@ export const App = () => {
           </div>
         )}
       </main>
+
+      {/* 免费次数已用完，引导开通会员 */}
+      <Modal
+        isOpen={showPaywallModal}
+        onClose={() => setShowPaywallModal(false)}
+        title="今日免费次数已用完"
+      >
+        <div className="modal-text">
+          <p>开通会员可无限查询，支持周卡 0.99 元、月卡 1.99 元、季卡 4.99 元、年卡 9.99 元。</p>
+          <button
+            type="button"
+            className="paywall-cta-button"
+            onClick={() => {
+              setShowPaywallModal(false)
+              setShowSubscriptionModal(true)
+            }}
+          >
+            开通会员
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }

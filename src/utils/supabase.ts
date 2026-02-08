@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { verifyActivationCode } from '@/utils/activationCode'
 
 // Supabase 配置 - ANON KEY 是安全的，设计用于前端暴露
 // 配合 RLS (Row Level Security) 策略，只允许匿名用户插入数据
@@ -301,6 +302,89 @@ export const getSession = async () => {
 export const getCurrentUser = async () => {
   const { data: { user } } = await supabase.auth.getUser()
   return user
+}
+
+/**
+ * 免费用户每日 1 次查询：尝试使用 1 次当日免费次数。
+ * 需在 Supabase 创建 daily_free_usage 表与 use_free_query RPC。
+ * @returns { allowed: true } 表示已使用本次免费次数并允许进入；{ allowed: false } 表示今日已用完
+ */
+export const useFreeQuery = async (): Promise<{ allowed: boolean }> => {
+  const { data, error } = await supabase.rpc('use_free_query')
+  if (error) {
+    if (error.code === 'PGRST202' || error.message?.includes('use_free_query')) {
+      return { allowed: false }
+    }
+    throw error
+  }
+  const allowed = data?.allowed === true
+  return { allowed }
+}
+
+/** 会员订阅状态（服务端判断是否有效，避免客户端改时间） */
+export interface MySubscription {
+  subscriptionEndAt: number | null
+  isActive: boolean
+}
+
+/**
+ * 获取当前用户的会员状态，由服务端根据当前时间判断 is_active。
+ * 需在 Supabase 创建 user_subscriptions 表与 get_my_subscription RPC。
+ */
+export const getMySubscription = async (): Promise<MySubscription> => {
+  const { data, error } = await supabase.rpc('get_my_subscription')
+  if (error) {
+    return { subscriptionEndAt: null, isActive: false }
+  }
+  const endAt = data?.subscription_end_at
+  const isActive = data?.is_active === true
+  const subscriptionEndAt =
+    endAt != null ? new Date(endAt).getTime() : null
+  return { subscriptionEndAt, isActive }
+}
+
+async function sha256Hex(text: string): Promise<string> {
+  const data = new TextEncoder().encode(text)
+  const buf = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+/**
+ * 前端验证激活码并写入会员。验证通过后调用 RPC activate_subscription 写入 user_subscriptions。
+ * 激活码一次性使用：code_hash 存入 used_activation_codes，重复使用会返回 code_already_used。
+ * 需在 Supabase 执行 scripts/sql/used_activation_codes.sql 和 activate_subscription_rpc.sql。
+ */
+export const activateSubscriptionWithCode = async (activationCode: string): Promise<{ ok: boolean; error?: string }> => {
+  const raw = (activationCode || '').trim()
+  if (!raw) return { ok: false, error: '请输入激活码' }
+
+  const result = await verifyActivationCode(raw)
+  if (!result.valid || result.days == null) {
+    return { ok: false, error: result.error ?? '激活码无效' }
+  }
+
+  const codeHash = await sha256Hex(raw)
+  const { data, error } = await supabase.rpc('activate_subscription', {
+    p_code_hash: codeHash,
+    p_days: result.days,
+  })
+  if (error) {
+    if (error.code === 'PGRST202' || error.message?.includes('activate_subscription')) {
+      return { ok: false, error: '请先在 Supabase 创建 activate_subscription RPC 与 used_activation_codes 表' }
+    }
+    return { ok: false, error: error.message }
+  }
+  if (data?.ok === true) return { ok: true }
+  const err = data?.error
+  const message =
+    err === 'code_already_used'
+      ? '该激活码已被使用'
+      : err === 'unauthorized'
+        ? '请先登录'
+        : err ?? '激活失败'
+  return { ok: false, error: message }
 }
 
 // 监听认证状态变化
