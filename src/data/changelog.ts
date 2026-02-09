@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.2.3',
+    date: '2026.2.9',
+    items: [
+      '星环突变调整到常见突变中',
+    ],
+  },
+  {
     version: 'V6.2.2',
     date: '2026.2.8',
     items: [
