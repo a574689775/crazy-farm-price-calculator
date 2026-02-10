@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.3.1',
+    date: '2026.2.10',
+    items: [
+      '更新免责声明',
+      '月核树、液光藤、幻月花、星空玫瑰价格基数更新'
+    ],
+  },
+  {
     version: 'V6.3.0',
     date: '2026.2.10',
     items: [
