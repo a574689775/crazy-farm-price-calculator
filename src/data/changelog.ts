@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.4.0',
+    date: '2026.2.10',
+    items: [
+      '历史记录删除功能',
+    ],
+  },
+  {
     version: 'V6.3.3',
     date: '2026.2.10',
     items: [

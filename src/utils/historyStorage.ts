@@ -33,3 +33,9 @@ export const addHistoryRecord = (record: HistoryRecord) => {
   const newList = [record, ...list].slice(0, MAX_RECORDS)
   saveHistoryRecords(newList)
 }
+
+export const removeHistoryRecord = (id: string) => {
+  const list = getHistoryRecords()
+  const newList = list.filter((item) => item.id !== id)
+  saveHistoryRecords(newList)
+}
