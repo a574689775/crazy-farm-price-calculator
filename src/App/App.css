@@ -210,6 +210,57 @@
 }
 
 /* 免费次数用尽弹窗中的「开通会员」按钮 */
+.paywall-tip-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #843100;
+}
+
+.paywall-plan-card {
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(to right, #FFF7DC, #FFEBC4);
+  border: 1px solid rgba(225, 152, 89, 0.7);
+  text-align: left;
+}
+
+.paywall-plan-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.paywall-plan-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #843100;
+}
+
+.paywall-plan-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #c45c26;
+}
+
+.paywall-plan-sub {
+  font-size: 12px;
+  color: rgba(107, 45, 0, 0.85);
+}
+
+.paywall-plan-desc {
+  font-size: 12px;
+  color: rgba(132, 49, 0, 0.8);
+  margin: 2px 0 2px;
+}
+
+.paywall-plan-other {
+  font-size: 11px;
+  color: rgba(132, 49, 0, 0.6);
+  margin-top: 10px;
+}
+
 .paywall-cta-button {
   display: block;
   width: 100%;
@@ -232,7 +283,7 @@
 }
 
 .paywall-invite-hint {
-  margin: 1rem 0 0;
+  margin: 1rem 0 8px !important;
   font-size: 13px;
   color: rgba(132, 49, 0, 0.75);
 }

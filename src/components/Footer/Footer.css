@@ -338,6 +338,7 @@
 }
 .subscription-modal-content .modal-text {
   margin: 0;
+  text-align: left;
 }
 .subscription-modal-content .modal-text p {
   margin-bottom: 0.5rem;
@@ -351,6 +352,11 @@
 .subscription-plans-title {
   font-weight: 600;
   margin-bottom: 0.5rem !important;
+}
+.subscription-plans-desc {
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.75);
+  margin-bottom: 0.75rem !important;
 }
 .subscription-plans-list {
   list-style: none;
@@ -370,15 +376,32 @@
   border-radius: 8px;
   border: 1px solid rgba(132, 49, 0, 0.2);
   font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.subscription-plans-list li:hover {
+  background: rgba(255, 236, 196, 0.9);
+  border-color: rgba(132, 49, 0, 0.35);
+  box-shadow: 0 1px 4px rgba(132, 49, 0, 0.12);
 }
 .subscription-plan-name {
   color: rgba(132, 49, 0, 0.9);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .subscription-plans-list .subscription-plan-price {
   font-weight: 700;
   color: rgba(132, 49, 0, 1);
   white-space: nowrap;
+}
+.subscription-plan-tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #E19859;
+  color: #fff;
 }
 .subscription-plans-desc {
   font-size: 13px;
@@ -394,10 +417,10 @@
 .subscription-plan-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 12px 16px;
-  background: #FFF7DC;
-  border: 1px solid rgba(132, 49, 0, 0.35);
+  background: linear-gradient(to right, #FFEBC4, #FFDE9F);
+  border: 1px solid rgba(132, 49, 0, 0.6);
   border-radius: 10px;
   color: rgba(132, 49, 0, 1);
   text-decoration: none;
@@ -405,9 +428,21 @@
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 .subscription-plan-btn:hover {
-  background: #FFEBC4;
+  background: linear-gradient(to right, #FFDE9F, #FFD186);
   border-color: #E19859;
   box-shadow: 0 2px 8px rgba(132, 49, 0, 0.15);
+}
+.subscription-plan-btn-arrow {
+  display: inline-block;
+  margin-left: 6px;
+  animation: subscription-arrow-wiggle 0.9s ease-in-out infinite;
+}
+
+@keyframes subscription-arrow-wiggle {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(4px); }
+  60% { transform: translateX(0); }
+  100% { transform: translateX(0); }
 }
 .subscription-plan-label {
   font-weight: 600;
@@ -422,7 +457,7 @@
   font-weight: 600;
 }
 .subscription-plan-btn-single {
-  justify-content: center;
+  width: 100%;
   margin-bottom: 0.75rem;
 }
 .subscription-plans-hint {

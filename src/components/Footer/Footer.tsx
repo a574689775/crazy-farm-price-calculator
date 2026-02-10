@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Modal } from '../Modal'
 import { changelog } from '@/data/changelog'
-import { submitUserFeedback, signOut, activateSubscriptionWithCode } from '@/utils/supabase'
+import { submitUserFeedback, signOut, activateSubscriptionWithCode, getMySubscription } from '@/utils/supabase'
 import type { MySubscription } from '@/utils/supabase'
 import { Toast } from '../PriceCalculator/Toast'
 import './Footer.css'
@@ -34,6 +34,7 @@ export const Footer = ({
   const [feedbackContent, setFeedbackContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
   const [showChangelogModal, setShowChangelogModal] = useState(false)
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
   const [internalSubscriptionModal, setInternalSubscriptionModal] = useState(false)
@@ -92,6 +93,7 @@ export const Footer = ({
       setFeedbackContent('')
       setShowFeedbackForm(false)
       setShowContactModal(false)
+      setToastMessage('反馈成功！感谢您的反馈')
       setShowToast(true)
       setTimeout(() => {
         setShowToast(false)
@@ -119,6 +121,25 @@ export const Footer = ({
         setActivationError('')
         onSubscriptionActivated?.()
         setShowSubscriptionModal(false)
+        // 激活成功后，重新获取会员状态，用于展示最新剩余天数
+        try {
+          const latest = await getMySubscription()
+          if (latest && latest.subscriptionEndAt) {
+            const daysLeft = Math.max(
+              0,
+              Math.ceil((latest.subscriptionEndAt - Date.now()) / (24 * 60 * 60 * 1000)),
+            )
+            setToastMessage(`激活成功！有效时长 ${daysLeft} 天`)
+          } else {
+            setToastMessage('激活成功！会员已生效')
+          }
+        } catch {
+          setToastMessage('激活成功！会员已生效')
+        }
+        setShowToast(true)
+        setTimeout(() => {
+          setShowToast(false)
+        }, 2500)
       } else {
         setActivationError(error || '激活失败')
       }
@@ -138,6 +159,12 @@ export const Footer = ({
       console.error('登出失败:', error)
       alert('登出失败，请稍后重试')
     }
+  }
+
+  const PURCHASE_URL = 'https://pay.ldxp.cn/shop/TX7BUFYY/cb2cs2'
+
+  const handleOpenPurchasePage = () => {
+    window.open(PURCHASE_URL, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -276,7 +303,7 @@ export const Footer = ({
       </Modal>
 
       {/* Toast 提示 */}
-      {showToast && <Toast message="反馈成功！感谢您的反馈" />}
+      {showToast && <Toast message={toastMessage} />}
 
       {/* 会员 / 续费 / 激活码模态框 */}
       <Modal
@@ -301,18 +328,50 @@ export const Footer = ({
             </div>
           )}
           <div className="modal-text subscription-plans">
+            <p className="subscription-plans-title">{subscriptionActive ? '续费流程' : '开通流程'}</p>
+            <p className="subscription-plans-desc">
+              1. 在下方购买页面选择合适的会员档位完成支付；
+              <br />
+              2. 支付成功后复制激活码，回到本页面在下方输入并激活。
+            </p>
             <p className="subscription-plans-title">会员档位与价格</p>
             <ul className="subscription-plans-list">
-              <li><span className="subscription-plan-name">日卡</span><span className="subscription-plan-price">0.19 元</span></li>
-              <li><span className="subscription-plan-name">周卡</span><span className="subscription-plan-price">0.99 元</span></li>
-              <li><span className="subscription-plan-name">月卡</span><span className="subscription-plan-price">1.99 元</span></li>
-              <li><span className="subscription-plan-name">季卡</span><span className="subscription-plan-price">4.99 元</span></li>
-              <li><span className="subscription-plan-name">年卡</span><span className="subscription-plan-price">9.99 元</span></li>
-              <li><span className="subscription-plan-name">三年</span><span className="subscription-plan-price">19.9 元</span></li>
+              <li onClick={handleOpenPurchasePage}>
+                <span className="subscription-plan-name">日卡</span>
+                <span className="subscription-plan-price">0.19 元</span>
+              </li>
+              <li onClick={handleOpenPurchasePage}>
+                <span className="subscription-plan-name">周卡</span>
+                <span className="subscription-plan-price">0.99 元</span>
+              </li>
+              <li onClick={handleOpenPurchasePage}>
+                <span className="subscription-plan-name">
+                  月卡
+                  <span className="subscription-plan-tag">推荐</span>
+                </span>
+                <span className="subscription-plan-price">1.99 元</span>
+              </li>
+              <li onClick={handleOpenPurchasePage}>
+                <span className="subscription-plan-name">季卡</span>
+                <span className="subscription-plan-price">4.99 元</span>
+              </li>
+              <li onClick={handleOpenPurchasePage}>
+                <span className="subscription-plan-name">年卡</span>
+                <span className="subscription-plan-price">9.99 元</span>
+              </li>
+              <li onClick={handleOpenPurchasePage}>
+                <span className="subscription-plan-name">三年</span>
+                <span className="subscription-plan-price">19.9 元</span>
+              </li>
             </ul>
-            <a href="https://pay.ldxp.cn/shop/TX7BUFYY/cb2cs2" target="_blank" rel="noopener noreferrer" className="subscription-plan-btn subscription-plan-btn-single">
-              去购买 →
-            </a>
+            <button
+              type="button"
+              className="subscription-plan-btn subscription-plan-btn-single"
+              onClick={handleOpenPurchasePage}
+            >
+              前往购买会员
+              <span className="subscription-plan-btn-arrow">→</span>
+            </button>
             <p className="subscription-plans-hint">
               {subscriptionActive ? '购买后在下方输入激活码即可续费，时长将累加至当前到期日之后。' : '购买后在下方输入激活码即可开通，有效期自激活之日起按档位计算。'}
             </p>

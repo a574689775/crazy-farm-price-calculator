@@ -1,9 +1,10 @@
 .invite-modal-content-wrap {
-  max-width: 340px;
+  max-width: 380px;
 }
 
 .invite-modal-content {
   padding: 0 4px;
+  text-align: left;
 }
 
 .invite-modal-loading,
@@ -26,14 +27,18 @@
 }
 
 .invite-modal-code-block {
-  margin-bottom: 1.25rem;
+  margin: 16px 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(to right, #FFF7DC, #FFEBC4);
+  border: 1px solid rgba(225, 152, 89, 0.7);
 }
 
 .invite-modal-code-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .invite-modal-code {
@@ -44,70 +49,85 @@
   font-family: ui-monospace, monospace;
 }
 
+.invite-modal-code-hint {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(132, 49, 0, 0.75);
+}
+
 .invite-modal-copy-btn {
-  padding: 8px 16px;
-  background: #FFF7DC;
-  border: 1px solid rgba(132, 49, 0, 0.35);
-  border-radius: 8px;
-  color: rgba(132, 49, 0, 1);
-  font-size: 14px;
+  padding: 6px 14px;
+  background: rgba(132, 49, 0, 1);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .invite-modal-copy-btn:hover {
-  background: #FFEBC4;
-  border-color: #E19859;
+  background: rgba(148, 60, 5, 1);
+  transform: translateY(-1px);
 }
 
 .invite-modal-rules {
-  margin-bottom: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(132, 49, 0, 0.12);
+  margin-bottom: 8px;
 }
 
-.invite-modal-rules-list {
-  margin: 0;
-  padding-left: 1.25rem;
+.invite-modal-intro {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.8);
+}
+
+.invite-modal-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 16px;
+}
+
+.invite-modal-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 13px;
   color: rgba(132, 49, 0, 0.85);
-  line-height: 1.55;
 }
 
-.invite-modal-rules-list li {
-  margin-bottom: 0.5rem;
+.invite-modal-step-index {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(225, 152, 89, 1);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.invite-modal-rules-list li:last-child {
-  margin-bottom: 0;
-}
-
-.invite-modal-rules-list strong {
+.invite-modal-step-text strong {
   color: rgba(132, 49, 0, 1);
 }
 
 .invite-modal-tier-list {
-  margin: 0.35rem 0 0 1rem;
-  padding-left: 0.75rem;
+  margin: 4px 0 0 0;
+  padding-left: 0;
   list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+  font-size: 12px;
+  color: rgba(132, 49, 0, 0.85);
 }
 
 .invite-modal-tier-list li {
-  margin-bottom: 0.2rem;
-  position: relative;
-}
-
-.invite-modal-tier-list li::before {
-  content: '·';
-  position: absolute;
-  left: -0.6rem;
-  color: rgba(132, 49, 0, 0.6);
-}
-
-.invite-modal-stats {
-  padding-top: 1rem;
-  border-top: 1px solid rgba(132, 49, 0, 0.15);
+  margin: 0;
 }
 
 .invite-modal-stats-row {

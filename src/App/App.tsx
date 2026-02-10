@@ -465,7 +465,18 @@ export const App = () => {
         title="今日免费次数已用完"
       >
         <div className="modal-text">
-          <p>开通会员可无限查询，支持日卡 0.19 元、周卡 0.99 元、月卡 1.99 元、季卡 4.99 元、年卡 9.99 元、三年 19.9 元。</p>
+          <p className="paywall-plan-desc">开通会员后不限次数查价</p>
+          <p className="paywall-plan-desc">随时尝试不同作物和突变组合</p>
+          <p className="paywall-plan-desc">帮你更快找到最赚的搭配</p>
+          <div className="paywall-plan-card">
+            <div className="paywall-plan-main">
+              <span className="paywall-plan-name">月卡会员</span>
+              <span className="paywall-plan-price">¥1.99</span>
+            </div>
+            <div className="paywall-plan-sub">疯狂农场骨灰玩家，推荐选择这个档位</div>
+          </div>
+         
+          <p className="paywall-plan-other">其它档位：日卡 0.19｜周卡 0.99｜季卡 4.99｜年卡 9.99｜三年卡 19.9（单位：元）</p>
           <button
             type="button"
             className="paywall-cta-button"
@@ -474,9 +485,11 @@ export const App = () => {
               setShowSubscriptionModal(true)
             }}
           >
-            开通会员
+            开通会员，解锁无限查询
           </button>
-          <p className="paywall-invite-hint">邀请好友充值会员，你可获得低一档会员天数奖励。</p>
+          <p className="paywall-invite-hint">
+            邀请好友首充会员，你也可以获得会员奖励！
+          </p>
           <button
             type="button"
             className="paywall-invite-button"
@@ -485,7 +498,7 @@ export const App = () => {
               setShowInviteModal(true)
             }}
           >
-            邀请有礼
+            邀请好友，白嫖会员天数
           </button>
         </div>
       </Modal>
