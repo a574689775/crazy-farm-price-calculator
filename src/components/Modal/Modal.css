@@ -1,3 +1,4 @@
+/* 动画时长与 JS 中 ANIM_DURATION_MS 一致 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -14,8 +15,8 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation-duration: 0.3s;
-  animation-timing-function: ease-out;
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
 }
 
@@ -32,23 +33,16 @@
 }
 
 @keyframes modalOverlayFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes modalOverlayFadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
+/* 内容区从中心缩放 */
 .modal-content {
   position: relative;
   box-sizing: border-box;
@@ -65,43 +59,44 @@
   overflow: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  animation-duration: 0.3s;
-  animation-timing-function: ease-out;
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.34, 1.2, 0.64, 1);
   animation-fill-mode: both;
+  transform-origin: center center;
 }
 
 .modal-content-initial {
   opacity: 0;
-  transform: scale(0.9) translateY(-20px);
+  transform: scale(0.5);
 }
 
 .modal-content-enter {
-  animation-name: modalContentSlideIn;
+  animation-name: modalContentZoomIn;
 }
 
 .modal-content-exit {
-  animation-name: modalContentSlideOut;
+  animation-name: modalContentZoomOut;
 }
 
-@keyframes modalContentSlideIn {
+@keyframes modalContentZoomIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: scale(0.5);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
-@keyframes modalContentSlideOut {
+@keyframes modalContentZoomOut {
   from {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
   to {
     opacity: 0;
-    transform: scale(0.9) translateY(-20px);
+    transform: scale(0.5);
   }
 }
 

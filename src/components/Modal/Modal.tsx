@@ -13,6 +13,8 @@ interface ModalProps {
   contentClassName?: string
 }
 
+const ANIM_DURATION_MS = 280
+
 export const Modal = ({ isOpen, onClose, title, children, onBack, contentClassName }: ModalProps) => {
   const [isAnimating, setIsAnimating] = useState(false)
   const [shouldRender, setShouldRender] = useState(false)
@@ -21,18 +23,16 @@ export const Modal = ({ isOpen, onClose, title, children, onBack, contentClassNa
     if (isOpen) {
       setShouldRender(true)
       setIsAnimating(false)
-      // 使用 setTimeout 确保 DOM 已经渲染
       const timer = setTimeout(() => {
         setIsAnimating(true)
-      }, 10)
+      }, 20)
       return () => clearTimeout(timer)
     } else {
       if (shouldRender) {
         setIsAnimating(false)
-        // 等待动画结束后移除 DOM
         const timer = setTimeout(() => {
           setShouldRender(false)
-        }, 300) // 与 CSS 动画时长一致
+        }, ANIM_DURATION_MS)
         return () => clearTimeout(timer)
       }
     }
