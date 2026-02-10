@@ -1,0 +1,121 @@
+.invite-modal-content-wrap {
+  max-width: 340px;
+}
+
+.invite-modal-content {
+  padding: 0 4px;
+}
+
+.invite-modal-loading,
+.invite-modal-error {
+  margin: 0;
+  padding: 1rem 0;
+  color: rgba(132, 49, 0, 0.85);
+  font-size: 14px;
+}
+
+.invite-modal-error {
+  color: #c0392b;
+}
+
+.invite-modal-label {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(132, 49, 0, 0.9);
+}
+
+.invite-modal-code-block {
+  margin-bottom: 1.25rem;
+}
+
+.invite-modal-code-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.invite-modal-code {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: rgba(132, 49, 0, 1);
+  font-family: ui-monospace, monospace;
+}
+
+.invite-modal-copy-btn {
+  padding: 8px 16px;
+  background: #FFF7DC;
+  border: 1px solid rgba(132, 49, 0, 0.35);
+  border-radius: 8px;
+  color: rgba(132, 49, 0, 1);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.invite-modal-copy-btn:hover {
+  background: #FFEBC4;
+  border-color: #E19859;
+}
+
+.invite-modal-rules {
+  margin-bottom: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(132, 49, 0, 0.12);
+}
+
+.invite-modal-rules-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.85);
+  line-height: 1.55;
+}
+
+.invite-modal-rules-list li {
+  margin-bottom: 0.5rem;
+}
+
+.invite-modal-rules-list li:last-child {
+  margin-bottom: 0;
+}
+
+.invite-modal-rules-list strong {
+  color: rgba(132, 49, 0, 1);
+}
+
+.invite-modal-tier-list {
+  margin: 0.35rem 0 0 1rem;
+  padding-left: 0.75rem;
+  list-style: none;
+}
+
+.invite-modal-tier-list li {
+  margin-bottom: 0.2rem;
+  position: relative;
+}
+
+.invite-modal-tier-list li::before {
+  content: '·';
+  position: absolute;
+  left: -0.6rem;
+  color: rgba(132, 49, 0, 0.6);
+}
+
+.invite-modal-stats {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(132, 49, 0, 0.15);
+}
+
+.invite-modal-stats-row {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(132, 49, 0, 0.85);
+}
+
+.invite-modal-stats-row strong {
+  color: rgba(132, 49, 0, 1);
+}

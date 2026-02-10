@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.3.0',
+    date: '2026.2.10',
+    items: [
+      '添加会员邀请体系',
+    ],
+  },
+  {
     version: 'V6.2.3',
     date: '2026.2.9',
     items: [

@@ -5,7 +5,8 @@
  * 后端验签激活码并写入会员，无浏览器兼容问题。激活码格式 v2：{ days, v: 2 }，按激活起算。
  *
  * 配置：ACTIVATION_PUBLIC_KEY（公钥 Base64）
- * 表：user_subscriptions、used_activation_codes（见 scripts/sql/）
+ * 表：user_subscriptions、used_activation_codes、invite_records（见 scripts/sql/）
+ * 邀请奖励：被邀请人首次激活成功后，按低一档为邀请人加天数（1→0,7→1,30→7,90→30,365→90,1095→365）
  *
  * 若出现 CORS 错误：在 Supabase Edge Functions 设置中关闭此函数的「Enforce JWT verification」，
  * 否则网关在到达本函数前会返回 401，该响应不含 CORS 头。
@@ -50,6 +51,12 @@ function parseSubFromJwt(token: string): string | null {
   } catch {
     return null
   }
+}
+
+/** 被邀请人充值天数 → 邀请人获得天数（低一档），非标准档位为 0 */
+function inviteRewardDaysForInviter(rechargeDays: number): number {
+  const map: Record<number, number> = { 1: 0, 7: 1, 30: 7, 90: 30, 365: 90, 1095: 365 }
+  return map[rechargeDays] ?? 0
 }
 
 function corsHeaders(origin: string | null) {
@@ -159,6 +166,41 @@ Deno.serve(async (req) => {
       if (insertErr.code === '23505') return send(400, { ok: false, error: 'code_already_used' })
       console.error('insert used_activation_codes', insertErr)
       return send(500, { ok: false, error: 'db_error' })
+    }
+
+    // 邀请奖励：当前用户（被邀请人）首次激活成功 → 为邀请人按低一档加天数
+    const { data: inviteRow } = await supabase
+      .from('invite_records')
+      .select('id, inviter_id')
+      .eq('invitee_id', userId)
+      .is('reward_claimed_at', null)
+      .maybeSingle()
+    if (inviteRow?.inviter_id && inviteRow.inviter_id !== userId) {
+      const inviterId = inviteRow.inviter_id as string
+      const rewardDays = inviteRewardDaysForInviter(days)
+      const nowIso = new Date().toISOString()
+      const { error: updateRecordErr } = await supabase
+        .from('invite_records')
+        .update({ reward_claimed_at: nowIso, invitee_recharge_days: days })
+        .eq('id', inviteRow.id)
+      if (updateRecordErr) {
+        console.error('update invite_records reward_claimed_at', updateRecordErr)
+      } else if (rewardDays > 0) {
+        const rewardMs = rewardDays * 24 * 60 * 60 * 1000
+        const { data: inviterSub } = await supabase.from('user_subscriptions').select('subscription_end_at').eq('user_id', inviterId).maybeSingle()
+        let inviterEnd: string
+        if (inviterSub?.subscription_end_at) {
+          const endMs = new Date(inviterSub.subscription_end_at).getTime()
+          const baseMs = endMs > nowMs ? endMs : nowMs
+          inviterEnd = new Date(baseMs + rewardMs).toISOString()
+        } else {
+          inviterEnd = new Date(nowMs + rewardMs).toISOString()
+        }
+        await supabase.from('user_subscriptions').upsert(
+          { user_id: inviterId, subscription_end_at: inviterEnd },
+          { onConflict: 'user_id' }
+        )
+      }
     }
 
     return send(200, { ok: true })

@@ -10,8 +10,12 @@ import { Login } from '@/components/Login'
 import { parseShareUrl } from '@/utils/shareEncoder'
 import { logCropQuery, subscribeCropDailyStats, getSession, onAuthStateChange, useFreeQuery, getMySubscription } from '@/utils/supabase'
 import type { MySubscription } from '@/utils/supabase'
+import { GiftOutlined } from '@ant-design/icons'
 import { Modal } from '@/components/Modal'
+import { InviteModal } from '@/components/InviteModal'
 import './App.css'
+
+const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
 
 const ALLOWED_HOST = 'fknc.top'
 
@@ -42,6 +46,7 @@ export const App = () => {
   const [todayQueryCounts, setTodayQueryCounts] = useState<Record<string, number>>({})
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
   const [showPaywallModal, setShowPaywallModal] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
   const [subscriptionState, setSubscriptionState] = useState<MySubscription | null>(null)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
@@ -212,6 +217,18 @@ export const App = () => {
     const unsubscribe = subscribeCropDailyStats(setTodayQueryCounts)
     return () => unsubscribe()
   }, [isAuthenticated])
+
+  // 首次进入选择作物页时自动弹出邀请有礼弹窗（仅一次，用 localStorage 标记）
+  useEffect(() => {
+    if (!isAuthenticated || currentPage !== 'selector' || showHistory) return
+    try {
+      if (localStorage.getItem(INVITE_MODAL_FIRST_SHOWN_KEY)) return
+      localStorage.setItem(INVITE_MODAL_FIRST_SHOWN_KEY, '1')
+      setShowInviteModal(true)
+    } catch {
+      // ignore
+    }
+  }, [isAuthenticated, currentPage, showHistory])
 
   const handleSelectCrop = async (crop: CropConfig) => {
     if (subscriptionState?.isActive) {
@@ -394,6 +411,17 @@ export const App = () => {
           <div className={`content-container ${currentPage === 'calculator' ? 'calculator-active' : ''}`}>
             {/* 选择作物页面 - 始终渲染，通过transform控制位置 */}
             <div className="page-wrapper page-selector">
+              {currentPage === 'selector' && !showHistory && (
+                <button
+                  type="button"
+                  className="invite-fab"
+                  onClick={() => setShowInviteModal(true)}
+                  title="邀请有礼"
+                  aria-label="邀请有礼"
+                >
+                  <GiftOutlined />
+                </button>
+              )}
               <CropSelector
                 crops={crops}
                 selectedCrop={selectedCrop}
@@ -448,8 +476,21 @@ export const App = () => {
           >
             开通会员
           </button>
+          <p className="paywall-invite-hint">邀请好友充值会员，你可获得低一档会员天数奖励。</p>
+          <button
+            type="button"
+            className="paywall-invite-button"
+            onClick={() => {
+              setShowPaywallModal(false)
+              setShowInviteModal(true)
+            }}
+          >
+            邀请有礼
+          </button>
         </div>
       </Modal>
+
+      <InviteModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} />
     </div>
   )
 }

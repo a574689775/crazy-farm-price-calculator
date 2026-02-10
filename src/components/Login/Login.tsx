@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
-import { signIn, sendResetPasswordCode, verifyResetPasswordCode, sendEmailOtp, verifyEmailOtp } from '@/utils/supabase'
+import { signIn, sendResetPasswordCode, verifyResetPasswordCode, sendEmailOtp, verifyEmailOtp, bindInviteRelation } from '@/utils/supabase'
 import { translateSupabaseError } from '@/utils/errorMessages'
 import { Toast } from '../PriceCalculator/Toast'
 import { Footer } from '../Footer'
@@ -49,6 +49,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
 
   // 注册验证码倒计时
   useEffect(() => {
@@ -132,6 +133,15 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
 
         // 使用验证码注册
         await verifyEmailOtp(email, verificationCode, password)
+        const codeToBind = inviteCode.trim()
+        if (codeToBind) {
+          const bindRes = await bindInviteRelation(codeToBind)
+          if (!bindRes.ok && bindRes.error) {
+            setToastMessage(bindRes.error)
+            setShowToast(true)
+            setTimeout(() => setShowToast(false), 3000)
+          }
+        }
         setToastMessage('注册成功！正在登录...')
         setShowToast(true)
         setTimeout(() => {
@@ -481,6 +491,22 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                     {showConfirmPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                   </button>
                 </div>
+              </div>
+            )}
+
+            {isSignUp && (
+              <div className="login-input-group">
+                <label className="login-label">邀请码 <span className="login-optional">（选填）</span></label>
+                <input
+                  type="text"
+                  className="login-input"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.replace(/\s/g, '').toUpperCase().slice(0, 6))}
+                  placeholder="如有邀请码请输入 6 位"
+                  disabled={loading}
+                  maxLength={6}
+                  autoComplete="off"
+                />
               </div>
             )}
 

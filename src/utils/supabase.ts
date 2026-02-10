@@ -341,6 +341,68 @@ export const getMySubscription = async (): Promise<MySubscription> => {
   return { subscriptionEndAt, isActive }
 }
 
+/** 邀请：获取或懒生成当前用户 6 位邀请码 */
+export const getOrCreateInviteCode = async (): Promise<{ ok: boolean; inviteCode?: string; error?: string }> => {
+  const { data, error } = await supabase.rpc('get_or_create_invite_code')
+  if (error) {
+    return { ok: false, error: error.message || '获取邀请码失败' }
+  }
+  const ok = (data as { ok?: boolean })?.ok === true
+  const inviteCode = (data as { invite_code?: string })?.invite_code
+  if (!ok || !inviteCode) {
+    return { ok: false, error: (data as { error?: string })?.error || '获取邀请码失败' }
+  }
+  return { ok: true, inviteCode }
+}
+
+/** 邀请：绑定邀请关系（被邀请人注册后调用，仅建立关系不发奖） */
+export const bindInviteRelation = async (inviteCode: string): Promise<{ ok: boolean; error?: string }> => {
+  const code = (inviteCode || '').trim()
+  if (!code) return { ok: false, error: '请输入邀请码' }
+  const { data, error } = await supabase.rpc('bind_invite_relation', { p_invite_code: code })
+  if (error) {
+    return { ok: false, error: error.message || '绑定失败' }
+  }
+  const ok = (data as { ok?: boolean })?.ok === true
+  if (!ok) {
+    const err = (data as { error?: string })?.error
+    const msg =
+      err === 'already_bound'
+        ? '您已经绑定过邀请关系'
+        : err === 'code_not_found'
+          ? '邀请码无效或已失效'
+          : err === 'cannot_invite_self'
+            ? '不能填写自己的邀请码'
+            : err === 'invalid_code'
+              ? '请输入 6 位邀请码'
+              : err || '绑定失败'
+    return { ok: false, error: msg }
+  }
+  return { ok: true }
+}
+
+/** 邀请：我的邀请统计（已邀请人数、已获得奖励天数） */
+export const getMyInviteStats = async (): Promise<{
+  ok: boolean
+  invitedCount?: number
+  rewardDays?: number
+  error?: string
+}> => {
+  const { data, error } = await supabase.rpc('get_my_invite_stats')
+  if (error) {
+    return { ok: false, error: error.message || '获取统计失败' }
+  }
+  const ok = (data as { ok?: boolean })?.ok === true
+  if (!ok) {
+    return { ok: false, error: (data as { error?: string })?.error || '获取统计失败' }
+  }
+  return {
+    ok: true,
+    invitedCount: (data as { invited_count?: number })?.invited_count ?? 0,
+    rewardDays: (data as { reward_days?: number })?.reward_days ?? 0,
+  }
+}
+
 /** 将 Edge Function 返回的 error 码映射为对用户展示的文案 */
 function mapActivationErrorCode(err: string | undefined): string {
   return err === 'invalid_format' || err === 'invalid_encoding'

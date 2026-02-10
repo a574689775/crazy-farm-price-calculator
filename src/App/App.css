@@ -231,6 +231,58 @@
   opacity: 0.8;
 }
 
+.paywall-invite-hint {
+  margin: 1rem 0 0;
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.75);
+}
+
+.paywall-invite-button {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid rgba(132, 49, 0, 0.5);
+  border-radius: 12px;
+  color: rgba(132, 49, 0, 1);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.paywall-invite-button:hover {
+  background: rgba(255, 247, 220, 0.6);
+}
+
+/* 选择页固定「邀请有礼」小圆球 */
+.invite-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 80px;
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, #FFF7DC, #FFEBC4);
+  border: 1px solid rgba(132, 49, 0, 0.4);
+  border-radius: 50%;
+  color: #843100;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(132, 49, 0, 0.15);
+}
+
+.invite-fab:hover {
+  background: linear-gradient(to bottom, #FFEBC4, #FFDE9F);
+  border-color: rgba(132, 49, 0, 0.5);
+  color: #6b2d00;
+}
+
 @media (max-width: 768px) {
   .app {
     height: 100dvh;
