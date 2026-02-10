@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.3.3',
+    date: '2026.2.10',
+    items: [
+      'PWA应用支持，添加缓存，加快页面速度',
+    ],
+  },
+  {
     version: 'V6.3.2',
     date: '2026.2.10',
     items: [
