@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Modal } from '../Modal'
 import { changelog } from '@/data/changelog'
-import { submitUserFeedback, signOut, activateSubscriptionWithCode, getMySubscription } from '@/utils/supabase'
+import { submitUserFeedback, activateSubscriptionWithCode, getMySubscription } from '@/utils/supabase'
 import type { MySubscription } from '@/utils/supabase'
 import { Toast } from '../PriceCalculator/Toast'
 import './Footer.css'
@@ -10,6 +10,9 @@ interface FooterProps {
   hideSignOut?: boolean
   /** 登录页不显示会员入口，未登录只能先登录 */
   hideSubscription?: boolean
+  /** 外部控制联系我们弹窗（用于个人中心统一入口） */
+  contactModalOpen?: boolean
+  onContactModalChange?: (open: boolean) => void
   /** 由父组件控制会员弹窗时传入 */
   subscriptionModalOpen?: boolean
   onSubscriptionModalChange?: (open: boolean) => void
@@ -22,12 +25,21 @@ interface FooterProps {
 export const Footer = ({
   hideSignOut = false,
   hideSubscription = false,
+  contactModalOpen,
+  onContactModalChange,
   subscriptionModalOpen,
   onSubscriptionModalChange,
   subscriptionState,
   onSubscriptionActivated,
 }: FooterProps) => {
-  const [showContactModal, setShowContactModal] = useState(false)
+  // 这些 props 目前仅用于保持与旧版兼容
+  void hideSignOut
+  void hideSubscription
+  const [internalContactModal, setInternalContactModal] = useState(false)
+  const showContactModal =
+    onContactModalChange !== undefined ? (contactModalOpen ?? false) : internalContactModal
+  const setShowContactModal =
+    onContactModalChange !== undefined ? (open: boolean) => onContactModalChange(open) : setInternalContactModal
   const [showContactQRCode, setShowContactQRCode] = useState(false)
   const [contactType, setContactType] = useState<'author' | 'assistant'>('author')
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
@@ -150,17 +162,6 @@ export const Footer = ({
     }
   }
 
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-      // 刷新页面，让 App 重新检查登录状态
-      window.location.reload()
-    } catch (error) {
-      console.error('登出失败:', error)
-      alert('登出失败，请稍后重试')
-    }
-  }
-
   const PURCHASE_URL = 'https://pay.ldxp.cn/shop/TX7BUFYY/cb2cs2'
 
   const handleOpenPurchasePage = () => {
@@ -170,29 +171,7 @@ export const Footer = ({
   return (
     <>
       <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-link" onClick={() => setShowChangelogModal(true)}>
-            {changelog[0].version}
-          </div>
-          <div className="footer-actions">
-            <div className="footer-link" onClick={() => setShowContactModal(true)}>
-              联系我们
-            </div>
-            {!hideSubscription && (
-              <div className="footer-link" onClick={() => setShowSubscriptionModal(true)}>
-                {subscriptionActive ? '续费会员' : '开通会员'}
-              </div>
-            )}
-            <div className="footer-link" onClick={() => setShowDisclaimerModal(true)}>
-              免责声明
-            </div>
-            {!hideSignOut && (
-              <div className="footer-link" onClick={handleSignOut}>
-                退出登录
-              </div>
-            )}
-          </div>
-        </div>
+        <div className="footer-content" />
       </footer>
       <div className="footer-beian">
         <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">冀ICP备2024055698号-3</a>

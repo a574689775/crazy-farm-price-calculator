@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.5.0',
+    date: '2026.2.10',
+    items: [
+      '添加个人中心功能，展示用户信息和会员状态',
+    ],
+  },
+  {
     version: 'V6.4.1',
     date: '2026.2.10',
     items: [

@@ -19,6 +19,17 @@
   max-width: 400px;
 }
 
+.login-help-text {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #a35d15;
+  text-align: center;
+}
+
+.login-help-text strong {
+  font-weight: 700;
+}
+
 .login-box {
   position: relative;
   width: 100%;

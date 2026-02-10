@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { CropConfig, HistoryRecord, WeatherMutation } from '@/types'
 import { crops } from '@/data/crops'
+import { changelog } from '@/data/changelog'
 import { Footer } from '@/components/Footer'
 import { CropSelector } from '@/components/CropSelector'
 import { PriceCalculator } from '@/components/PriceCalculator'
@@ -8,9 +9,16 @@ import { HistoryView } from '@/components/HistoryView'
 import { FeedbackDataView } from '@/components/FeedbackDataView'
 import { Login } from '@/components/Login'
 import { parseShareUrl } from '@/utils/shareEncoder'
-import { logCropQuery, subscribeCropDailyStats, getSession, onAuthStateChange, useFreeQuery, getMySubscription } from '@/utils/supabase'
+import {
+  logCropQuery,
+  subscribeCropDailyStats,
+  getSession,
+  onAuthStateChange,
+  useFreeQuery,
+  getMySubscription,
+  signOut,
+} from '@/utils/supabase'
 import type { MySubscription } from '@/utils/supabase'
-import { GiftOutlined } from '@ant-design/icons'
 import { Modal } from '@/components/Modal'
 import { InviteModal } from '@/components/InviteModal'
 import './App.css'
@@ -48,6 +56,12 @@ export const App = () => {
   const [showPaywallModal, setShowPaywallModal] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [subscriptionState, setSubscriptionState] = useState<MySubscription | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [showUserCenter, setShowUserCenter] = useState(false)
+  const [isUserCenterClosing, setIsUserCenterClosing] = useState(false)
+  const [showUserContactModal, setShowUserContactModal] = useState(false)
+  const [showUserDisclaimerModal, setShowUserDisclaimerModal] = useState(false)
+  const [showUserChangelogModal, setShowUserChangelogModal] = useState(false)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -63,6 +77,19 @@ export const App = () => {
       setPrefillData(null)
       clearTimer.current = null
     }, ANIMATION_DURATION)
+  }
+
+  const openUserCenter = () => {
+    setIsUserCenterClosing(false)
+    setShowUserCenter(true)
+  }
+
+  const closeUserCenter = () => {
+    setIsUserCenterClosing(true)
+    window.setTimeout(() => {
+      setShowUserCenter(false)
+      setIsUserCenterClosing(false)
+    }, 220)
   }
 
   // 取消待清理，避免快速前进/后退时被错误清空
@@ -113,12 +140,16 @@ export const App = () => {
     const checkAuth = async () => {
       const session = await getSession()
       setIsAuthenticated(!!session)
+      setUserEmail(session?.user?.email ?? null)
     }
     checkAuth()
 
     // 监听认证状态变化
-    const { data: { subscription } } = onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session)
+      setUserEmail(session?.user?.email ?? null)
     })
 
     return () => {
@@ -411,29 +442,21 @@ export const App = () => {
           <div className={`content-container ${currentPage === 'calculator' ? 'calculator-active' : ''}`}>
             {/* 选择作物页面 - 始终渲染，通过transform控制位置 */}
             <div className="page-wrapper page-selector">
-              {currentPage === 'selector' && !showHistory && (
-                <button
-                  type="button"
-                  className="invite-fab"
-                  onClick={() => setShowInviteModal(true)}
-                  title="邀请有礼"
-                  aria-label="邀请有礼"
-                >
-                  <GiftOutlined />
-                </button>
-              )}
               <CropSelector
                 crops={crops}
                 selectedCrop={selectedCrop}
                 onSelectCrop={handleSelectCrop}
-                onShowHistory={handleShowHistory}
+                onOpenUserCenter={openUserCenter}
                 queryCounts={todayQueryCounts}
+                subscriptionActive={subscriptionState?.isActive}
               />
               <Footer
                 subscriptionModalOpen={showSubscriptionModal}
                 onSubscriptionModalChange={setShowSubscriptionModal}
                 subscriptionState={subscriptionState}
                 onSubscriptionActivated={refreshSubscription}
+                contactModalOpen={showUserContactModal}
+                onContactModalChange={setShowUserContactModal}
               />
             </div>
             
@@ -457,6 +480,153 @@ export const App = () => {
           </div>
         )}
       </main>
+
+      {/* 个人中心抽屉 */}
+      {showUserCenter && (
+        <>
+          <div
+            className={`user-center-overlay ${isUserCenterClosing ? 'closing' : ''}`}
+            onClick={closeUserCenter}
+          />
+          <aside className={`user-center-drawer ${isUserCenterClosing ? 'closing' : ''}`}>
+            <div className="user-center-header">
+              <div className="user-center-title">个人中心</div>
+              <button
+                type="button"
+                className="user-center-close"
+                onClick={closeUserCenter}
+                aria-label="关闭个人中心"
+              >
+                ×
+              </button>
+            </div>
+            <div className="user-center-body">
+              <div className="user-center-section">
+                <div className="user-center-user">
+                  <div className="user-center-avatar">
+                    {(userEmail && userEmail[0]?.toUpperCase()) || 'U'}
+                  </div>
+                  <div className="user-center-user-text">
+                    <div className="user-center-user-email">{userEmail || '已登录用户'}</div>
+                    <div className="user-center-user-tag">
+                      {subscriptionState?.isActive ? '会员用户' : '免费用户'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="user-center-section">
+                <div className="user-center-membership">
+                  {subscriptionState?.isActive ? (
+                    <>
+                      <div className="user-center-membership-main">已开通会员 · 不限次数查询</div>
+                      {subscriptionState.subscriptionEndAt && (
+                        <div className="user-center-membership-sub">
+                          有效期至{' '}
+                          {new Date(subscriptionState.subscriptionEndAt).toLocaleDateString('zh-CN', {
+                            timeZone: 'Asia/Shanghai',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="user-center-membership-main">当前为免费用户</div>
+                      <div className="user-center-membership-sub">每日免费进入计算器 1 次，开通会员解锁不限次体验。</div>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    className="user-center-primary-btn"
+                    onClick={() => {
+                      closeUserCenter()
+                      setShowSubscriptionModal(true)
+                    }}
+                  >
+                    {subscriptionState?.isActive ? '续费会员' : '开通会员'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="user-center-section">
+                <button
+                  type="button"
+                  className="user-center-item"
+                  onClick={() => {
+                    closeUserCenter()
+                    handleShowHistory()
+                  }}
+                >
+                  <span className="user-center-item-label">计算历史</span>
+                  <span className="user-center-item-arrow">›</span>
+                </button>
+                <button
+                  type="button"
+                  className="user-center-item"
+                  onClick={() => {
+                    closeUserCenter()
+                    setShowInviteModal(true)
+                  }}
+                >
+                  <span className="user-center-item-label">邀请有礼</span>
+                  <span className="user-center-item-arrow">›</span>
+                </button>
+                <button
+                  type="button"
+                  className="user-center-item"
+                  onClick={() => {
+                    closeUserCenter()
+                    setShowUserContactModal(true)
+                  }}
+                >
+                  <span className="user-center-item-label">联系我们</span>
+                  <span className="user-center-item-arrow">›</span>
+                </button>
+                <button
+                  type="button"
+                  className="user-center-item"
+                  onClick={() => {
+                    closeUserCenter()
+                    setShowUserDisclaimerModal(true)
+                  }}
+                >
+                  <span className="user-center-item-label">免责声明</span>
+                  <span className="user-center-item-arrow">›</span>
+                </button>
+                <button
+                  type="button"
+                  className="user-center-item"
+                  onClick={() => {
+                    closeUserCenter()
+                    setShowUserChangelogModal(true)
+                  }}
+                >
+                  <span className="user-center-item-label">{changelog[0].version}</span>
+                  <span className="user-center-item-arrow">›</span>
+                </button>
+              </div>
+            </div>
+            <div className="user-center-section user-center-section-danger">
+              <button
+                type="button"
+                className="user-center-danger-btn"
+                onClick={async () => {
+                  setShowUserCenter(false)
+                  try {
+                    await signOut()
+                  } finally {
+                    window.location.reload()
+                  }
+                }}
+              >
+                退出登录
+              </button>
+            </div>
+          </aside>
+        </>
+      )}
 
       {/* 免费次数已用完，引导开通会员 */}
       <Modal
@@ -504,6 +674,62 @@ export const App = () => {
       </Modal>
 
       <InviteModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} />
+
+      {/* 个人中心：更新日志模态框 */}
+      <Modal
+        isOpen={showUserChangelogModal}
+        onClose={() => setShowUserChangelogModal(false)}
+        title="更新日志"
+      >
+        <div className="changelog">
+          {changelog.map((item) => (
+            <div key={item.version} className="changelog-item">
+              <h4 className="changelog-version">
+                {item.version} <span className="changelog-date">({item.date})</span>
+              </h4>
+              <ul className="changelog-list">
+                {item.items.map((change, index) => (
+                  <li key={index}>{change}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      {/* 个人中心：联系我们，转由 Footer 控制原有模态框 */}
+
+      {/* 个人中心：免责声明模态框（复用 Footer 内容） */}
+      <Modal
+        isOpen={showUserDisclaimerModal}
+        onClose={() => setShowUserDisclaimerModal(false)}
+        title="免责声明"
+      >
+        <div className="modal-text disclaimer-text">
+          <p><strong>1. 收费与合规说明</strong></p>
+          <p>本工具已实行部分收费，并非完全免费。收费手续合法，运营主体已完成企业备案。根据现行法规，本服务类型不需要 ICP 许可证。</p>
+
+          <p><strong>2. 版权与素材声明（重要）</strong></p>
+          <p>页面中的作物等图片素材来源于网易游戏《蛋仔派对》，其所有权及知识产权归网易公司所有。我们仅将上述图片用于标识作物，不用于其他用途，不主张任何素材权利，并尊重网易游戏原创内容。</p>
+          <p>如您为相关素材的版权方或授权方，认为本使用方式构成侵权，请通过 574689775@qq.com 联系我们，我们将在收到有效通知后及时下架或替换相关素材。</p>
+          
+          <p><strong>3. 非官方与独立性声明</strong></p>
+          <p>本工具为爱好者独立开发，与网易游戏《蛋仔派对》官方无任何关联、赞助或授权关系。非官方产品。</p>
+          
+          <p><strong>4. 数据免责与风险自担</strong></p>
+          <p>本工具所有计算功能、数据及结果均基于对公开游戏机制的分析，仅供参考，不保证100%准确性，不作为游戏内交易的官方依据。实际游戏内数值请以官方发布为准。</p>
+          <p>用户因使用、依赖本工具信息所产生的任何直接或间接风险、损失，需自行承担全部责任。</p>
+          
+          <p><strong>5. 开发者责任限制</strong></p>
+          <p>开发者在本工具可用的技术上尽力保证其稳定，但对于服务的连续性、准确性、安全性不作担保。对于因使用本工具而产生的任何问题，开发者的责任在法律允许的最大范围内予以免除。</p>
+          
+          <p><strong>6. 服务变更与终止</strong></p>
+          <p>开发者保留随时修改、暂停或终止本工具服务的权利，无需事先通知。</p>
+          
+          <p><strong>7. 用户同意</strong></p>
+          <p>继续使用本工具，即表示您已阅读、理解并完全同意本声明的全部条款。</p>
+        </div>
+      </Modal>
     </div>
   )
 }

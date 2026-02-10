@@ -554,6 +554,10 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
         )}
       </div>
 
+      <div className="login-help-text">
+        有登录问题可添加微信 <strong>18746870222</strong> 联系处理
+      </div>
+
       <Footer hideSignOut={true} hideSubscription={true} />
 
       {showToast && <Toast message={toastMessage} />}

@@ -1,6 +1,6 @@
 import type { CropConfig } from '@/types'
 import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { ClockCircleOutlined, FireFilled } from '@ant-design/icons'
+import { FireFilled, UserOutlined } from '@ant-design/icons'
 import { SVGText } from '@/components/SVGText'
 import { GradientButton } from '@/components/GradientButton'
 import './CropSelector.css'
@@ -9,13 +9,21 @@ interface CropSelectorProps {
   crops: CropConfig[]
   selectedCrop: CropConfig | null
   onSelectCrop: (crop: CropConfig) => void
-  onShowHistory?: () => void
+  /** 打开个人中心抽屉 */
+  onOpenUserCenter?: () => void
   queryCounts?: Record<string, number>
+  /** 当前是否为会员用户，用于展示免费次数提示逻辑 */
+  subscriptionActive?: boolean
 }
 
 const SHAKE_DURATION_MS = 400
 
-export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts = {} }: CropSelectorProps) => {
+export const CropSelector = ({
+  crops,
+  onSelectCrop,
+  onOpenUserCenter,
+  queryCounts = {},
+}: CropSelectorProps) => {
   const nodeRefs = useRef(new Map<string, HTMLDivElement>())
   const prevPositionsRef = useRef(new Map<string, DOMRect>())
   const prevOrderRef = useRef<string>('')
@@ -273,9 +281,9 @@ export const CropSelector = ({ crops, onSelectCrop, onShowHistory, queryCounts =
         <div className="champion-section">
           <div className="champion-title-row">
             <div className="champion-title">月球作物：</div>
-            <GradientButton onClick={onShowHistory}>
-              <ClockCircleOutlined style={{ marginRight: '4px', color: '#000' }} />
-              计算历史
+            <GradientButton onClick={onOpenUserCenter}>
+              <UserOutlined style={{ marginRight: '4px', color: '#000' }} />
+              个人中心
             </GradientButton>
           </div>
           <div className="champion-grid">
