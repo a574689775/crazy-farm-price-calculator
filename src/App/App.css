@@ -349,17 +349,19 @@
 }
 
 .user-center-avatar {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: linear-gradient(to bottom, #ffecc8, #ffde9f);
   border: 1px solid rgba(132, 49, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: #843100;
+  overflow: hidden;
+}
+
+.user-center-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .user-center-user-text {
@@ -404,6 +406,36 @@
 
 .user-center-nickname-btn:hover {
   background: rgba(255, 243, 224, 0.6);
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.avatar-item {
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+}
+
+.avatar-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-item--active {
+  border-color: rgba(132, 49, 0, 0.7);
+  box-shadow: 0 0 0 2px rgba(255, 243, 224, 0.9);
 }
 
 .user-center-body {
@@ -551,6 +583,13 @@
 /* 设置昵称弹窗 */
 .nickname-modal-content {
   padding: 8px 0;
+}
+
+.nickname-modal-section-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(132, 49, 0, 0.9);
 }
 
 .nickname-modal-hint {

@@ -323,6 +323,19 @@ export const updateUserDisplayName = async (displayName: string): Promise<{ ok: 
 }
 
 /**
+ * 更新当前用户头像编号（写入 auth.users.raw_user_meta_data.avatar_index，范围 1~18）
+ */
+export const updateUserAvatarIndex = async (avatarIndex: number): Promise<{ ok: boolean; error?: string }> => {
+  const n = Number.isFinite(avatarIndex) ? Math.floor(avatarIndex) : 1
+  const safeIndex = Math.min(18, Math.max(1, n || 1))
+  const { error } = await supabase.auth.updateUser({
+    data: { avatar_index: safeIndex },
+  })
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
+/**
  * 免费用户每日 1 次查询：尝试使用 1 次当日免费次数。
  * 需在 Supabase 创建 daily_free_usage 表与 use_free_query RPC。
  * @returns { allowed: true } 表示已使用本次免费次数并允许进入；{ allowed: false } 表示今日已用完

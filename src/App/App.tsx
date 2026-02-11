@@ -18,6 +18,7 @@ import {
   getMySubscription,
   signOut,
   updateUserDisplayName,
+  updateUserAvatarIndex,
 } from '@/utils/supabase'
 import type { MySubscription } from '@/utils/supabase'
 import { Modal } from '@/components/Modal'
@@ -25,6 +26,8 @@ import { InviteModal } from '@/components/InviteModal'
 import './App.css'
 
 const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
+const AVATAR_BASE_URL = 'https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/avatars'
+const AVATAR_COUNT = 18
 
 /** 昵称校验：最多 12 字符、最多 6 个汉字，仅允许中文/字母/数字 */
 const validateNickname = (s: string): { ok: true } | { ok: false; error: string } => {
@@ -56,11 +59,13 @@ export const App = () => {
   const [subscriptionState, setSubscriptionState] = useState<MySubscription | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userDisplayName, setUserDisplayName] = useState<string | null>(null)
+  const [userAvatarIndex, setUserAvatarIndex] = useState<number>(1)
   const [showUserCenter, setShowUserCenter] = useState(false)
   const [showNicknameModal, setShowNicknameModal] = useState(false)
   const [nicknameInput, setNicknameInput] = useState('')
   const [nicknameSaving, setNicknameSaving] = useState(false)
   const [nicknameError, setNicknameError] = useState<string | null>(null)
+  const [tempAvatarIndex, setTempAvatarIndex] = useState<number>(1)
   const [isUserCenterClosing, setIsUserCenterClosing] = useState(false)
   const [showUserContactModal, setShowUserContactModal] = useState(false)
   const [showUserDisclaimerModal, setShowUserDisclaimerModal] = useState(false)
@@ -144,6 +149,14 @@ export const App = () => {
       const session = await getSession()
       setIsAuthenticated(!!session)
       setUserEmail(session?.user?.email ?? null)
+      const avatarMeta = (session?.user?.user_metadata as { avatar_index?: number | string } | undefined)?.avatar_index
+      if (avatarMeta !== undefined) {
+        const n = typeof avatarMeta === 'number' ? avatarMeta : parseInt(String(avatarMeta), 10)
+        const safe = Number.isFinite(n) ? Math.min(AVATAR_COUNT, Math.max(1, n || 1)) : 1
+        setUserAvatarIndex(safe)
+      } else {
+        setUserAvatarIndex(1)
+      }
     }
     checkAuth()
 
@@ -155,6 +168,12 @@ export const App = () => {
       setUserEmail(session?.user?.email ?? null)
       const name = (session?.user?.user_metadata as { display_name?: string } | undefined)?.display_name
       setUserDisplayName(typeof name === 'string' ? name : null)
+      const avatarMeta = (session?.user?.user_metadata as { avatar_index?: number | string } | undefined)?.avatar_index
+      if (avatarMeta !== undefined) {
+        const n = typeof avatarMeta === 'number' ? avatarMeta : parseInt(String(avatarMeta), 10)
+        const safe = Number.isFinite(n) ? Math.min(AVATAR_COUNT, Math.max(1, n || 1)) : 1
+        setUserAvatarIndex(safe)
+      }
     })
 
     return () => {
@@ -488,7 +507,11 @@ export const App = () => {
               <div className="user-center-section">
                 <div className="user-center-user">
                   <div className="user-center-avatar">
-                    {((userDisplayName || userEmail) && (userDisplayName || userEmail)![0]?.toUpperCase()) || 'U'}
+                    <img
+                      src={`${AVATAR_BASE_URL}/${userAvatarIndex || 1}.png`}
+                      alt="头像"
+                      className="user-center-avatar-img"
+                    />
                   </div>
                   <div className="user-center-user-text">
                     <div className="user-center-user-email">
@@ -508,10 +531,11 @@ export const App = () => {
                   onClick={() => {
                     setNicknameInput(userDisplayName ?? userEmail ?? '')
                     setNicknameError(null)
+                    setTempAvatarIndex(userAvatarIndex || 1)
                     setShowNicknameModal(true)
                   }}
                 >
-                  {userDisplayName ? '修改昵称' : '设置昵称'}
+                  修改个人信息
                 </button>
               </div>
               <div className="user-center-section">
@@ -695,9 +719,31 @@ export const App = () => {
             setNicknameError(null)
           }
         }}
-        title="设置昵称"
+        title="修改个人信息"
       >
         <div className="nickname-modal-content">
+          <div className="nickname-modal-section-title">选择头像</div>
+          <div className="avatar-grid">
+            {Array.from({ length: AVATAR_COUNT }, (_v, i) => {
+              const index = i + 1
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  className={`avatar-item ${tempAvatarIndex === index ? 'avatar-item--active' : ''}`}
+                  onClick={() => setTempAvatarIndex(index)}
+                  aria-label={`选择头像 ${index}`}
+                >
+                  <img
+                    src={`${AVATAR_BASE_URL}/${index}.png`}
+                    alt=""
+                    className="avatar-item-img"
+                  />
+                </button>
+              )
+            })}
+          </div>
+          <div className="nickname-modal-section-title">昵称</div>
           <p className="nickname-modal-hint">
             昵称最多 12 个字符、最多 6 个汉字，仅支持中文、字母和数字，不可包含特殊符号。
           </p>
@@ -723,15 +769,22 @@ export const App = () => {
               }
               setNicknameSaving(true)
               setNicknameError(null)
-              const { ok, error } = await updateUserDisplayName(nicknameInput.trim())
-              if (ok) {
-                const session = await getSession()
-                const name = (session?.user?.user_metadata as { display_name?: string } | undefined)?.display_name
-                setUserDisplayName(typeof name === 'string' ? name : null)
-                setShowNicknameModal(false)
-              } else {
-                setNicknameError(error ?? '保存失败')
+              const nickname = nicknameInput.trim()
+              const nickRes = await updateUserDisplayName(nickname)
+              if (!nickRes.ok) {
+                setNicknameError(nickRes.error ?? '保存失败')
+                setNicknameSaving(false)
+                return
               }
+              const avatarRes = await updateUserAvatarIndex(tempAvatarIndex)
+              if (!avatarRes.ok) {
+                setNicknameError(avatarRes.error ?? '头像保存失败')
+                setNicknameSaving(false)
+                return
+              }
+              setUserDisplayName(nickname)
+              setUserAvatarIndex(tempAvatarIndex)
+              setShowNicknameModal(false)
               setNicknameSaving(false)
             }}
           >
