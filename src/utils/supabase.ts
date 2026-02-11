@@ -302,6 +302,26 @@ export const getCurrentUser = async () => {
   return user
 }
 
+/** 从 user 或 user_metadata 取展示用昵称（优先 display_name，否则 email 前缀） */
+export const getDisplayName = (user: { email?: string | null; user_metadata?: Record<string, unknown> } | null): string | null => {
+  if (!user) return null
+  const name = user.user_metadata?.display_name
+  if (typeof name === 'string' && name.trim()) return name.trim()
+  return user.email ?? null
+}
+
+/**
+ * 更新当前用户昵称（写入 auth.users.raw_user_meta_data.display_name）
+ */
+export const updateUserDisplayName = async (displayName: string): Promise<{ ok: boolean; error?: string }> => {
+  const trimmed = displayName.trim()
+  const { error } = await supabase.auth.updateUser({
+    data: { display_name: trimmed || undefined },
+  })
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
 /**
  * 免费用户每日 1 次查询：尝试使用 1 次当日免费次数。
  * 需在 Supabase 创建 daily_free_usage 表与 use_free_query RPC。

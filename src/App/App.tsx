@@ -17,6 +17,7 @@ import {
   useFreeQuery,
   getMySubscription,
   signOut,
+  updateUserDisplayName,
 } from '@/utils/supabase'
 import type { MySubscription } from '@/utils/supabase'
 import { Modal } from '@/components/Modal'
@@ -24,6 +25,17 @@ import { InviteModal } from '@/components/InviteModal'
 import './App.css'
 
 const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
+
+/** 昵称校验：最多 12 字符、最多 6 个汉字，仅允许中文/字母/数字 */
+const validateNickname = (s: string): { ok: true } | { ok: false; error: string } => {
+  const t = s.trim()
+  if (t.length === 0) return { ok: false, error: '请输入昵称' }
+  if (t.length > 12) return { ok: false, error: '昵称最多 12 个字符' }
+  const cjkCount = (t.match(/[\u4e00-\u9fa5]/g) || []).length
+  if (cjkCount > 6) return { ok: false, error: '昵称最多 6 个汉字' }
+  if (!/^[\u4e00-\u9fa5a-zA-Z0-9]+$/.test(t)) return { ok: false, error: '仅支持中文、字母和数字，不可包含特殊符号' }
+  return { ok: true }
+}
 
 type Page = 'selector' | 'calculator' | 'feedback'
 interface PrefillData {
@@ -43,7 +55,12 @@ export const App = () => {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [subscriptionState, setSubscriptionState] = useState<MySubscription | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userDisplayName, setUserDisplayName] = useState<string | null>(null)
   const [showUserCenter, setShowUserCenter] = useState(false)
+  const [showNicknameModal, setShowNicknameModal] = useState(false)
+  const [nicknameInput, setNicknameInput] = useState('')
+  const [nicknameSaving, setNicknameSaving] = useState(false)
+  const [nicknameError, setNicknameError] = useState<string | null>(null)
   const [isUserCenterClosing, setIsUserCenterClosing] = useState(false)
   const [showUserContactModal, setShowUserContactModal] = useState(false)
   const [showUserDisclaimerModal, setShowUserDisclaimerModal] = useState(false)
@@ -136,6 +153,8 @@ export const App = () => {
     } = onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session)
       setUserEmail(session?.user?.email ?? null)
+      const name = (session?.user?.user_metadata as { display_name?: string } | undefined)?.display_name
+      setUserDisplayName(typeof name === 'string' ? name : null)
     })
 
     return () => {
@@ -469,15 +488,31 @@ export const App = () => {
               <div className="user-center-section">
                 <div className="user-center-user">
                   <div className="user-center-avatar">
-                    {(userEmail && userEmail[0]?.toUpperCase()) || 'U'}
+                    {((userDisplayName || userEmail) && (userDisplayName || userEmail)![0]?.toUpperCase()) || 'U'}
                   </div>
                   <div className="user-center-user-text">
-                    <div className="user-center-user-email">{userEmail || '已登录用户'}</div>
+                    <div className="user-center-user-email">
+                      {userDisplayName || userEmail || '已登录用户'}
+                    </div>
+                    {userDisplayName && userEmail && (
+                      <div className="user-center-user-email-sub">{userEmail}</div>
+                    )}
                     <div className="user-center-user-tag">
                       {subscriptionState?.isActive ? '会员用户' : '免费用户'}
                     </div>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  className="user-center-nickname-btn"
+                  onClick={() => {
+                    setNicknameInput(userDisplayName ?? userEmail ?? '')
+                    setNicknameError(null)
+                    setShowNicknameModal(true)
+                  }}
+                >
+                  {userDisplayName ? '修改昵称' : '设置昵称'}
+                </button>
               </div>
               <div className="user-center-section">
                 <div className="user-center-membership">
@@ -650,6 +685,60 @@ export const App = () => {
       </Modal>
 
       <InviteModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} />
+
+      {/* 设置昵称模态框 */}
+      <Modal
+        isOpen={showNicknameModal}
+        onClose={() => {
+          if (!nicknameSaving) {
+            setShowNicknameModal(false)
+            setNicknameError(null)
+          }
+        }}
+        title="设置昵称"
+      >
+        <div className="nickname-modal-content">
+          <p className="nickname-modal-hint">
+            昵称最多 12 个字符、最多 6 个汉字，仅支持中文、字母和数字，不可包含特殊符号。
+          </p>
+          <input
+            type="text"
+            className="nickname-modal-input"
+            value={nicknameInput}
+            onChange={(e) => setNicknameInput(e.target.value)}
+            placeholder="请输入昵称"
+            maxLength={12}
+            disabled={nicknameSaving}
+          />
+          {nicknameError && <p className="nickname-modal-error">{nicknameError}</p>}
+          <button
+            type="button"
+            className="nickname-modal-save"
+            disabled={nicknameSaving}
+            onClick={async () => {
+              const valid = validateNickname(nicknameInput)
+              if (!valid.ok) {
+                setNicknameError(valid.error)
+                return
+              }
+              setNicknameSaving(true)
+              setNicknameError(null)
+              const { ok, error } = await updateUserDisplayName(nicknameInput.trim())
+              if (ok) {
+                const session = await getSession()
+                const name = (session?.user?.user_metadata as { display_name?: string } | undefined)?.display_name
+                setUserDisplayName(typeof name === 'string' ? name : null)
+                setShowNicknameModal(false)
+              } else {
+                setNicknameError(error ?? '保存失败')
+              }
+              setNicknameSaving(false)
+            }}
+          >
+            {nicknameSaving ? '保存中...' : '保存'}
+          </button>
+        </div>
+      </Modal>
 
       {/* 个人中心：更新日志模态框 */}
       <Modal

@@ -377,10 +377,33 @@
   max-width: 200px;
 }
 
+.user-center-user-email-sub {
+  font-size: 12px;
+  color: rgba(132, 49, 0, 0.65);
+  margin-top: 2px;
+}
+
 .user-center-user-tag {
   margin-top: 2px;
   font-size: 11px;
   color: rgba(132, 49, 0, 0.7);
+}
+
+.user-center-nickname-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(132, 49, 0, 0.35);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(132, 49, 0, 0.85);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.user-center-nickname-btn:hover {
+  background: rgba(255, 243, 224, 0.6);
 }
 
 .user-center-body {
@@ -523,6 +546,66 @@
 .user-center-danger-btn:hover {
   background: rgba(255, 240, 236, 0.95);
   border-color: rgba(166, 61, 46, 0.6);
+}
+
+/* 设置昵称弹窗 */
+.nickname-modal-content {
+  padding: 8px 0;
+}
+
+.nickname-modal-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.7);
+  line-height: 1.5;
+}
+
+.nickname-modal-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(132, 49, 0, 0.3);
+  border-radius: 10px;
+  font-size: 14px;
+  color: #843100;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+
+.nickname-modal-input::placeholder {
+  color: rgba(132, 49, 0, 0.45);
+}
+
+.nickname-modal-input:focus {
+  outline: none;
+  border-color: rgba(132, 49, 0, 0.6);
+}
+
+.nickname-modal-error {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #c0392b;
+}
+
+.nickname-modal-save {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(132, 49, 0, 1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.nickname-modal-save:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.nickname-modal-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @keyframes user-center-slide-in {
