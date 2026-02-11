@@ -25,24 +25,10 @@ import './App.css'
 
 const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
 
-const ALLOWED_HOST = 'fknc.top'
-
 type Page = 'selector' | 'calculator' | 'feedback'
 interface PrefillData {
   weight: number
   mutations: WeatherMutation[]
-}
-
-const isAllowedDomain = (): boolean => {
-  if (typeof window === 'undefined') return true
-  const h = window.location.hostname
-  return (
-    h === ALLOWED_HOST ||
-    h === `www.${ALLOWED_HOST}` ||
-    h === 'localhost' ||
-    h === '127.0.0.1' ||
-    h === '0.0.0.0'
-  )
 }
 
 export const App = () => {
@@ -386,27 +372,6 @@ export const App = () => {
       }
     }
   }, [])
-
-  // 非 fknc.top 域名时全屏提醒（域名迁移通知）
-  if (!isAllowedDomain()) {
-    return (
-      <div className="app domain-reminder">
-        <div className="domain-reminder__card">
-          <h1 className="domain-reminder__title">域名迁移与旧域名下线通知</h1>
-          <p className="domain-reminder__para">
-            为提供更稳定的服务体验，我们已完成主域名升级。全新域名 fknc.top 现已正式启用，访问更快，并支持微信内直接打开。
-          </p>
-          <p className="domain-reminder__para">
-            旧域名 crazyfarm.cv 将于近期起逐步下线，建议您立即切换至新域名，以免影响后续使用。
-          </p>
-          <div className="domain-reminder__cta">
-            <span className="domain-reminder__cta-text">请立即访问：</span>
-            <a href="https://fknc.top" className="domain-reminder__link">fknc.top</a>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // 如果还在检查登录状态，显示加载中
   if (isAuthenticated === null) {

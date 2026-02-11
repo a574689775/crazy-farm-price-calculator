@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.5.2',
+    date: '2026.2.11',
+    items: [
+      '移除域名下线提醒，旧域名重定向到新域名',
+    ],
+  },
+  {
     version: 'V6.5.1',
     date: '2026.2.11',
     items: [
