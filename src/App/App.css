@@ -349,6 +349,7 @@
 }
 
 .user-center-avatar {
+  flex: 0 0 56px;
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -367,6 +368,8 @@
 .user-center-user-text {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0; /* 允许内部文本正确使用省略号 */
 }
 
 .user-center-user-email {
@@ -376,13 +379,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
 }
 
 .user-center-user-email-sub {
   font-size: 12px;
   color: rgba(132, 49, 0, 0.65);
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-center-user-tag {

@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V6.7.1',
+    date: '2026.2.11',
+    items: [
+      '修复邮箱过长时头像被挤压的bug',
+    ],
+  },
+  {
     version: 'V6.7.0',
     date: '2026.2.11',
     items: [
