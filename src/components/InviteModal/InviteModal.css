@@ -7,16 +7,43 @@
   text-align: left;
 }
 
-.invite-modal-loading,
-.invite-modal-error {
-  margin: 0;
-  padding: 1rem 0;
-  color: rgba(132, 49, 0, 0.85);
-  font-size: 14px;
+/* 加载态：固定高度减少切换时跳动，居中 spinner + 文案 */
+.invite-modal-loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.invite-modal-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(132, 49, 0, 0.15);
+  border-top-color: rgba(132, 49, 0, 0.75);
+  border-radius: 50%;
+  animation: invite-modal-spin 0.7s linear infinite;
+}
+
+.invite-modal-loading-text {
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.65);
+}
+
+@keyframes invite-modal-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .invite-modal-error {
+  margin: 0;
+  padding: 1rem 0;
   color: #c0392b;
+  font-size: 14px;
 }
 
 .invite-modal-label {

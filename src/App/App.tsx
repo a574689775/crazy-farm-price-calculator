@@ -551,61 +551,72 @@ export const App = () => {
               </div>
 
               <div className="user-center-section">
-                <button
-                  type="button"
-                  className="user-center-item"
-                  onClick={() => {
-                    closeUserCenter()
-                    handleShowHistory()
-                  }}
-                >
-                  <span className="user-center-item-label">计算历史</span>
-                  <span className="user-center-item-arrow">›</span>
-                </button>
-                <button
-                  type="button"
-                  className="user-center-item"
-                  onClick={() => {
-                    closeUserCenter()
-                    setShowInviteModal(true)
-                  }}
-                >
-                  <span className="user-center-item-label">邀请有礼</span>
-                  <span className="user-center-item-arrow">›</span>
-                </button>
-                <button
-                  type="button"
-                  className="user-center-item"
-                  onClick={() => {
-                    closeUserCenter()
-                    setShowUserContactModal(true)
-                  }}
-                >
-                  <span className="user-center-item-label">联系我们</span>
-                  <span className="user-center-item-arrow">›</span>
-                </button>
-                <button
-                  type="button"
-                  className="user-center-item"
-                  onClick={() => {
-                    closeUserCenter()
-                    setShowUserDisclaimerModal(true)
-                  }}
-                >
-                  <span className="user-center-item-label">免责声明</span>
-                  <span className="user-center-item-arrow">›</span>
-                </button>
-                <button
-                  type="button"
-                  className="user-center-item"
-                  onClick={() => {
-                    closeUserCenter()
-                    setShowUserChangelogModal(true)
-                  }}
-                >
-                  <span className="user-center-item-label">{changelog[0].version}</span>
-                  <span className="user-center-item-arrow">›</span>
-                </button>
+                <div className="user-center-section-title">功能</div>
+                <div className="user-center-item-list">
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      closeUserCenter()
+                      handleShowHistory()
+                    }}
+                  >
+                    <span className="user-center-item-label">计算历史</span>
+                    <span className="user-center-item-arrow">›</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      closeUserCenter()
+                      setShowInviteModal(true)
+                    }}
+                  >
+                    <span className="user-center-item-label">邀请有礼</span>
+                    <span className="user-center-item-arrow">›</span>
+                  </button>
+                </div>
+              </div>
+              <div className="user-center-section">
+                <div className="user-center-section-title">帮助与关于</div>
+                <div className="user-center-item-list">
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      closeUserCenter()
+                      setShowUserContactModal(true)
+                    }}
+                  >
+                    <span className="user-center-item-label">联系我们</span>
+                    <span className="user-center-item-arrow">›</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      closeUserCenter()
+                      setShowUserDisclaimerModal(true)
+                    }}
+                  >
+                    <span className="user-center-item-label">免责声明</span>
+                    <span className="user-center-item-arrow">›</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      closeUserCenter()
+                      setShowUserChangelogModal(true)
+                    }}
+                  >
+                    <span className="user-center-item-label">更新日志</span>
+                    <span className="user-center-item-right">
+                      <span className="user-center-item-extra">{changelog[0].version}</span>
+                      <span className="user-center-item-arrow">›</span>
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
             <div className="user-center-section user-center-section-danger">

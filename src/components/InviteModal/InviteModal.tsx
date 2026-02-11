@@ -53,7 +53,10 @@ export const InviteModal = ({ isOpen, onClose }: InviteModalProps) => {
     <Modal isOpen={isOpen} onClose={onClose} title="邀请有礼" contentClassName="invite-modal-content-wrap">
       <div className="invite-modal-content">
         {loading && (
-          <p className="invite-modal-loading">加载中...</p>
+          <div className="invite-modal-loading-wrap" aria-busy="true" aria-label="加载中">
+            <div className="invite-modal-spinner" />
+            <span className="invite-modal-loading-text">加载中</span>
+          </div>
         )}
         {error && (
           <p className="invite-modal-error">{error}</p>
