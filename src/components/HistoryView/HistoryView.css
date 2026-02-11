@@ -1,8 +1,11 @@
 .history-view {
   box-sizing: border-box;
-  border: none;
+  /* 改为 1px 细边框并增加轻微阴影，营造悬浮感 */
+  border: 1px solid rgba(132, 49, 0, 0.18);
   border-radius: 20px;
-  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  /* 使用个人中心同款柔和背景渐变 */
+  background: linear-gradient(180deg, #fffdf8 0%, #fff8eb 35%, #fff0dc 100%);
+  box-shadow: 0 6px 18px rgba(132, 49, 0, 0.18);
   max-height: calc(100dvh - 24px);
   max-height: calc(100vh - 24px);
   display: flex;
@@ -13,25 +16,8 @@
 }
 
 .history-view::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 4px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
+  /* 取消原有粗描边渐变，只保留卡片自身细边框与阴影 */
+  display: none;
 }
 
 .history-header {
@@ -55,11 +41,12 @@
   left: 16px;
   right: 16px;
   height: 0;
-  border-bottom: 2px dashed #dfd5db;
+  border-bottom: 1px dashed #dfd5db;
 }
 
 .history-title {
-  color: #000;
+  /* 与选择页、个人中心保持棕色主标题风格 */
+  color: #843100;
   font-style: normal;
   font-size: 20px;
   font-weight: 700;
@@ -96,7 +83,6 @@
   padding: 1rem;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  margin: 0 4px 4px 4px;
   border-radius: 0 0 16px 16px;
   position: relative;
   z-index: 1;
@@ -127,28 +113,11 @@
   justify-content: space-between;
   height: 90px;
   padding: 16px;
-  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  /* 简洁的卡片样式：柔和渐变 + 细边框 */
+  background: linear-gradient(to bottom, #fffaf2, #fff0dc);
   border-radius: 12px;
+  border: 1px solid rgba(225, 152, 89, 0.45);
   overflow: hidden;
-}
-
-.history-item::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  border-radius: 12px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {

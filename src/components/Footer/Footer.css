@@ -140,9 +140,10 @@
   position: relative;
   width: 100%;
   padding: 16px;
-  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  /* 与整体卡片风格统一的简洁按钮样式 */
+  background: rgba(255, 250, 239, 0.96);
   border-radius: 12px;
-  border: none;
+  border: 1px solid rgba(225, 152, 89, 0.5);
   cursor: pointer;
   text-align: center;
   box-sizing: border-box;
@@ -156,22 +157,8 @@
 }
 
 .contact-option-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  border-radius: 12px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
+  /* 去掉额外描边效果，保持风格简洁 */
+  display: none;
 }
 
 .contact-option-title {
@@ -203,36 +190,21 @@
 .feedback-textarea-wrapper {
   position: relative;
   border-radius: 20px;
-  overflow: hidden;
   height: 200px;
+  border: 1px solid rgba(225, 152, 89, 0.6);
+  background: rgba(255, 250, 239, 0.96);
 }
 
 .feedback-textarea-wrapper::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  border-radius: 20px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 .feedback-textarea {
-  position: relative;
-  width: calc(100% - 4px);
-  height: 196px;
-  min-height: 196px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   padding: 12px 16px;
-  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  background: transparent;
   border: none;
   border-radius: 20px;
   color: rgba(132, 49, 0, 1);

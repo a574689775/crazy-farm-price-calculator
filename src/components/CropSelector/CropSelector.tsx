@@ -289,11 +289,13 @@ export const CropSelector = ({
           <div className="champion-grid">
             {moonCrops.map(renderCropItem)}
           </div>
-          <div className="champion-divider"></div>
         </div>
 
         {/* 普通作物 */}
-        <div className="champion-section">
+        <div className="champion-section champion-section-normal">
+          <div className="champion-title-row">
+            <div className="champion-title">普通作物：</div>
+          </div>
           <div className="champion-grid">
             {normalCrops.map(renderCropItem)}
           </div>

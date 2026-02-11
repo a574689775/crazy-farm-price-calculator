@@ -1,8 +1,11 @@
 .price-calculator {
   box-sizing: border-box;
-  border: none;
+  /* 改为 1px 细边框并增加轻微阴影，营造悬浮感 */
+  border: 1px solid rgba(132, 49, 0, 0.18);
   border-radius: 20px;
-  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  /* 使用个人中心同款柔和背景渐变 */
+  background: linear-gradient(180deg, #fffdf8 0%, #fff8eb 35%, #fff0dc 100%);
+  box-shadow: 0 6px 18px rgba(132, 49, 0, 0.18);
   max-height: calc(100dvh - 24px);
   max-height: calc(100vh - 24px);
   display: flex;
@@ -13,25 +16,8 @@
 }
 
 .price-calculator::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 4px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
+  /* 取消原有粗描边渐变，只保留卡片自身细边框与阴影 */
+  display: none;
 }
 
 .price-calculator::-webkit-scrollbar {
@@ -45,25 +31,8 @@
 }
 
 .price-calculator.empty::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 4px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
+  /* 与正常态保持一致，不再使用额外描边层 */
+  display: none;
 }
 
 .calculator-header {
@@ -87,11 +56,12 @@
   left: 16px;
   right: 16px;
   height: 0;
-  border-bottom: 2px dashed #dfd5db;
+  border-bottom: 1px dashed #dfd5db;
 }
 
 .calculator-title {
-  color: #000;
+  /* 与其他页面统一使用棕色主标题 */
+  color: #843100;
   font-style: normal;
   font-size: 20px;
   font-weight: 700;
@@ -108,7 +78,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000;
+  color: #843100;
   cursor: pointer;
   transition: opacity 0.2s;
   position: absolute;
@@ -136,14 +106,14 @@
   padding: 0;
   -webkit-tap-highlight-color: transparent;
   font-size: 20px;
-  color: #000 !important;
+  color: #843100 !important;
 }
 
 .share-header-button svg {
   width: 20px;
   height: 20px;
-  color: #000;
-  fill: #000;
+  color: #843100;
+  fill: #843100;
 }
 
 .share-header-button:hover {
@@ -154,13 +124,13 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 1rem;
+  /* 与其他页面保持一致的内边距体系 */
+  padding: 16px 16px 20px;
   -ms-overflow-style: none;
   scrollbar-width: none;
   gap: 0.875rem;
   display: flex;
   flex-direction: column;
-  margin: 0 4px 0 4px;
   border-radius: 0 0 16px 16px;
   position: relative;
   z-index: 1;
@@ -345,7 +315,6 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #8b9aff;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -357,8 +326,9 @@
 }
 
 .quick-action-item input[type="checkbox"]:checked {
-  background: #fff;
-  border-color: #fff;
+  /* 改为与整体风格一致的棕色选中态 */
+  background: #843100;
+  border-color: #843100;
 }
 
 .quick-action-item input[type="checkbox"]:checked::after {
@@ -368,7 +338,7 @@
   top: 2px;
   width: 5px;
   height: 9px;
-  border: solid #1a1a1a;
+  border: solid #fff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -545,9 +515,9 @@
 }
 
 .calculator-result {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #333;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(132, 49, 0, 0.2);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -558,29 +528,30 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: #2a2a2a;
-  border-radius: 6px;
+  background: rgba(255, 250, 239, 0.95);
+  border-radius: 10px;
+  border: 1px solid rgba(132, 49, 0, 0.12);
 }
 
 .result-item.highlight {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffeec4 0%, #ffd79a 100%);
+  color: #843100;
 }
 
 .result-label {
   font-size: 1rem;
   font-weight: 600;
-  color: #e0e0e0;
+  color: rgba(132, 49, 0, 0.85);
 }
 
 .result-value {
   font-size: 1rem;
   font-weight: 600;
-  color: #e0e0e0;
+  color: rgba(132, 49, 0, 0.9);
 }
 
 .result-item.highlight .result-value {
-  color: white;
+  color: #843100;
 }
 
 .result-value-large {
@@ -591,18 +562,20 @@
 /* 固定底部的价格展示区域 */
 .calculator-result-fixed {
   position: sticky;
-  height: 60px;
-  width: calc(100% - 8px);
-  border-radius: 0 0 16px 16px;
+  height: 56px;
+  /* 让底部价格栏与外层卡片边框完全贴合 */
+  width: 100%;
+  border-radius: 0;
+  /* 底部条略深一些，突出但不过分抢眼 */
   background: #f5d6a7;
-  padding: 0 20px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
   z-index: 20;
   box-sizing: border-box;
-  margin: 0 4px 4px 4px;
+  margin: 0;
 }
 
 .calculator-result-fixed .result-right {
@@ -613,15 +586,17 @@
 }
 
 .calculator-result-fixed .result-value-container {
-  padding: 4px 20px;
+  padding: 4px 18px;
   background: #FFF6D9;
-  box-shadow: inset 0 0 4px 0 #00000025;
+  /* 细腻的描边和轻微阴影，呼应整体风格 */
+  box-shadow: 0 1px 2px rgba(132, 49, 0, 0.12);
+  border: 1px solid rgba(196, 92, 38, 0.55);
   border-radius: 999px;
 }
 
 .calculator-result-fixed .result-value-large {
   color: #843100;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 28px;
   display: inline-block;
@@ -634,7 +609,7 @@
   border: none;
   outline: none;
   color: #843100;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 28px;
   text-align: center;

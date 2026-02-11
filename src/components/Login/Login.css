@@ -5,11 +5,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px 16px 0;
-  background-image: url('https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  padding: 16px 16px 0;
   box-sizing: border-box;
 }
 
@@ -34,17 +30,20 @@
   position: relative;
   width: 100%;
   max-width: 400px;
-  max-height: calc(100dvh - 210px);
-  max-height: calc(100vh - 210px);
+  max-height: calc(100dvh - 180px);
+  max-height: calc(100vh - 180px);
   min-height: 300px;
-  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  /* 与其他主卡片保持一致的柔和渐变、描边和阴影 */
+  background: linear-gradient(180deg, #fffdf8 0%, #fff8eb 35%, #fff0dc 100%);
+  border: 1px solid rgba(132, 49, 0, 0.18);
   border-radius: 20px;
-  padding: 32px 24px;
+  padding: 24px 20px;
   box-sizing: border-box;
   overflow: visible;
   margin-top: 160px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 6px 18px rgba(132, 49, 0, 0.18);
 }
 
 .login-top-image {
@@ -70,26 +69,9 @@
   pointer-events: none;
 }
 
+/* 去掉额外的金色描边层，保持登录卡片风格简洁 */
 .login-box::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 4px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 1;
+  display: none;
 }
 
 .login-header {
@@ -102,7 +84,7 @@
 }
 
 .login-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #843100;
   margin: 0;
@@ -126,7 +108,7 @@
 }
 
 .login-input-group {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .login-label {
@@ -149,7 +131,7 @@
   height: 46px;
   padding: 0 16px;
   background: rgba(255, 252, 239, 1);
-  border: 2px solid #FFDE9F;
+  border: 1px solid rgba(225, 152, 89, 0.7);
   border-radius: 12px;
   color: rgba(132, 49, 0, 1);
   font-size: 14px;
@@ -160,8 +142,8 @@
 
 .login-input:focus {
   outline: none;
-  border-color: #843100;
-  background: rgba(255, 255, 255, 1);
+  border-color: rgba(132, 49, 0, 0.9);
+  background: rgba(255, 252, 239, 1);
 }
 
 .login-input::placeholder {
@@ -197,8 +179,8 @@
   font-weight: 700;
   cursor: pointer;
   font-family: 'ResourceHanRoundedCN Medium', sans-serif;
-  margin-top: 48px;
-  margin-bottom: 24px;
+  margin-top: 32px;
+  margin-bottom: 20px;
 }
 
 .login-submit-button:disabled {
@@ -262,14 +244,14 @@
   display: flex;
   align-items: center;
   height: 46px;
-  border: 2px solid #FFDE9F;
+  border: 1px solid rgba(225, 152, 89, 0.7);
   border-radius: 12px;
   background: rgba(255, 252, 239, 1);
   box-sizing: border-box;
 }
 
 .login-verification-wrapper:focus-within {
-  border-color: #843100;
+  border-color: rgba(132, 49, 0, 0.9);
 }
 
 .login-verification-input {

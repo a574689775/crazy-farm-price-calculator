@@ -89,8 +89,9 @@ export const WeightInputGroup = ({
             <label className="input-label">
               <SVGText
                 fillColor="#843100"
-                strokeColor="#fff"
-                strokeWidth={2}
+                /* 去掉白色描边，保持文字简洁干净 */
+                strokeColor="transparent"
+                strokeWidth={0}
                 fontSize={14}
                 fontWeight={700}
                 textAlign="left"
@@ -116,8 +117,8 @@ export const WeightInputGroup = ({
             <label className="input-label">
               <SVGText
                 fillColor="#843100"
-                strokeColor="#fff"
-                strokeWidth={2}
+                strokeColor="transparent"
+                strokeWidth={0}
                 fontSize={14}
                 fontWeight={700}
                 textAlign="left"
@@ -143,8 +144,8 @@ export const WeightInputGroup = ({
             <label className="input-label">
               <SVGText
                 fillColor="#843100"
-                strokeColor="#fff"
-                strokeWidth={2}
+                strokeColor="transparent"
+                strokeWidth={0}
                 fontSize={14}
                 fontWeight={700}
                 textAlign="left"
@@ -170,8 +171,8 @@ export const WeightInputGroup = ({
             <label className="input-label">
               <SVGText
                 fillColor="#843100"
-                strokeColor="#fff"
-                strokeWidth={2}
+                strokeColor="transparent"
+                strokeWidth={0}
                 fontSize={14}
                 fontWeight={700}
                 textAlign="left"
@@ -182,8 +183,8 @@ export const WeightInputGroup = ({
             <div className="growth-time-value">
               <SVGText
                 fillColor="#843100"
-                strokeColor="#fff"
-                strokeWidth={2}
+                strokeColor="transparent"
+                strokeWidth={0}
                 fontSize={14}
                 fontWeight={600}
                 textAlign="left"

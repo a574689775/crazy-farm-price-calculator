@@ -487,14 +487,23 @@ export const App = () => {
                 queryCounts={todayQueryCounts}
                 subscriptionActive={subscriptionState?.isActive}
               />
-              <Footer
-                subscriptionModalOpen={showSubscriptionModal}
-                onSubscriptionModalChange={setShowSubscriptionModal}
-                subscriptionState={subscriptionState}
-                onSubscriptionActivated={refreshSubscription}
-                contactModalOpen={showUserContactModal}
-                onContactModalChange={setShowUserContactModal}
-              />
+              {/* 历史记录或计算器页面打开时，让 Footer 透明但保留高度，避免高度跳动 */}
+              <div
+                style={{
+                  opacity: currentPage === 'selector' && !showHistory ? 1 : 0,
+                  pointerEvents: currentPage === 'selector' && !showHistory ? 'auto' : 'none',
+                  transition: 'opacity 0.2s ease',
+                }}
+              >
+                <Footer
+                  subscriptionModalOpen={showSubscriptionModal}
+                  onSubscriptionModalChange={setShowSubscriptionModal}
+                  subscriptionState={subscriptionState}
+                  onSubscriptionActivated={refreshSubscription}
+                  contactModalOpen={showUserContactModal}
+                  onContactModalChange={setShowUserContactModal}
+                />
+              </div>
             </div>
             
             {/* 历史记录页面 - 始终渲染，通过transform控制位置 */}

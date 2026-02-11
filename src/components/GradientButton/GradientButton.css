@@ -4,8 +4,9 @@
   padding: 4px 16px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(to bottom, #F6F8FC, #E7ECF7);
-  color: #000;
+  /* 统一为奶油棕主色，贴合整体视觉 */
+  background: linear-gradient(to bottom, #FFF7DC, #FFEBC4);
+  color: #843100;
   font-style: normal;
   font-size: 14px;
   font-weight: 400;
@@ -23,11 +24,11 @@
 }
 
 .gradient-button:not(.disabled):hover {
-  opacity: 0.8;
+  opacity: 0.92;
 }
 
 .gradient-button:not(.disabled):active {
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .gradient-button.disabled {

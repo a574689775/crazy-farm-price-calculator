@@ -1,8 +1,11 @@
 .crop-selector {
   box-sizing: border-box;
-  border: none;
+  /* 改为 1px 细边框并增加轻微阴影，营造悬浮感 */
+  border: 1px solid rgba(132, 49, 0, 0.18);
   border-radius: 20px;
-  background: linear-gradient(to bottom, #FFF7DC, #FFECC8);
+  /* 使用个人中心同款柔和背景渐变 */
+  background: linear-gradient(180deg, #fffdf8 0%, #fff8eb 35%, #fff0dc 100%);
+  box-shadow: 0 6px 18px rgba(132, 49, 0, 0.18);
   padding: 0;
   height: 100%;
   position: relative;
@@ -12,25 +15,8 @@
 }
 
 .crop-selector::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  padding: 4px;
-  background: linear-gradient(to bottom, #E19859, #D58D50);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
+  /* 取消原有粗描边渐变，只保留卡片自身细边框与阴影 */
+  display: none;
 }
 
 .crop-selector-content {
@@ -39,8 +25,8 @@
   overflow-x: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  margin: 4px;
-  padding: 32px 12px 12px;
+  /* 顶部为标题留出更多空间，底部留白更充足 */
+  padding: 40px 16px 20px;
   position: relative;
   z-index: 1;
   border-radius: 16px;
@@ -72,6 +58,11 @@
   margin-bottom: 16px;
 }
 
+.champion-section-normal {
+  /* 普通作物分组与上方留出更明显的间距，但不额外增加视觉装饰 */
+  margin-top: 24px;
+}
+
 .champion-title-row {
   display: flex;
   align-items: center;
@@ -80,7 +71,7 @@
 }
 
 .champion-title {
-  color: #000;
+  color: #843100;
   font-size: 16px;
   font-weight: 700;
   line-height: 16px;
