@@ -315,10 +315,21 @@ export const getDisplayName = (user: { email?: string | null; user_metadata?: Re
  */
 export const updateUserDisplayName = async (displayName: string): Promise<{ ok: boolean; error?: string }> => {
   const trimmed = displayName.trim()
-  const { error } = await supabase.auth.updateUser({
-    data: { display_name: trimmed || undefined },
+  const { data, error } = await supabase.rpc('set_display_name', {
+    p_display_name: trimmed,
   })
-  if (error) return { ok: false, error: error.message }
+  if (error) {
+    return { ok: false, error: error.message || '保存失败' }
+  }
+  const ok = (data as { ok?: boolean } | null)?.ok === true
+  if (!ok) {
+    const code = (data as { error?: string } | null)?.error
+    let msg = '保存失败'
+    if (code === 'taken') msg = '该昵称已被其他用户占用'
+    else if (code === 'empty') msg = '请输入昵称'
+    else if (code === 'not_authenticated') msg = '请先登录后再修改昵称'
+    return { ok: false, error: msg }
+  }
   return { ok: true }
 }
 
