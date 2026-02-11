@@ -369,6 +369,15 @@ export interface MySubscription {
   isActive: boolean
 }
 
+/** 会员时长排行榜条目 */
+export interface MembershipLeaderboardItem {
+  userId: string
+  displayName: string | null
+  email: string | null
+  avatarIndex: number
+  daysLeft: number
+}
+
 /**
  * 获取当前用户的会员状态，由服务端根据当前时间判断 is_active。
  * 需在 Supabase 创建 user_subscriptions 表与 get_my_subscription RPC。
@@ -383,6 +392,53 @@ export const getMySubscription = async (): Promise<MySubscription> => {
   const subscriptionEndAt =
     endAt != null ? new Date(endAt).getTime() : null
   return { subscriptionEndAt, isActive }
+}
+
+/** 会员时长排行榜：前若干名按剩余天数降序排列 */
+export const getMembershipLeaderboard = async (): Promise<{
+  ok: boolean
+  items: MembershipLeaderboardItem[]
+  error?: string
+}> => {
+  const { data, error } = await supabase.rpc('get_membership_leaderboard')
+  if (error) {
+    return { ok: false, items: [], error: error.message || '获取排行榜失败' }
+  }
+  const rows = (data as unknown as Array<{
+    user_id?: string
+    display_name?: string | null
+    email?: string | null
+    avatar_index?: number | string | null
+    days_left?: number | string | null
+  }>) ?? []
+
+  const items: MembershipLeaderboardItem[] = rows.map((row, idx) => {
+    const rawAvatar = row.avatar_index
+    let avatar = 1
+    if (rawAvatar !== undefined && rawAvatar !== null) {
+      const n = typeof rawAvatar === 'number' ? rawAvatar : parseInt(String(rawAvatar), 10)
+      if (Number.isFinite(n)) {
+        avatar = Math.min(18, Math.max(1, n || 1))
+      }
+    }
+    const rawDays = row.days_left
+    let days = 0
+    if (rawDays !== undefined && rawDays !== null) {
+      const n = typeof rawDays === 'number' ? rawDays : parseInt(String(rawDays), 10)
+      if (Number.isFinite(n)) {
+        days = Math.max(0, n)
+      }
+    }
+    return {
+      userId: row.user_id ?? `unknown-${idx}`,
+      displayName: row.display_name ?? null,
+      email: row.email ?? null,
+      avatarIndex: avatar,
+      daysLeft: days,
+    }
+  })
+
+  return { ok: true, items }
 }
 
 /** 邀请：获取或懒生成当前用户 6 位邀请码 */

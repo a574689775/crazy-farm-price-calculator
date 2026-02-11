@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { CropConfig, HistoryRecord, WeatherMutation } from '@/types'
 import { crops } from '@/data/crops'
 import { changelog } from '@/data/changelog'
@@ -20,9 +20,18 @@ import {
   updateUserDisplayName,
   updateUserAvatarIndex,
 } from '@/utils/supabase'
-import type { MySubscription } from '@/utils/supabase'
+import type { MySubscription, MembershipLeaderboardItem } from '@/utils/supabase'
+import { getMembershipLeaderboard } from '@/utils/supabase'
 import { Modal } from '@/components/Modal'
 import { InviteModal } from '@/components/InviteModal'
+import {
+  HistoryOutlined,
+  GiftOutlined,
+  CrownOutlined,
+  CustomerServiceOutlined,
+  ExclamationCircleOutlined,
+  FileTextOutlined,
+} from '@ant-design/icons'
 import './App.css'
 
 const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
@@ -48,6 +57,7 @@ interface PrefillData {
 
 export const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [selectedCrop, setSelectedCrop] = useState<CropConfig | null>(null)
   const [currentPage, setCurrentPage] = useState<Page>('selector')
   const [showHistory, setShowHistory] = useState(false)
@@ -70,6 +80,10 @@ export const App = () => {
   const [showUserContactModal, setShowUserContactModal] = useState(false)
   const [showUserDisclaimerModal, setShowUserDisclaimerModal] = useState(false)
   const [showUserChangelogModal, setShowUserChangelogModal] = useState(false)
+  const [leaderboard, setLeaderboard] = useState<MembershipLeaderboardItem[] | null>(null)
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+  const [leaderboardError, setLeaderboardError] = useState<string | null>(null)
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -86,6 +100,24 @@ export const App = () => {
       clearTimer.current = null
     }, ANIMATION_DURATION)
   }
+
+  const loadLeaderboard = useCallback(async () => {
+    setLeaderboardLoading(true)
+    setLeaderboardError(null)
+    try {
+      const res = await getMembershipLeaderboard()
+      if (res.ok) {
+        setLeaderboard(res.items)
+      } else {
+        setLeaderboardError(res.error ?? '排行榜获取失败')
+      }
+    } catch (e) {
+      console.error('加载会员排行榜失败:', e)
+      setLeaderboardError('排行榜获取失败')
+    } finally {
+      setLeaderboardLoading(false)
+    }
+  }, [])
 
   const openUserCenter = () => {
     setIsUserCenterClosing(false)
@@ -148,6 +180,7 @@ export const App = () => {
     const checkAuth = async () => {
       const session = await getSession()
       setIsAuthenticated(!!session)
+      setCurrentUserId(session?.user?.id ?? null)
       setUserEmail(session?.user?.email ?? null)
       const avatarMeta = (session?.user?.user_metadata as { avatar_index?: number | string } | undefined)?.avatar_index
       if (avatarMeta !== undefined) {
@@ -165,6 +198,7 @@ export const App = () => {
       data: { subscription },
     } = onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session)
+      setCurrentUserId(session?.user?.id ?? null)
       setUserEmail(session?.user?.email ?? null)
       const name = (session?.user?.user_metadata as { display_name?: string } | undefined)?.display_name
       setUserDisplayName(typeof name === 'string' ? name : null)
@@ -585,7 +619,10 @@ export const App = () => {
                       handleShowHistory()
                     }}
                   >
-                    <span className="user-center-item-label">计算历史</span>
+                    <span className="user-center-item-label">
+                      <HistoryOutlined className="user-center-item-icon" />
+                      <span>计算历史</span>
+                    </span>
                     <span className="user-center-item-arrow">›</span>
                   </button>
                   <button
@@ -596,7 +633,24 @@ export const App = () => {
                       setShowInviteModal(true)
                     }}
                   >
-                    <span className="user-center-item-label">邀请有礼</span>
+                    <span className="user-center-item-label">
+                      <GiftOutlined className="user-center-item-icon" />
+                      <span>邀请有礼</span>
+                    </span>
+                    <span className="user-center-item-arrow">›</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      setShowLeaderboardModal(true)
+                      void loadLeaderboard()
+                    }}
+                  >
+                    <span className="user-center-item-label">
+                      <CrownOutlined className="user-center-item-icon" />
+                      <span>会员时长排行榜</span>
+                    </span>
                     <span className="user-center-item-arrow">›</span>
                   </button>
                 </div>
@@ -612,7 +666,10 @@ export const App = () => {
                       setShowUserContactModal(true)
                     }}
                   >
-                    <span className="user-center-item-label">联系我们</span>
+                    <span className="user-center-item-label">
+                      <CustomerServiceOutlined className="user-center-item-icon" />
+                      <span>联系我们</span>
+                    </span>
                     <span className="user-center-item-arrow">›</span>
                   </button>
                   <button
@@ -623,7 +680,10 @@ export const App = () => {
                       setShowUserDisclaimerModal(true)
                     }}
                   >
-                    <span className="user-center-item-label">免责声明</span>
+                    <span className="user-center-item-label">
+                      <ExclamationCircleOutlined className="user-center-item-icon" />
+                      <span>免责声明</span>
+                    </span>
                     <span className="user-center-item-arrow">›</span>
                   </button>
                   <button
@@ -634,7 +694,10 @@ export const App = () => {
                       setShowUserChangelogModal(true)
                     }}
                   >
-                    <span className="user-center-item-label">更新日志</span>
+                    <span className="user-center-item-label">
+                      <FileTextOutlined className="user-center-item-icon" />
+                      <span>更新日志</span>
+                    </span>
                     <span className="user-center-item-right">
                       <span className="user-center-item-extra">{changelog[0].version}</span>
                       <span className="user-center-item-arrow">›</span>
@@ -709,6 +772,77 @@ export const App = () => {
       </Modal>
 
       <InviteModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} />
+
+      {/* 会员时长排行榜模态框 */}
+      <Modal
+        isOpen={showLeaderboardModal}
+        onClose={() => setShowLeaderboardModal(false)}
+        title="会员时长排行榜"
+        contentClassName="leaderboard-modal"
+      >
+        <div className="leaderboard-modal-content">
+          {leaderboardLoading && (
+            <div className="leaderboard-loading-wrap">
+              <div className="leaderboard-spinner" />
+              <span className="leaderboard-loading-text">榜单加载中...</span>
+            </div>
+          )}
+          {!leaderboardLoading && leaderboardError && (
+            <div className="leaderboard-error">{leaderboardError}</div>
+          )}
+          {!leaderboardLoading && !leaderboardError && leaderboard && leaderboard.length === 0 && (
+            <div className="leaderboard-empty">暂时没有会员上榜，开通会员即可参与榜单。</div>
+          )}
+          {!leaderboardLoading && !leaderboardError && leaderboard && leaderboard.length > 0 && (
+            <div className="leaderboard-list">
+              {leaderboard.map((item, index) => {
+                const rank = index + 1
+                const topClass =
+                  rank === 1
+                    ? 'leaderboard-item--top1'
+                    : rank === 2
+                      ? 'leaderboard-item--top2'
+                      : rank === 3
+                        ? 'leaderboard-item--top3'
+                        : ''
+                return (
+                  <div
+                    key={item.userId}
+                    className={`leaderboard-item ${topClass} ${
+                      currentUserId && item.userId === currentUserId ? 'leaderboard-item--me' : ''
+                    }`}
+                  >
+                    <div className="leaderboard-rank-badge">{rank}</div>
+                    <div className="leaderboard-user">
+                      <div className="leaderboard-avatar">
+                        <img
+                          src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                          alt="头像"
+                          className="leaderboard-avatar-img"
+                        />
+                      </div>
+                      <div className="leaderboard-user-text">
+                        <div className="leaderboard-user-name">
+                          {item.displayName || '神秘用户'}
+                        </div>
+                        <div className="leaderboard-user-sub">
+                          剩余 {item.daysLeft} 天会员
+                        </div>
+                      </div>
+                    </div>
+                    <div className="leaderboard-days-badge">
+                      {currentUserId && item.userId === currentUserId && (
+                        <span className="leaderboard-me-badge">我</span>
+                      )}
+                      {item.daysLeft} 天
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </Modal>
 
       {/* 设置昵称模态框 */}
       <Modal
