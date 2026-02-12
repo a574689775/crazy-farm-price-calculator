@@ -138,6 +138,26 @@ export const logCropQuery = async (cropName: string) => {
   return next
 }
 
+/** 用户每日查询统计：记录一次用户对某作物的查询（点击作物进入计算器时调用） */
+const logUserQueryState = { p: Promise.resolve() as Promise<unknown> }
+export const logUserQuery = async (cropName: string) => {
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : ''
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0' || hostname === '') {
+    return Promise.resolve()
+  }
+  if (!supabase) return Promise.resolve()
+  const prev = logUserQueryState.p
+  const next = prev.then(async () => {
+    try {
+      await supabase.rpc('log_user_query', { p_crop_name: cropName || null })
+    } catch (e) {
+      console.error(e)
+    }
+  })
+  logUserQueryState.p = next
+  return next
+}
+
 /**
  * 获取当日所有作物的查询次数映射
  */
@@ -438,6 +458,65 @@ export const getMembershipLeaderboard = async (): Promise<{
     }
   })
 
+  return { ok: true, items }
+}
+
+/** 今日查询排行榜条目 */
+export interface QueryLeaderboardItem {
+  userId: string
+  displayName: string | null
+  email: string | null
+  avatarIndex: number
+  queryCount: number
+  rankPos: number
+}
+
+/** 今日查询排行榜：按用户当日总查询次数降序，前 100 名 */
+export const getQueryLeaderboard = async (): Promise<{
+  ok: boolean
+  items: QueryLeaderboardItem[]
+  error?: string
+}> => {
+  const { data, error } = await supabase.rpc('get_user_query_leaderboard', { p_limit: 100 })
+  if (error) {
+    return { ok: false, items: [], error: error.message || '获取排行榜失败' }
+  }
+  const rows = (data as unknown as Array<{
+    user_id?: string
+    display_name?: string | null
+    email?: string | null
+    avatar_index?: number | string | null
+    query_count?: number | string | null
+    rank_pos?: number | string | null
+  }>) ?? []
+  const items: QueryLeaderboardItem[] = rows.map((row, idx) => {
+    const rawAvatar = row.avatar_index
+    let avatar = 1
+    if (rawAvatar !== undefined && rawAvatar !== null) {
+      const n = typeof rawAvatar === 'number' ? rawAvatar : parseInt(String(rawAvatar), 10)
+      if (Number.isFinite(n)) avatar = Math.min(18, Math.max(1, n || 1))
+    }
+    const rawCount = row.query_count
+    let count = 0
+    if (rawCount !== undefined && rawCount !== null) {
+      const n = typeof rawCount === 'number' ? rawCount : parseInt(String(rawCount), 10)
+      if (Number.isFinite(n)) count = Math.max(0, n)
+    }
+    const rawRank = row.rank_pos
+    let rank = idx + 1
+    if (rawRank !== undefined && rawRank !== null) {
+      const n = typeof rawRank === 'number' ? rawRank : parseInt(String(rawRank), 10)
+      if (Number.isFinite(n)) rank = n
+    }
+    return {
+      userId: row.user_id ?? `unknown-${idx}`,
+      displayName: row.display_name ?? null,
+      email: row.email ?? null,
+      avatarIndex: avatar,
+      queryCount: count,
+      rankPos: rank,
+    }
+  })
   return { ok: true, items }
 }
 

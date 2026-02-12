@@ -11,6 +11,7 @@ import { Login } from '@/components/Login'
 import { parseShareUrl } from '@/utils/shareEncoder'
 import {
   logCropQuery,
+  logUserQuery,
   subscribeCropDailyStats,
   getSession,
   onAuthStateChange,
@@ -20,14 +21,14 @@ import {
   updateUserDisplayName,
   updateUserAvatarIndex,
 } from '@/utils/supabase'
-import type { MySubscription, MembershipLeaderboardItem } from '@/utils/supabase'
-import { getMembershipLeaderboard } from '@/utils/supabase'
+import type { MySubscription, MembershipLeaderboardItem, QueryLeaderboardItem } from '@/utils/supabase'
+import { getMembershipLeaderboard, getQueryLeaderboard } from '@/utils/supabase'
 import { Modal } from '@/components/Modal'
 import { InviteModal } from '@/components/InviteModal'
 import {
   HistoryOutlined,
   GiftOutlined,
-  CrownOutlined,
+  TrophyOutlined,
   CustomerServiceOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
@@ -83,7 +84,11 @@ export const App = () => {
   const [leaderboard, setLeaderboard] = useState<MembershipLeaderboardItem[] | null>(null)
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null)
+  const [queryLeaderboard, setQueryLeaderboard] = useState<QueryLeaderboardItem[] | null>(null)
+  const [queryLeaderboardLoading, setQueryLeaderboardLoading] = useState(false)
+  const [queryLeaderboardError, setQueryLeaderboardError] = useState<string | null>(null)
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
+  const [leaderboardTab, setLeaderboardTab] = useState<'membership' | 'query'>('membership')
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -116,6 +121,24 @@ export const App = () => {
       setLeaderboardError('排行榜获取失败')
     } finally {
       setLeaderboardLoading(false)
+    }
+  }, [])
+
+  const loadQueryLeaderboard = useCallback(async () => {
+    setQueryLeaderboardLoading(true)
+    setQueryLeaderboardError(null)
+    try {
+      const res = await getQueryLeaderboard()
+      if (res.ok) {
+        setQueryLeaderboard(res.items)
+      } else {
+        setQueryLeaderboardError(res.error ?? '排行榜获取失败')
+      }
+    } catch (e) {
+      console.error('加载查询排行榜失败:', e)
+      setQueryLeaderboardError('排行榜获取失败')
+    } finally {
+      setQueryLeaderboardLoading(false)
     }
   }, [])
 
@@ -324,6 +347,7 @@ export const App = () => {
       calculatorEntryCheckedRef.current = true
       doOpenCalculator(crop, null)
       logCropQuery(crop.name).catch(console.error)
+      logUserQuery(crop.name).catch(console.error)
       return
     }
     try {
@@ -335,6 +359,7 @@ export const App = () => {
       calculatorEntryCheckedRef.current = true
       doOpenCalculator(crop, null)
       logCropQuery(crop.name).catch(console.error)
+      logUserQuery(crop.name).catch(console.error)
     } catch (e) {
       console.error('useFreeQuery failed', e)
       setShowPaywallModal(true)
@@ -410,6 +435,7 @@ export const App = () => {
       calculatorEntryCheckedRef.current = true
       doOpenCalculator(crop, prefill)
       logCropQuery(crop.name).catch(console.error)
+      logUserQuery(crop.name).catch(console.error)
       return
     }
     try {
@@ -421,6 +447,7 @@ export const App = () => {
       calculatorEntryCheckedRef.current = true
       doOpenCalculator(crop, prefill)
       logCropQuery(crop.name).catch(console.error)
+      logUserQuery(crop.name).catch(console.error)
     } catch (e) {
       console.error('useFreeQuery failed', e)
       setShowPaywallModal(true)
@@ -654,11 +681,12 @@ export const App = () => {
                     onClick={() => {
                       setShowLeaderboardModal(true)
                       void loadLeaderboard()
+                      void loadQueryLeaderboard()
                     }}
                   >
                     <span className="user-center-item-label">
-                      <CrownOutlined className="user-center-item-icon" />
-                      <span>会员时长排行榜</span>
+                      <TrophyOutlined className="user-center-item-icon" />
+                      <span>排行榜</span>
                     </span>
                     <span className="user-center-item-arrow">›</span>
                   </button>
@@ -782,72 +810,148 @@ export const App = () => {
 
       <InviteModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} />
 
-      {/* 会员时长排行榜模态框 */}
+      {/* 排行榜模态框：Tab 切换 会员时长 / 今日查询 */}
       <Modal
         isOpen={showLeaderboardModal}
         onClose={() => setShowLeaderboardModal(false)}
-        title="会员时长排行榜"
+        title="排行榜"
         contentClassName="leaderboard-modal"
       >
         <div className="leaderboard-modal-content">
-          {leaderboardLoading && (
-            <div className="leaderboard-loading-wrap">
-              <div className="leaderboard-spinner" />
-              <span className="leaderboard-loading-text">榜单加载中...</span>
+          <div className="leaderboard-tabs">
+            <button
+              type="button"
+              className={`leaderboard-tab ${leaderboardTab === 'membership' ? 'leaderboard-tab--active' : ''}`}
+              onClick={() => setLeaderboardTab('membership')}
+            >
+              会员时长
+            </button>
+            <button
+              type="button"
+              className={`leaderboard-tab ${leaderboardTab === 'query' ? 'leaderboard-tab--active' : ''}`}
+              onClick={() => setLeaderboardTab('query')}
+            >
+              今日查询
+            </button>
+          </div>
+          {leaderboardTab === 'membership' && (
+            <div className="leaderboard-section">
+              {leaderboardLoading && (
+                <div className="leaderboard-loading-wrap">
+                  <div className="leaderboard-spinner" />
+                  <span className="leaderboard-loading-text">加载中...</span>
+                </div>
+              )}
+              {!leaderboardLoading && leaderboardError && (
+                <div className="leaderboard-error">{leaderboardError}</div>
+              )}
+              {!leaderboardLoading && !leaderboardError && leaderboard && leaderboard.length === 0 && (
+                <div className="leaderboard-empty">暂时没有会员上榜，开通会员即可参与榜单。</div>
+              )}
+              {!leaderboardLoading && !leaderboardError && leaderboard && leaderboard.length > 0 && (
+                <div className="leaderboard-list">
+                  {leaderboard.map((item, index) => {
+                    const rank = index + 1
+                    const topClass =
+                      rank === 1 ? 'leaderboard-item--top1'
+                        : rank === 2 ? 'leaderboard-item--top2'
+                          : rank === 3 ? 'leaderboard-item--top3' : ''
+                    return (
+                      <div
+                        key={item.userId}
+                        className={`leaderboard-item ${topClass} ${
+                          currentUserId && item.userId === currentUserId ? 'leaderboard-item--me' : ''
+                        }`}
+                      >
+                        <div className="leaderboard-rank-badge">{rank}</div>
+                        <div className="leaderboard-user">
+                          <div className="leaderboard-avatar">
+                            <img
+                              src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                              alt="头像"
+                              className="leaderboard-avatar-img"
+                            />
+                          </div>
+                          <div className="leaderboard-user-text">
+                            <div className="leaderboard-user-name">
+                              {item.displayName || '神秘用户'}
+                            </div>
+                            <div className="leaderboard-user-sub">
+                              剩余 {item.daysLeft} 天会员
+                            </div>
+                          </div>
+                        </div>
+                        <div className="leaderboard-days-badge">
+                          {currentUserId && item.userId === currentUserId && (
+                            <span className="leaderboard-me-badge">我</span>
+                          )}
+                          {item.daysLeft} 天
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
-          {!leaderboardLoading && leaderboardError && (
-            <div className="leaderboard-error">{leaderboardError}</div>
-          )}
-          {!leaderboardLoading && !leaderboardError && leaderboard && leaderboard.length === 0 && (
-            <div className="leaderboard-empty">暂时没有会员上榜，开通会员即可参与榜单。</div>
-          )}
-          {!leaderboardLoading && !leaderboardError && leaderboard && leaderboard.length > 0 && (
-            <div className="leaderboard-list">
-              {leaderboard.map((item, index) => {
-                const rank = index + 1
-                const topClass =
-                  rank === 1
-                    ? 'leaderboard-item--top1'
-                    : rank === 2
-                      ? 'leaderboard-item--top2'
-                      : rank === 3
-                        ? 'leaderboard-item--top3'
-                        : ''
-                return (
-                  <div
-                    key={item.userId}
-                    className={`leaderboard-item ${topClass} ${
-                      currentUserId && item.userId === currentUserId ? 'leaderboard-item--me' : ''
-                    }`}
-                  >
-                    <div className="leaderboard-rank-badge">{rank}</div>
-                    <div className="leaderboard-user">
-                      <div className="leaderboard-avatar">
-                        <img
-                          src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
-                          alt="头像"
-                          className="leaderboard-avatar-img"
-                        />
-                      </div>
-                      <div className="leaderboard-user-text">
-                        <div className="leaderboard-user-name">
-                          {item.displayName || '神秘用户'}
+          {leaderboardTab === 'query' && (
+            <div className="leaderboard-section">
+              {queryLeaderboardLoading && (
+                <div className="leaderboard-loading-wrap">
+                  <div className="leaderboard-spinner" />
+                  <span className="leaderboard-loading-text">加载中...</span>
+                </div>
+              )}
+              {!queryLeaderboardLoading && queryLeaderboardError && (
+                <div className="leaderboard-error">{queryLeaderboardError}</div>
+              )}
+              {!queryLeaderboardLoading && !queryLeaderboardError && queryLeaderboard && queryLeaderboard.length === 0 && (
+                <div className="leaderboard-empty">今日暂无查询记录，选择作物进入计算器即可参与。</div>
+              )}
+              {!queryLeaderboardLoading && !queryLeaderboardError && queryLeaderboard && queryLeaderboard.length > 0 && (
+                <div className="leaderboard-list">
+                  {queryLeaderboard.map((item) => {
+                    const rank = item.rankPos
+                    const topClass =
+                      rank === 1 ? 'leaderboard-item--top1'
+                        : rank === 2 ? 'leaderboard-item--top2'
+                          : rank === 3 ? 'leaderboard-item--top3' : ''
+                    return (
+                      <div
+                        key={item.userId}
+                        className={`leaderboard-item ${topClass} ${
+                          currentUserId && item.userId === currentUserId ? 'leaderboard-item--me' : ''
+                        }`}
+                      >
+                        <div className="leaderboard-rank-badge">{rank}</div>
+                        <div className="leaderboard-user">
+                          <div className="leaderboard-avatar">
+                            <img
+                              src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                              alt="头像"
+                              className="leaderboard-avatar-img"
+                            />
+                          </div>
+                          <div className="leaderboard-user-text">
+                            <div className="leaderboard-user-name">
+                              {item.displayName || '神秘用户'}
+                            </div>
+                            <div className="leaderboard-user-sub">
+                              今日查询 {item.queryCount} 次
+                            </div>
+                          </div>
                         </div>
-                        <div className="leaderboard-user-sub">
-                          剩余 {item.daysLeft} 天会员
+                        <div className="leaderboard-days-badge">
+                          {currentUserId && item.userId === currentUserId && (
+                            <span className="leaderboard-me-badge">我</span>
+                          )}
+                          {item.queryCount} 次
                         </div>
                       </div>
-                    </div>
-                    <div className="leaderboard-days-badge">
-                      {currentUserId && item.userId === currentUserId && (
-                        <span className="leaderboard-me-badge">我</span>
-                      )}
-                      {item.daysLeft} 天
-                    </div>
-                  </div>
-                )
-              })}
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
