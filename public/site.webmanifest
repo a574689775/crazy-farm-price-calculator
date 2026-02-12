@@ -8,13 +8,13 @@
   "lang": "zh-CN",
   "icons": [
     {
-      "src": "https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/android-chrome-192x192.png",
+      "src": "/carzyfarm/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/android-chrome-512x512.png",
+      "src": "/carzyfarm/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

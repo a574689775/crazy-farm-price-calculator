@@ -7,6 +7,15 @@ export default defineConfig({
   plugins: [react()],
   // 如果部署到服务器，base 应该是 '/'；如果部署到 GitHub Pages，base 应该是 '/crazy-farm-price-calculator/'
   base: process.env.VITE_BASE_PATH || '/',
+  server: {
+    proxy: {
+      '/carzyfarm': {
+        target: 'https://now.bdstatic.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/carzyfarm/, '/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm'),
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

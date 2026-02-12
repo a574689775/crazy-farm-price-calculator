@@ -68,7 +68,7 @@ export const Modal = ({ isOpen, onClose, title, children, onBack, contentClassNa
             )}
             <div className="modal-title-wrapper">
               <img 
-                src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/田园阿公.png" 
+                src="/carzyfarm/田园阿公.png" 
                 alt="阿公" 
                 className="modal-title-image"
               />

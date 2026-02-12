@@ -224,8 +224,8 @@ export const Footer = ({
               )}
               <img
                 src={contactType === 'author' 
-                  ? 'https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/大脸猫vx.jpg'
-                  : 'https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/蓝皮鼠vx.jpg'
+                  ? '/carzyfarm/大脸猫vx.jpg'
+                  : '/carzyfarm/蓝皮鼠vx.jpg'
                 }
                 alt="联系方式"
                 className={`modal-qrcode ${imageLoading ? 'modal-qrcode-hidden' : ''}`}

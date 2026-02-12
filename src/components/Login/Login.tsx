@@ -258,12 +258,12 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
     <div className="login-container">
       <div className="login-box">
         <img 
-          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/蛋仔.png" 
+          src="/carzyfarm/蛋仔.png" 
           alt="蛋仔" 
           className="login-top-image"
         />
         <img 
-          src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/hi.png" 
+          src="/carzyfarm/hi.png" 
           alt="hi" 
           className="login-hi-image"
         />

@@ -252,7 +252,7 @@ export const CropSelector = ({
             </div>
           )}
           <img 
-            src={`https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/${crop.name}.png`}
+            src={`/carzyfarm/${crop.name}.png`}
             alt={crop.name}
             className="crop-item-image"
           />

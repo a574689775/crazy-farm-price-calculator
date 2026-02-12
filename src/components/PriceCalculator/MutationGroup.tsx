@@ -110,7 +110,7 @@ export const MutationGroup = ({
               </SVGText>
               <img 
                 className={`mutation-checkmark ${isSelected ? 'visible' : ''}`}
-                src="https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/对号.png" 
+                src="/carzyfarm/对号.png" 
                 alt="选中"
               />
             </div>

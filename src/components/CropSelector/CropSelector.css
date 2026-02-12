@@ -43,7 +43,7 @@
   transform: translateX(-50%);
   width: 277px;
   height: 51px;
-  background-image: url('https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/标题背景.png');
+  background-image: url('/carzyfarm/标题背景.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

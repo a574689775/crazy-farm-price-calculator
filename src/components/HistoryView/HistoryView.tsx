@@ -48,7 +48,7 @@ export const HistoryView = ({ onBack, active, onSelectRecord }: HistoryViewProps
         <div className="history-item-body">
           <img
             className="history-item-image"
-            src={`https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/${record.cropName}.png`}
+            src={`/carzyfarm/${record.cropName}.png`}
             alt={record.cropName}
           />
           <div className="history-item-info">

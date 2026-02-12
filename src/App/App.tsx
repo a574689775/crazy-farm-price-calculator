@@ -36,7 +36,9 @@ import {
 import './App.css'
 
 const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
-const AVATAR_BASE_URL = '/avatars'
+/** 静态资源基础路径，本地走 vite 代理，线上走 nginx 代理，同域后可被 SW 缓存 */
+const CARZYFARM_BASE = '/carzyfarm'
+const AVATAR_BASE_URL = `${CARZYFARM_BASE}/avatars`
 const AVATAR_COUNT = 18
 
 /** 昵称校验：最多 12 字符、最多 6 个汉字，仅允许中文/字母/数字 */

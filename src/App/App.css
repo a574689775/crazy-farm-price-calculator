@@ -7,7 +7,7 @@
 .app {
   height: 100dvh;
   height: 100vh;
-  background-image: url('https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/bg.jpg');
+  background-image: url('/carzyfarm/bg.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
