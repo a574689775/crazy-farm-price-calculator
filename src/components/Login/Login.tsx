@@ -142,8 +142,8 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
             setTimeout(() => setShowToast(false), 3000)
           }
         }
-        // 新用户自动分配随机中文昵称，避免排行榜显示「神秘用户」
-        await assignRandomDisplayName()
+        // 新用户自动分配随机中文昵称，避免排行榜显示「神秘用户」（失败不阻塞登录，进主应用后会再试一次）
+        await assignRandomDisplayName().catch(() => {})
         setToastMessage('注册成功！正在登录...')
         setShowToast(true)
         setTimeout(() => {
