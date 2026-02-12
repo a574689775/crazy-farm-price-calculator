@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'ResourceHanRoundedCN Medium';
-  src: url('https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/ResourceHanRoundedCN-Medium.ttf') format('truetype');
+  src: url('/fonts/ResourceHanRoundedCN-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
