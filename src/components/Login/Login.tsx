@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
-import { signIn, sendResetPasswordCode, verifyResetPasswordCode, sendEmailOtp, verifyEmailOtp, bindInviteRelation } from '@/utils/supabase'
+import { signIn, sendResetPasswordCode, verifyResetPasswordCode, sendEmailOtp, verifyEmailOtp, bindInviteRelation, assignRandomDisplayName } from '@/utils/supabase'
 import { translateSupabaseError } from '@/utils/errorMessages'
 import { Toast } from '../PriceCalculator/Toast'
 import { Footer } from '../Footer'
@@ -142,6 +142,8 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
             setTimeout(() => setShowToast(false), 3000)
           }
         }
+        // 新用户自动分配随机中文昵称，避免排行榜显示「神秘用户」
+        await assignRandomDisplayName()
         setToastMessage('注册成功！正在登录...')
         setShowToast(true)
         setTimeout(() => {

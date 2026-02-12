@@ -354,6 +354,31 @@ export const updateUserDisplayName = async (displayName: string): Promise<{ ok: 
 }
 
 /**
+ * 为当前用户自动分配随机中文昵称（仅当 display_name 为空时）。
+ * 新用户注册或存量用户首次登录时调用，排行榜不再显示「神秘用户」。
+ * 需在 Supabase 执行 scripts/sql/assign_random_display_name.sql 创建 RPC。
+ */
+export const assignRandomDisplayName = async (): Promise<{
+  ok: boolean
+  displayName?: string
+  error?: string
+}> => {
+  const { data, error } = await supabase.rpc('assign_random_display_name')
+  if (error) {
+    return { ok: false, error: error.message || '分配昵称失败' }
+  }
+  const payload = data as { ok?: boolean; display_name?: string; error?: string } | null
+  if (!payload?.ok) {
+    return { ok: false, error: payload?.error || '分配昵称失败' }
+  }
+  const displayName = typeof payload.display_name === 'string' ? payload.display_name : undefined
+  if (displayName) {
+    await supabase.auth.refreshSession()
+  }
+  return { ok: true, displayName }
+}
+
+/**
  * 更新当前用户头像编号（写入 auth.users.raw_user_meta_data.avatar_index，范围 1~18）
  */
 export const updateUserAvatarIndex = async (avatarIndex: number): Promise<{ ok: boolean; error?: string }> => {

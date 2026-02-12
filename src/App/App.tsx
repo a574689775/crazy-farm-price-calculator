@@ -20,6 +20,7 @@ import {
   signOut,
   updateUserDisplayName,
   updateUserAvatarIndex,
+  assignRandomDisplayName,
 } from '@/utils/supabase'
 import type { MySubscription, MembershipLeaderboardItem, QueryLeaderboardItem } from '@/utils/supabase'
 import { getMembershipLeaderboard, getQueryLeaderboard } from '@/utils/supabase'
@@ -226,7 +227,11 @@ export const App = () => {
       setCurrentUserId(session?.user?.id ?? null)
       setUserEmail(session?.user?.email ?? null)
       const name = (session?.user?.user_metadata as { display_name?: string } | undefined)?.display_name
-      setUserDisplayName(typeof name === 'string' ? name : null)
+      const hasDisplayName = typeof name === 'string' && name.trim().length > 0
+      setUserDisplayName(hasDisplayName ? name : null)
+      if (session && !hasDisplayName) {
+        assignRandomDisplayName().catch(() => {})
+      }
       const avatarMeta = (session?.user?.user_metadata as { avatar_index?: number | string } | undefined)?.avatar_index
       if (avatarMeta !== undefined) {
         const n = typeof avatarMeta === 'number' ? avatarMeta : parseInt(String(avatarMeta), 10)
