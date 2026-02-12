@@ -36,7 +36,7 @@ import {
 import './App.css'
 
 const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
-const AVATAR_BASE_URL = 'https://now.bdstatic.com/stash/v1/5249c21/soundMyst/0ca7f11/carzyfarm/avatars'
+const AVATAR_BASE_URL = '/avatars'
 const AVATAR_COUNT = 18
 
 /** 昵称校验：最多 12 字符、最多 6 个汉字，仅允许中文/字母/数字 */
