@@ -9,11 +9,11 @@ export const QUALITY_MUTATIONS: WeatherMutation[] = ['星空', '流光', '水晶
 // 月球突变（只有月球作物才有，太阳耀斑在中间状态突变里）
 export const MOON_COMMON_MUTATIONS: WeatherMutation[] = ['流火', '日蚀', '暗雾', '陨石']
 
-// 常见突变（品质顺序：紫→绿→灰）
-export const COMMON_MUTATIONS: WeatherMutation[] = ['瓷化', '亮晶晶', '星环', '落雷', '冰冻', '颤栗', '覆雪', '潮湿', '迷雾', '生机']
+// 常见突变（品质顺序：紫→绿→蓝→灰）
+export const COMMON_MUTATIONS: WeatherMutation[] = ['瓷化', '亮晶晶', '落雷', '冰冻', '金币', '颤栗', '覆雪', '潮湿', '迷雾', '生机']
 
 // 罕见突变
-export const RARE_MUTATIONS: WeatherMutation[] = ['霓虹', '血月', '彩虹', '荧光']
+export const RARE_MUTATIONS: WeatherMutation[] = ['霓虹', '星环', '血月', '彩虹', '荧光']
 
 // 往期突变
 export const PAST_MUTATIONS: WeatherMutation[] = ['极光', '幽魂', '惊魂夜']

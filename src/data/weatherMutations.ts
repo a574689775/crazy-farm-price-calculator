@@ -23,6 +23,7 @@ export const weatherMutations: WeatherMutationConfig[] = [
   
   // 蓝色突变
   { name: '金', color: '蓝色', multiplier: 10 },
+  { name: '金币', color: '蓝色', multiplier: 5 },
   { name: '血月', color: '蓝色', multiplier: 5 },
   { name: '幽魂', color: '蓝色', multiplier: 5 },
   { name: '惊魂夜', color: '蓝色', multiplier: 5 },
