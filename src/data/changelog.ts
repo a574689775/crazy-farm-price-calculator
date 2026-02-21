@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.3.2',
+    date: '2026.2.21',
+    items: [
+      '微调月兔价格基数',
+      '添加月兔生长速度',
+      '微调玉米价格基数',
+    ],
+  },
+  {
     version: 'V7.3.1',
     date: '2026.2.15',
     items: [

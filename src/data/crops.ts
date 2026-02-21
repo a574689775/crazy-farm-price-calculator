@@ -14,7 +14,7 @@ const rawCrops: CropConfig[] = [
   { name: '西瓜', priceCoefficient: 10.7111, maxWeight: 170.00, growthSpeed: 6, type: '普通', specialMutations: ['方形'] },
   { name: '梨', priceCoefficient: 484.155, maxWeight: 13.60, growthSpeed: 75, type: '普通' },
   { name: '橘子', priceCoefficient: 537.9143, maxWeight: 13.60, growthSpeed: 75, type: '普通' },
-  { name: '玉米', priceCoefficient: 103.5216, maxWeight: 40.80, growthSpeed: 27.78, type: '普通' },
+  { name: '玉米', priceCoefficient: 103.5096, maxWeight: 40.80, growthSpeed: 27.78, type: '普通' },
   { name: '白菜', priceCoefficient: 579.7213, maxWeight: 10.20, growthSpeed: 80, type: '普通' },
   { name: '牵牛花', priceCoefficient: 2108.1851, maxWeight: 5.10, growthSpeed: 200, type: '普通' },
   { name: '棉花', priceCoefficient: 2578.4733, maxWeight: 5.20, growthSpeed: 200, type: '普通' },
@@ -49,7 +49,7 @@ const rawCrops: CropConfig[] = [
   { name: '液光藤', priceCoefficient: 3512.9681, maxWeight: 20.4, growthSpeed: 520, type: '月球' },
   { name: '幻月花', priceCoefficient: 8368.8326, maxWeight: 23.8, growthSpeed: 1142.5, type: '月球' },
   { name: '星空玫瑰', priceCoefficient: 33134.0877, maxWeight: 10.2, growthSpeed: 2966.6, type: '月球' },
-  { name: '月兔', priceCoefficient: 11138.4363, maxWeight: 23.8, growthSpeed: 0, type: '月球' },
+  { name: '月兔', priceCoefficient: 11154.0159, maxWeight: 23.8, growthSpeed: 1524, type: '月球' },
   { name: '红包树', priceCoefficient: 80883.1108, maxWeight: 5.10, growthSpeed: 0, type: '月球' },
 ]
 
