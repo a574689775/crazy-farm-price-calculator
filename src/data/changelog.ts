@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.3.3',
+    date: '2026.2.22',
+    items: [
+      '调整红包树价格基数',
+    ],
+  },
+  {
     version: 'V7.3.2',
     date: '2026.2.21',
     items: [
