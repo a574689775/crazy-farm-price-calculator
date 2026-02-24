@@ -4,6 +4,7 @@ import { signIn, sendResetPasswordCode, verifyResetPasswordCode, sendEmailOtp, v
 import { translateSupabaseError } from '@/utils/errorMessages'
 import { Toast } from '../PriceCalculator/Toast'
 import { Footer } from '../Footer'
+import { Modal } from '../Modal'
 import './Login.css'
 
 const LOGIN_EMAIL_KEY = 'crazy-farm-login-email'
@@ -25,9 +26,13 @@ function setStoredEmail(value: string) {
 
 interface LoginProps {
   onLoginSuccess: () => void
+  /** 点击「免责声明」时打开弹窗（登录页由 App 传入） */
+  onOpenDisclaimer?: () => void
+  /** 点击「用户隐私」时打开弹窗（登录页由 App 传入） */
+  onOpenPrivacy?: () => void
 }
 
-export const Login = ({ onLoginSuccess }: LoginProps) => {
+export const Login = ({ onLoginSuccess, onOpenDisclaimer, onOpenPrivacy }: LoginProps) => {
   const [email, setEmail] = useState(getStoredEmail)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -50,6 +55,8 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [inviteCode, setInviteCode] = useState('')
+  const [agreeToTerms, setAgreeToTerms] = useState(false)
+  const [showTermsConfirmModal, setShowTermsConfirmModal] = useState(false)
 
   // 注册验证码倒计时
   useEffect(() => {
@@ -104,8 +111,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const performSubmit = async () => {
     setLoading(true)
 
     try {
@@ -165,6 +171,18 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
       }, 3000)
       setLoading(false)
     }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // 仅登录时要求阅读并同意；注册不展示该选项，直接提交
+    if (!isSignUp && !agreeToTerms) {
+      setShowTermsConfirmModal(true)
+      return
+    }
+
+    await performSubmit()
   }
 
   const handleSendResetCode = async () => {
@@ -512,6 +530,32 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
               </div>
             )}
 
+            {!isSignUp && (
+              <label className="login-agree-row">
+                <input
+                  type="checkbox"
+                  className="login-agree-checkbox"
+                  checked={agreeToTerms}
+                  onChange={(e) => setAgreeToTerms(e.target.checked)}
+                  disabled={loading}
+                />
+                <span className="login-agree-text">
+                  我已阅读并同意
+                  {onOpenDisclaimer ? (
+                    <button type="button" className="login-agree-link" onClick={(e) => { e.preventDefault(); onOpenDisclaimer() }}>《免责声明》</button>
+                  ) : (
+                    <span>《免责声明》</span>
+                  )}
+                  和
+                  {onOpenPrivacy ? (
+                    <button type="button" className="login-agree-link" onClick={(e) => { e.preventDefault(); onOpenPrivacy() }}>《用户隐私》</button>
+                  ) : (
+                    <span>《用户隐私》</span>
+                  )}
+                </span>
+              </label>
+            )}
+
             <button
               type="submit"
               className="login-submit-button"
@@ -561,6 +605,43 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
       </div>
 
       <Footer hideSignOut={true} hideSubscription={true} />
+
+      <Modal
+        isOpen={showTermsConfirmModal}
+        onClose={() => {
+          if (!loading) setShowTermsConfirmModal(false)
+        }}
+        title="用户登录必读"
+      >
+        <div className="modal-text disclaimer-text">
+          <p>登录前，请确认已阅读并同意《免责声明》和《用户隐私》。</p>
+          <p>您可以随时在个人中心再次查看和管理相关条款。</p>
+          <div className="login-terms-actions">
+            <button
+              type="button"
+              className="login-terms-btn login-terms-btn-secondary"
+              onClick={() => {
+                if (!loading) setShowTermsConfirmModal(false)
+              }}
+            >
+              我再看看
+            </button>
+            <button
+              type="button"
+              className="login-terms-btn login-terms-btn-primary"
+              disabled={loading}
+              onClick={() => {
+                if (loading) return
+                setAgreeToTerms(true)
+                setShowTermsConfirmModal(false)
+                void performSubmit()
+              }}
+            >
+              我已同意并继续
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {showToast && <Toast message={toastMessage} />}
     </div>

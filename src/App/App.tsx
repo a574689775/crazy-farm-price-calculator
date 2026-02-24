@@ -33,6 +33,7 @@ import {
   CustomerServiceOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
+  LockOutlined,
 } from '@ant-design/icons'
 import './App.css'
 
@@ -83,6 +84,7 @@ export const App = () => {
   const [isUserCenterClosing, setIsUserCenterClosing] = useState(false)
   const [showUserContactModal, setShowUserContactModal] = useState(false)
   const [showUserDisclaimerModal, setShowUserDisclaimerModal] = useState(false)
+  const [showUserPrivacyModal, setShowUserPrivacyModal] = useState(false)
   const [showUserChangelogModal, setShowUserChangelogModal] = useState(false)
   const [leaderboard, setLeaderboard] = useState<MembershipLeaderboardItem[] | null>(null)
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
@@ -492,13 +494,62 @@ export const App = () => {
     )
   }
 
-  // 如果未登录，显示登录页（不展示备案号/公安号）
+  // 如果未登录，显示登录页（不展示备案号/公安号）；登录页需能打开免责声明与用户隐私弹窗
   if (!isAuthenticated) {
     return (
       <div className="app">
         <main className="main main-login">
-          <Login onLoginSuccess={handleLoginSuccess} />
+          <Login
+            onLoginSuccess={handleLoginSuccess}
+            onOpenDisclaimer={() => setShowUserDisclaimerModal(true)}
+            onOpenPrivacy={() => setShowUserPrivacyModal(true)}
+          />
         </main>
+        {/* 登录页用：免责声明与用户隐私弹窗（与个人中心内容一致） */}
+        <Modal
+          isOpen={showUserDisclaimerModal}
+          onClose={() => setShowUserDisclaimerModal(false)}
+          title="免责声明"
+        >
+          <div className="modal-text disclaimer-text">
+            <p><strong>1. 收费与合规说明</strong></p>
+            <p>本工具已实行部分收费，并非完全免费。收费手续合法，运营主体已完成企业备案。根据现行法规，本服务类型不需要 ICP 许可证。</p>
+            <p><strong>2. 版权与素材声明（重要）</strong></p>
+            <p>页面中的作物等图片素材来源于网易游戏《蛋仔派对》，其所有权及知识产权归网易公司所有。我们仅将上述图片用于标识作物，不用于其他用途，不主张任何素材权利，并尊重网易游戏原创内容。</p>
+            <p>如您为相关素材的版权方或授权方，认为本使用方式构成侵权，请通过 574689775@qq.com 联系我们，我们将在收到有效通知后及时下架或替换相关素材。</p>
+            <p><strong>3. 非官方与独立性声明</strong></p>
+            <p>本工具为爱好者独立开发，与网易游戏《蛋仔派对》官方无任何关联、赞助或授权关系。非官方产品。</p>
+            <p><strong>4. 数据免责与风险自担</strong></p>
+            <p>本工具所有计算功能、数据及结果均基于对公开游戏机制的分析，仅供参考，不保证100%准确性，不作为游戏内交易的官方依据。实际游戏内数值请以官方发布为准。</p>
+            <p>用户因使用、依赖本工具信息所产生的任何直接或间接风险、损失，需自行承担全部责任。</p>
+            <p><strong>5. 开发者责任限制</strong></p>
+            <p>开发者在本工具可用的技术上尽力保证其稳定，但对于服务的连续性、准确性、安全性不作担保。对于因使用本工具而产生的任何问题，开发者的责任在法律允许的最大范围内予以免除。</p>
+            <p><strong>6. 服务变更与终止</strong></p>
+            <p>开发者保留随时修改、暂停或终止本工具服务的权利，无需事先通知。</p>
+            <p><strong>7. 用户同意</strong></p>
+            <p>继续使用本工具，即表示您已阅读、理解并完全同意本声明的全部条款。</p>
+          </div>
+        </Modal>
+        <Modal
+          isOpen={showUserPrivacyModal}
+          onClose={() => setShowUserPrivacyModal(false)}
+          title="用户隐私"
+        >
+          <div className="modal-text disclaimer-text">
+            <p><strong>1. 信息收集范围</strong></p>
+            <p>为提供登录、会员与查询服务，我们可能收集：您登录时使用的账号信息（如邮箱）、昵称与头像设置、查询与计算记录（用于历史与统计）、会员激活与到期信息、以及您主动提交的反馈内容。</p>
+            <p><strong>2. 使用目的</strong></p>
+            <p>上述信息仅用于账号识别、会员权益校验、历史记录展示、产品改进与必要的客服联系，不会用于与产品无关的营销或对外出售。</p>
+            <p><strong>3. 存储与安全</strong></p>
+            <p>数据在服务端与本地按需存储，我们采取合理技术措施保护数据安全。因网络或设备原因导致的数据丢失，我们无法完全避免，请重要信息自行备份。</p>
+            <p><strong>4. 第三方与共享</strong></p>
+            <p>登录、支付等由第三方服务（如 Supabase、支付渠道）处理，其隐私政策以对方为准。我们不会将您的个人信息出售给第三方。</p>
+            <p><strong>5. 用户权利</strong></p>
+            <p>您可随时在应用内查看、修改昵称与头像；如需删除账号或数据，可通过 574689775@qq.com 联系我们处理。</p>
+            <p><strong>6. 条款更新</strong></p>
+            <p>我们可能适时更新本隐私说明，更新后将通过应用内展示或公告方式告知，继续使用即视为接受更新后的条款。</p>
+          </div>
+        </Modal>
       </div>
     )
   }
@@ -727,6 +778,20 @@ export const App = () => {
                     <span className="user-center-item-label">
                       <ExclamationCircleOutlined className="user-center-item-icon" />
                       <span>免责声明</span>
+                    </span>
+                    <span className="user-center-item-arrow">›</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      closeUserCenter()
+                      setShowUserPrivacyModal(true)
+                    }}
+                  >
+                    <span className="user-center-item-label">
+                      <LockOutlined className="user-center-item-icon" />
+                      <span>用户隐私</span>
                     </span>
                     <span className="user-center-item-arrow">›</span>
                   </button>
@@ -1100,6 +1165,33 @@ export const App = () => {
           
           <p><strong>7. 用户同意</strong></p>
           <p>继续使用本工具，即表示您已阅读、理解并完全同意本声明的全部条款。</p>
+        </div>
+      </Modal>
+
+      {/* 个人中心：用户隐私模态框 */}
+      <Modal
+        isOpen={showUserPrivacyModal}
+        onClose={() => setShowUserPrivacyModal(false)}
+        title="用户隐私"
+      >
+        <div className="modal-text disclaimer-text">
+          <p><strong>1. 信息收集范围</strong></p>
+          <p>为提供登录、会员与查询服务，我们可能收集：您登录时使用的账号信息（如邮箱）、昵称与头像设置、查询与计算记录（用于历史与统计）、会员激活与到期信息、以及您主动提交的反馈内容。</p>
+          
+          <p><strong>2. 使用目的</strong></p>
+          <p>上述信息仅用于账号识别、会员权益校验、历史记录展示、产品改进与必要的客服联系，不会用于与产品无关的营销或对外出售。</p>
+          
+          <p><strong>3. 存储与安全</strong></p>
+          <p>数据在服务端与本地按需存储，我们采取合理技术措施保护数据安全。因网络或设备原因导致的数据丢失，我们无法完全避免，请重要信息自行备份。</p>
+          
+          <p><strong>4. 第三方与共享</strong></p>
+          <p>登录、支付等由第三方服务（如 Supabase、支付渠道）处理，其隐私政策以对方为准。我们不会将您的个人信息出售给第三方。</p>
+          
+          <p><strong>5. 用户权利</strong></p>
+          <p>您可随时在应用内查看、修改昵称与头像；如需删除账号或数据，可通过 574689775@qq.com 联系我们处理。</p>
+          
+          <p><strong>6. 条款更新</strong></p>
+          <p>我们可能适时更新本隐私说明，更新后将通过应用内展示或公告方式告知，继续使用即视为接受更新后的条款。</p>
         </div>
       </Modal>
     </div>

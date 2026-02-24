@@ -189,6 +189,85 @@
   opacity: 0.7;
 }
 
+.login-terms-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.login-terms-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.login-terms-btn-primary {
+  background: rgba(132, 49, 0, 1);
+  color: #fff;
+}
+
+.login-terms-btn-primary:disabled {
+  background: rgba(132, 49, 0, 0.5);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.login-terms-btn-secondary {
+  background: rgba(255, 252, 239, 1);
+  color: rgba(132, 49, 0, 0.9);
+  border: 1px solid rgba(132, 49, 0, 0.25);
+}
+
+.login-agree-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.85);
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.login-agree-checkbox {
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: rgba(132, 49, 0, 0.9);
+  cursor: pointer;
+}
+
+.login-agree-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.login-agree-link {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: #E19859;
+  text-decoration: underline;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.login-agree-link:hover {
+  color: rgba(132, 49, 0, 0.95);
+}
+
 .login-password-wrapper {
   position: relative;
   display: flex;
