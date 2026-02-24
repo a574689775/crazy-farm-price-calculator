@@ -330,6 +330,7 @@
   list-style: none;
   margin: 0 0 1rem 0;
   padding: 0;
+  padding-top: 10px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 8px 16px;
@@ -346,6 +347,10 @@
   font-size: 13px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.subscription-plans-list li.subscription-plan-item-recommended {
+  position: relative;
+  overflow: visible;
 }
 .subscription-plans-list li:hover {
   background: rgba(255, 236, 196, 0.9);
@@ -364,12 +369,20 @@
   color: rgba(132, 49, 0, 1);
   white-space: nowrap;
 }
-.subscription-plan-tag {
-  font-size: 11px;
+/* 推荐角标：浮在卡片上方，不占位也不挡文字 */
+.subscription-plans-list .subscription-plan-tag {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
   padding: 2px 6px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: #E19859;
   color: #fff;
+  white-space: nowrap;
+  line-height: 1.2;
+  box-shadow: 0 1px 2px rgba(132, 49, 0, 0.2);
 }
 .subscription-plans-desc {
   font-size: 13px;

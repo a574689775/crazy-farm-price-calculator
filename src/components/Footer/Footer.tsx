@@ -323,11 +323,9 @@ export const Footer = ({
                 <span className="subscription-plan-name">周卡</span>
                 <span className="subscription-plan-price">0.99 元</span>
               </li>
-              <li onClick={handleOpenPurchasePage}>
-                <span className="subscription-plan-name">
-                  月卡
-                  <span className="subscription-plan-tag">推荐</span>
-                </span>
+              <li onClick={handleOpenPurchasePage} className="subscription-plan-item-recommended">
+                <span className="subscription-plan-name">月卡</span>
+                <span className="subscription-plan-tag">推荐</span>
                 <span className="subscription-plan-price">1.99 元</span>
               </li>
               <li onClick={handleOpenPurchasePage}>
