@@ -43,6 +43,9 @@ const CARZYFARM_BASE = '/carzyfarm'
 const AVATAR_BASE_URL = `${CARZYFARM_BASE}/avatars`
 const AVATAR_COUNT = 18
 
+/** 临时 mock：把当前用户显示为第几名（1/2/3），0 表示关闭。看效果后记得改回 0 */
+const MOCK_ME_AS_TOP_RANK = 0
+
 /** 昵称校验：最多 12 字符、最多 6 个汉字，仅允许中文/字母/数字 */
 const validateNickname = (s: string): { ok: true } | { ok: false; error: string } => {
   const t = s.trim()
@@ -921,47 +924,88 @@ export const App = () => {
                 <div className="leaderboard-empty">暂时没有会员上榜，开通会员即可参与榜单。</div>
               )}
               {!leaderboardLoading && !leaderboardError && leaderboard && leaderboard.length > 0 && (
-                <div className="leaderboard-list">
-                  {leaderboard.map((item, index) => {
-                    const rank = index + 1
-                    const topClass =
-                      rank === 1 ? 'leaderboard-item--top1'
-                        : rank === 2 ? 'leaderboard-item--top2'
-                          : rank === 3 ? 'leaderboard-item--top3' : ''
-                    return (
-                      <div
-                        key={item.userId}
-                        className={`leaderboard-item ${topClass} ${
-                          currentUserId && item.userId === currentUserId ? 'leaderboard-item--me' : ''
-                        }`}
-                      >
-                        <div className="leaderboard-rank-badge">{rank}</div>
-                        <div className="leaderboard-user">
-                          <div className="leaderboard-avatar">
-                            <img
-                              src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
-                              alt="头像"
-                              className="leaderboard-avatar-img"
-                            />
+                <div className="leaderboard-section-inner">
+                  <div className="leaderboard-top3">
+                    {leaderboard.slice(0, 3).map((item, index) => {
+                      const rank = index + 1
+                      const rankClass =
+                        rank === 1
+                          ? 'leaderboard-top-item--1'
+                          : rank === 2
+                            ? 'leaderboard-top-item--2'
+                            : 'leaderboard-top-item--3'
+                      const mockAsMe = MOCK_ME_AS_TOP_RANK === rank && currentUserId
+                      const displayItem = mockAsMe
+                        ? {
+                            ...item,
+                            userId: currentUserId!,
+                            displayName: userDisplayName || '我',
+                            avatarIndex: userAvatarIndex || 1,
+                          }
+                        : item
+                      const isMe = currentUserId && displayItem.userId === currentUserId
+                      return (
+                        <div
+                          key={displayItem.userId + String(rank)}
+                          className={`leaderboard-top-item ${rankClass} ${isMe ? 'leaderboard-top-item--me' : ''}`}
+                        >
+                          <div className="leaderboard-top-rank">{rank}</div>
+                          <div className="leaderboard-top-avatar-wrap">
+                            <div className="leaderboard-avatar">
+                              <img
+                                src={`${AVATAR_BASE_URL}/${displayItem.avatarIndex}.png`}
+                                alt="头像"
+                                className="leaderboard-avatar-img"
+                              />
+                            </div>
                           </div>
-                          <div className="leaderboard-user-text">
-                            <div className="leaderboard-user-name">
-                              {item.displayName || '神秘用户'}
-                            </div>
-                            <div className="leaderboard-user-sub">
-                              剩余 {item.daysLeft} 天会员
-                            </div>
+                          <div className="leaderboard-top-name">
+                            {displayItem.displayName || '神秘用户'}
+                          </div>
+                          <div className="leaderboard-top-badge">
+                            {isMe && <span className="leaderboard-me-badge">我</span>}
+                            <span>{displayItem.daysLeft} 天</span>
                           </div>
                         </div>
-                        <div className="leaderboard-days-badge">
-                          {currentUserId && item.userId === currentUserId && (
-                            <span className="leaderboard-me-badge">我</span>
-                          )}
-                          {item.daysLeft} 天
-                        </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
+                  {leaderboard.length > 3 && (
+                    <div className="leaderboard-list">
+                      {leaderboard.slice(3).map((item, index) => {
+                        const rank = index + 4
+                        const isMe = currentUserId && item.userId === currentUserId
+                        return (
+                          <div
+                            key={item.userId}
+                            className={`leaderboard-item ${isMe ? 'leaderboard-item--me' : ''}`}
+                          >
+                            <div className="leaderboard-rank-badge">{rank}</div>
+                            <div className="leaderboard-user">
+                              <div className="leaderboard-avatar">
+                                <img
+                                  src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                                  alt="头像"
+                                  className="leaderboard-avatar-img"
+                                />
+                              </div>
+                              <div className="leaderboard-user-text">
+                                <div className="leaderboard-user-name">
+                                  {item.displayName || '神秘用户'}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="leaderboard-days-badge">
+                              {isMe && (
+                                <span className="leaderboard-me-badge">我</span>
+                              )}
+                              {item.daysLeft} 天
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -981,47 +1025,94 @@ export const App = () => {
                 <div className="leaderboard-empty">今日暂无查询记录，选择作物进入计算器即可参与。</div>
               )}
               {!queryLeaderboardLoading && !queryLeaderboardError && queryLeaderboard && queryLeaderboard.length > 0 && (
-                <div className="leaderboard-list">
-                  {queryLeaderboard.map((item) => {
-                    const rank = item.rankPos
-                    const topClass =
-                      rank === 1 ? 'leaderboard-item--top1'
-                        : rank === 2 ? 'leaderboard-item--top2'
-                          : rank === 3 ? 'leaderboard-item--top3' : ''
-                    return (
-                      <div
-                        key={item.userId}
-                        className={`leaderboard-item ${topClass} ${
-                          currentUserId && item.userId === currentUserId ? 'leaderboard-item--me' : ''
-                        }`}
-                      >
-                        <div className="leaderboard-rank-badge">{rank}</div>
-                        <div className="leaderboard-user">
-                          <div className="leaderboard-avatar">
-                            <img
-                              src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
-                              alt="头像"
-                              className="leaderboard-avatar-img"
-                            />
-                          </div>
-                          <div className="leaderboard-user-text">
-                            <div className="leaderboard-user-name">
-                              {item.displayName || '神秘用户'}
+                <div className="leaderboard-section-inner">
+                  <div className="leaderboard-top3">
+                    {queryLeaderboard
+                      .filter((item) => item.rankPos >= 1 && item.rankPos <= 3)
+                      .sort((a, b) => a.rankPos - b.rankPos)
+                      .map((item) => {
+                        const rank = item.rankPos
+                        const rankClass =
+                          rank === 1
+                            ? 'leaderboard-top-item--1'
+                            : rank === 2
+                              ? 'leaderboard-top-item--2'
+                              : 'leaderboard-top-item--3'
+                        const mockAsMe = MOCK_ME_AS_TOP_RANK === rank && currentUserId
+                        const displayItem = mockAsMe
+                          ? {
+                              ...item,
+                              userId: currentUserId!,
+                              displayName: userDisplayName || '我',
+                              avatarIndex: userAvatarIndex || 1,
+                            }
+                          : item
+                        const isMe = currentUserId && displayItem.userId === currentUserId
+                        return (
+                          <div
+                            key={displayItem.userId + String(rank)}
+                            className={`leaderboard-top-item ${rankClass} ${isMe ? 'leaderboard-top-item--me' : ''}`}
+                          >
+                            <div className="leaderboard-top-rank">{rank}</div>
+                            <div className="leaderboard-top-avatar-wrap">
+                              <div className="leaderboard-avatar">
+                                <img
+                                  src={`${AVATAR_BASE_URL}/${displayItem.avatarIndex}.png`}
+                                  alt="头像"
+                                  className="leaderboard-avatar-img"
+                                />
+                              </div>
                             </div>
-                            <div className="leaderboard-user-sub">
-                              今日查询 {item.queryCount} 次
+                            <div className="leaderboard-top-name">
+                              {displayItem.displayName || '神秘用户'}
+                            </div>
+                            <div className="leaderboard-top-badge">
+                              {isMe && <span className="leaderboard-me-badge">我</span>}
+                              <span>{displayItem.queryCount} 次</span>
                             </div>
                           </div>
-                        </div>
-                        <div className="leaderboard-days-badge">
-                          {currentUserId && item.userId === currentUserId && (
-                            <span className="leaderboard-me-badge">我</span>
-                          )}
-                          {item.queryCount} 次
-                        </div>
-                      </div>
-                    )
-                  })}
+                        )
+                      })}
+                  </div>
+                  {queryLeaderboard.length > 3 && (
+                    <div className="leaderboard-list">
+                      {queryLeaderboard
+                        .filter((item) => item.rankPos > 3)
+                        .sort((a, b) => a.rankPos - b.rankPos)
+                        .map((item) => {
+                          const rank = item.rankPos
+                          const isMe = currentUserId && item.userId === currentUserId
+                          return (
+                            <div
+                              key={item.userId}
+                              className={`leaderboard-item ${isMe ? 'leaderboard-item--me' : ''}`}
+                            >
+                              <div className="leaderboard-rank-badge">{rank}</div>
+                              <div className="leaderboard-user">
+                                <div className="leaderboard-avatar">
+                                  <img
+                                    src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                                    alt="头像"
+                                    className="leaderboard-avatar-img"
+                                  />
+                                </div>
+                                <div className="leaderboard-user-text">
+                                  <div className="leaderboard-user-name">
+                                    {item.displayName || '神秘用户'}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="leaderboard-days-badge">
+                                {isMe && (
+                                  <span className="leaderboard-me-badge">我</span>
+                                )}
+                                {item.queryCount} 次
+                              </div>
+                            </div>
+                          )
+                        })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
