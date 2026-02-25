@@ -7,7 +7,7 @@ export interface ChangelogItem {
 export const changelog: ChangelogItem[] = [
   {
     version: 'V7.4.1',
-    date: '2026.2.22',
+    date: '2026.2.25',
     items: [
       '替换月兔、红包树、星空玫瑰作物图片',
     ],
