@@ -1,5 +1,6 @@
 import { InputNumber } from 'antd'
 import type { CropConfig } from '@/types'
+import { getCropImagePath } from '@/data/crops'
 import { SVGText } from '@/components/SVGText'
 import type { CalculationMode } from './types'
 import './PriceCalculator.css'
@@ -195,7 +196,7 @@ export const WeightInputGroup = ({
           </div>
         </div>
         <img 
-          src={`/carzyfarm/${crop.name}.png`}
+          src={getCropImagePath(crop.name)}
           alt={crop.name}
           className="crop-image"
         />

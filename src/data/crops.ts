@@ -68,3 +68,14 @@ export const getCropByName = (name: string): CropConfig | undefined => {
   return crops.find(crop => crop.name === name)
 }
 
+/** 使用「作物名称1.png」的作物（其余为「作物名称.png」） */
+const CROPS_IMAGE_NAME_SUFFIX_1 = new Set<string>(['月兔', '红包树', '星空玫瑰'])
+
+/**
+ * 根据作物名称返回图片路径（/carzyfarm/xxx.png 或 /carzyfarm/xxx1.png）
+ */
+export const getCropImagePath = (cropName: string): string => {
+  const filename = CROPS_IMAGE_NAME_SUFFIX_1.has(cropName) ? `${cropName}1.png` : `${cropName}.png`
+  return `/carzyfarm/${filename}`
+}
+

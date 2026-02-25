@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LeftOutlined } from '@ant-design/icons'
 import { Modal } from '@/components/Modal'
 import type { HistoryRecord } from '@/types'
+import { getCropImagePath } from '@/data/crops'
 import { getHistoryRecords, removeHistoryRecord } from '@/utils/historyStorage'
 import './HistoryView.css'
 
@@ -48,7 +49,7 @@ export const HistoryView = ({ onBack, active, onSelectRecord }: HistoryViewProps
         <div className="history-item-body">
           <img
             className="history-item-image"
-            src={`/carzyfarm/${record.cropName}.png`}
+            src={getCropImagePath(record.cropName)}
             alt={record.cropName}
           />
           <div className="history-item-info">
