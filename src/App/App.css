@@ -549,6 +549,21 @@
   height: 100%;
 }
 
+/* 反馈排行：奖励说明小卡片 */
+.leaderboard-reward-hint {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fff9e0, #ffecc8);
+  border: 1px solid rgba(225, 152, 89, 0.6);
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(107, 45, 0, 0.9);
+}
+
+.leaderboard-reward-hint strong {
+  font-weight: 700;
+}
+
 .leaderboard-top3 {
   display: flex;
   align-items: flex-end;

@@ -14,11 +14,48 @@ export interface FeedbackData {
   calculated_price: number
   actual_price: number | null
   is_accurate: boolean
+  // 由 submitFeedback 内部自动补充当前登录用户 ID，price_feedback 表中需有对应列
+  user_id?: string | null
 }
 
 export const submitFeedback = async (data: FeedbackData) => {
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : ''
+
   if (!supabase) {
     throw new Error('Supabase client is not initialized. Please check your environment variables.')
+  }
+
+  // 不论本地还是线上，都尽量为反馈记录绑定当前登录用户 ID，方便统计和排榜
+  try {
+    const { data: userData } = await supabase.auth.getUser()
+    if (userData?.user?.id) {
+      data.user_id = userData.user.id
+    }
+  } catch {
+    // 获取失败则保持匿名，不影响前端提示与插入
+  }
+
+  // 线上环境：只有“价格准确率”大于 98% 才真正写入库中
+  // 本地（localhost 等）环境：不做 98% 校验，所有反馈都写库，方便调试
+  const isLocal =
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0' ||
+    hostname === ''
+
+  if (!isLocal) {
+    // 若用户提供了真实价格，则按 |预测-真实|/真实 计算误差；否则视为 100% 准确
+    let accuracy = 100
+    if (data.actual_price != null && Number.isFinite(data.actual_price) && data.actual_price > 0) {
+      const diff = Math.abs(data.calculated_price - data.actual_price)
+      const ratio = diff / data.actual_price
+      accuracy = (1 - ratio) * 100
+    }
+
+    if (accuracy < 98) {
+      // 准确率不足 98%：对前端返回“成功”，但不实际插入记录
+      return true
+    }
   }
 
   const { error } = await supabase
@@ -496,6 +533,16 @@ export interface QueryLeaderboardItem {
   rankPos: number
 }
 
+/** 今日反馈排行榜条目（按有效反馈次数） */
+export interface FeedbackLeaderboardItem {
+  userId: string
+  displayName: string | null
+  email: string | null
+  avatarIndex: number
+  feedbackCount: number
+  rankPos: number
+}
+
 /** 今日查询排行榜：按用户当日总查询次数降序，前 100 名 */
 export const getQueryLeaderboard = async (): Promise<{
   ok: boolean
@@ -539,6 +586,56 @@ export const getQueryLeaderboard = async (): Promise<{
       email: row.email ?? null,
       avatarIndex: avatar,
       queryCount: count,
+      rankPos: rank,
+    }
+  })
+  return { ok: true, items }
+}
+
+/** 今日反馈排行榜：按当日有效反馈次数降序，前 100 名 */
+export const getFeedbackLeaderboard = async (): Promise<{
+  ok: boolean
+  items: FeedbackLeaderboardItem[]
+  error?: string
+}> => {
+  const { data, error } = await supabase.rpc('get_feedback_leaderboard', { p_limit: 100 })
+  if (error) {
+    return { ok: false, items: [], error: error.message || '获取排行榜失败' }
+  }
+  const rows = (data as unknown as Array<{
+    user_id?: string
+    display_name?: string | null
+    email?: string | null
+    avatar_index?: number | string | null
+    feedback_count?: number | string | null
+    rank_pos?: number | string | null
+  }>) ?? []
+
+  const items: FeedbackLeaderboardItem[] = rows.map((row, idx) => {
+    const rawAvatar = row.avatar_index
+    let avatar = 1
+    if (rawAvatar !== undefined && rawAvatar !== null) {
+      const n = typeof rawAvatar === 'number' ? rawAvatar : parseInt(String(rawAvatar), 10)
+      if (Number.isFinite(n)) avatar = Math.min(18, Math.max(1, n || 1))
+    }
+    const rawCount = row.feedback_count
+    let count = 0
+    if (rawCount !== undefined && rawCount !== null) {
+      const n = typeof rawCount === 'number' ? rawCount : parseInt(String(rawCount), 10)
+      if (Number.isFinite(n)) count = Math.max(0, n)
+    }
+    const rawRank = row.rank_pos
+    let rank = idx + 1
+    if (rawRank !== undefined && rawRank !== null) {
+      const n = typeof rawRank === 'number' ? rawRank : parseInt(String(rawRank), 10)
+      if (Number.isFinite(n)) rank = n
+    }
+    return {
+      userId: row.user_id ?? `unknown-${idx}`,
+      displayName: row.display_name ?? null,
+      email: row.email ?? null,
+      avatarIndex: avatar,
+      feedbackCount: count,
       rankPos: rank,
     }
   })

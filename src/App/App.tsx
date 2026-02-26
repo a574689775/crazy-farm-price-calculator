@@ -21,9 +21,11 @@ import {
   updateUserDisplayName,
   updateUserAvatarIndex,
   assignRandomDisplayName,
+  getMembershipLeaderboard,
+  getQueryLeaderboard,
+  getFeedbackLeaderboard,
 } from '@/utils/supabase'
-import type { MySubscription, MembershipLeaderboardItem, QueryLeaderboardItem } from '@/utils/supabase'
-import { getMembershipLeaderboard, getQueryLeaderboard } from '@/utils/supabase'
+import type { MySubscription, MembershipLeaderboardItem, QueryLeaderboardItem, FeedbackLeaderboardItem } from '@/utils/supabase'
 import { Modal } from '@/components/Modal'
 import { InviteModal } from '@/components/InviteModal'
 import {
@@ -95,8 +97,11 @@ export const App = () => {
   const [queryLeaderboard, setQueryLeaderboard] = useState<QueryLeaderboardItem[] | null>(null)
   const [queryLeaderboardLoading, setQueryLeaderboardLoading] = useState(false)
   const [queryLeaderboardError, setQueryLeaderboardError] = useState<string | null>(null)
+  const [feedbackLeaderboard, setFeedbackLeaderboard] = useState<FeedbackLeaderboardItem[] | null>(null)
+  const [feedbackLeaderboardLoading, setFeedbackLeaderboardLoading] = useState(false)
+  const [feedbackLeaderboardError, setFeedbackLeaderboardError] = useState<string | null>(null)
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
-  const [leaderboardTab, setLeaderboardTab] = useState<'membership' | 'query'>('membership')
+  const [leaderboardTab, setLeaderboardTab] = useState<'membership' | 'query' | 'feedback'>('membership')
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -147,6 +152,24 @@ export const App = () => {
       setQueryLeaderboardError('排行榜获取失败')
     } finally {
       setQueryLeaderboardLoading(false)
+    }
+  }, [])
+
+  const loadFeedbackLeaderboard = useCallback(async () => {
+    setFeedbackLeaderboardLoading(true)
+    setFeedbackLeaderboardError(null)
+    try {
+      const res = await getFeedbackLeaderboard()
+      if (res.ok) {
+        setFeedbackLeaderboard(res.items)
+      } else {
+        setFeedbackLeaderboardError(res.error ?? '排行榜获取失败')
+      }
+    } catch (e) {
+      console.error('加载反馈排行榜失败:', e)
+      setFeedbackLeaderboardError('排行榜获取失败')
+    } finally {
+      setFeedbackLeaderboardLoading(false)
     }
   }, [])
 
@@ -743,6 +766,7 @@ export const App = () => {
                       setShowLeaderboardModal(true)
                       void loadLeaderboard()
                       void loadQueryLeaderboard()
+                      void loadFeedbackLeaderboard()
                     }}
                   >
                     <span className="user-center-item-label">
@@ -907,6 +931,13 @@ export const App = () => {
               onClick={() => setLeaderboardTab('query')}
             >
               今日查询
+            </button>
+            <button
+              type="button"
+              className={`leaderboard-tab ${leaderboardTab === 'feedback' ? 'leaderboard-tab--active' : ''}`}
+              onClick={() => setLeaderboardTab('feedback')}
+            >
+              今日反馈
             </button>
           </div>
           {leaderboardTab === 'membership' && (
@@ -1107,6 +1138,107 @@ export const App = () => {
                                   <span className="leaderboard-me-badge">我</span>
                                 )}
                                 {item.queryCount} 次
+                              </div>
+                            </div>
+                          )
+                        })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          {leaderboardTab === 'feedback' && (
+            <div className="leaderboard-section">
+              {feedbackLeaderboardLoading && (
+                <div className="leaderboard-loading-wrap">
+                  <div className="leaderboard-spinner" />
+                  <span className="leaderboard-loading-text">加载中...</span>
+                </div>
+              )}
+              {!feedbackLeaderboardLoading && feedbackLeaderboardError && (
+                <div className="leaderboard-error">{feedbackLeaderboardError}</div>
+              )}
+              {!feedbackLeaderboardLoading && !feedbackLeaderboardError && feedbackLeaderboard && feedbackLeaderboard.length === 0 && (
+                <div className="leaderboard-empty">今日暂无有效反馈，提交高质量反馈即可参与排行，前 3 名会自动发放 3/2/1 天会员。</div>
+              )}
+              {!feedbackLeaderboardLoading && !feedbackLeaderboardError && feedbackLeaderboard && feedbackLeaderboard.length > 0 && (
+                <div className="leaderboard-section-inner">
+                  <div className="leaderboard-reward-hint">
+                    今日有效反馈排行前 3 名将于次日北京时间 0 点后自动发放会员奖励：第 1 名 3 天、第 2 名 2 天、第 3 名 1 天。
+                  </div>
+                  <div className="leaderboard-top3">
+                    {feedbackLeaderboard
+                      .filter((item) => item.rankPos >= 1 && item.rankPos <= 3)
+                      .sort((a, b) => a.rankPos - b.rankPos)
+                      .map((item) => {
+                        const rank = item.rankPos
+                        const rankClass =
+                          rank === 1
+                            ? 'leaderboard-top-item--1'
+                            : rank === 2
+                              ? 'leaderboard-top-item--2'
+                              : 'leaderboard-top-item--3'
+                        const isMe = currentUserId && item.userId === currentUserId
+                        return (
+                          <div
+                            key={item.userId + String(rank)}
+                            className={`leaderboard-top-item ${rankClass} ${isMe ? 'leaderboard-top-item--me' : ''}`}
+                          >
+                            <div className="leaderboard-top-rank">{rank}</div>
+                            <div className="leaderboard-top-avatar-wrap">
+                              <div className="leaderboard-avatar">
+                                <img
+                                  src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                                  alt="头像"
+                                  className="leaderboard-avatar-img"
+                                />
+                              </div>
+                            </div>
+                            <div className="leaderboard-top-name">
+                              {item.displayName || '神秘用户'}
+                            </div>
+                            <div className="leaderboard-top-badge">
+                              {isMe && <span className="leaderboard-me-badge">我</span>}
+                              <span>{item.feedbackCount} 次</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                  {feedbackLeaderboard.length > 3 && (
+                    <div className="leaderboard-list">
+                      {feedbackLeaderboard
+                        .filter((item) => item.rankPos > 3)
+                        .sort((a, b) => a.rankPos - b.rankPos)
+                        .map((item) => {
+                          const rank = item.rankPos
+                          const isMe = currentUserId && item.userId === currentUserId
+                          return (
+                            <div
+                              key={item.userId}
+                              className={`leaderboard-item ${isMe ? 'leaderboard-item--me' : ''}`}
+                            >
+                              <div className="leaderboard-rank-badge">{rank}</div>
+                              <div className="leaderboard-user">
+                                <div className="leaderboard-avatar">
+                                  <img
+                                    src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                                    alt="头像"
+                                    className="leaderboard-avatar-img"
+                                  />
+                                </div>
+                                <div className="leaderboard-user-text">
+                                  <div className="leaderboard-user-name">
+                                    {item.displayName || '神秘用户'}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="leaderboard-days-badge">
+                                {isMe && (
+                                  <span className="leaderboard-me-badge">我</span>
+                                )}
+                                {item.feedbackCount} 次
                               </div>
                             </div>
                           )
