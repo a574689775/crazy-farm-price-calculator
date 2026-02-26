@@ -64,7 +64,7 @@ begin
 end;
 $$;
 
--- ========== 3. 绑定邀请关系（被邀请人注册后调用，仅建立关系不发奖） ==========
+-- ========== 3. 绑定邀请关系（被邀请人注册后调用，建立关系并立即给邀请人发 1 天会员） ==========
 create or replace function public.bind_invite_relation(p_invite_code text)
 returns json
 language plpgsql
@@ -75,6 +75,8 @@ declare
   v_uid uuid;
   v_inviter_id uuid;
   v_code_trim text;
+  v_current_end timestamptz;
+  v_new_end timestamptz;
 begin
   v_uid := auth.uid();
   if v_uid is null then
@@ -102,6 +104,22 @@ begin
   insert into public.invite_records (inviter_id, invitee_id, invite_code, reward_claimed_at, created_at)
   values (v_inviter_id, v_uid, v_code_trim, null, now());
 
+  -- 新增：只要成功绑定邀请关系（拉新注册成功），立即为邀请人发放 1 天会员
+  select subscription_end_at into v_current_end
+  from public.user_subscriptions
+  where user_id = v_inviter_id;
+
+  if v_current_end is not null and v_current_end > now() then
+    v_new_end := v_current_end + interval '1 day';
+  else
+    v_new_end := now() + interval '1 day';
+  end if;
+
+  insert into public.user_subscriptions (user_id, subscription_end_at)
+  values (v_inviter_id, v_new_end)
+  on conflict (user_id) do update
+    set subscription_end_at = v_new_end;
+
   return json_build_object('ok', true);
 exception
   when unique_violation then
@@ -127,7 +145,7 @@ as $$
   end;
 $$;
 
--- ========== 5. 我的邀请统计 ==========
+-- ========== 5. 我的邀请统计（含拉新奖励 + 首充低一档奖励） ==========
 create or replace function public.get_my_invite_stats()
 returns json
 language plpgsql
@@ -144,10 +162,13 @@ begin
     return json_build_object('ok', false, 'error', 'unauthorized');
   end if;
 
+  -- 已邀请人数：按绑定成功的邀请记录数计算（包含尚未首充的被邀请人）
   select count(*)::int into v_count
   from public.invite_records
-  where inviter_id = v_uid and reward_claimed_at is not null;
+  where inviter_id = v_uid;
 
+  -- 已获得的奖励天数：仅统计「好友首次充值」时按低一档发放的会员天数总和
+  -- 说明：注册立刻赠送的 1 天会员不计入该统计，避免对历史数据造成混淆
   select coalesce(sum(public.invite_reward_days_for_inviter(invitee_recharge_days)), 0)::int into v_total_days
   from public.invite_records
   where inviter_id = v_uid and reward_claimed_at is not null and invitee_recharge_days is not null;
@@ -162,5 +183,5 @@ $$;
 
 -- ========== 6. 注释 ==========
 comment on function public.get_or_create_invite_code is '获取或懒生成当前用户 6 位邀请码';
-comment on function public.bind_invite_relation is '被邀请人注册后绑定邀请关系，不发奖';
-comment on function public.get_my_invite_stats is '邀请人：已邀请人数、已获得奖励天数';
+comment on function public.bind_invite_relation is '被邀请人注册后绑定邀请关系，并为邀请人发放 1 天会员';
+comment on function public.get_my_invite_stats is '邀请人：已邀请人数、已获得奖励天数（拉新奖励+充值低一档奖励）';

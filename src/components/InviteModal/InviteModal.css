@@ -3,7 +3,6 @@
 }
 
 .invite-modal-content {
-  padding: 0 4px;
   text-align: left;
 }
 
@@ -99,21 +98,21 @@
   transform: translateY(-1px);
 }
 
-.invite-modal-rules {
-  margin-bottom: 8px;
+.invite-modal-intro {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: rgba(132, 49, 0, 0.85);
 }
 
-.invite-modal-intro {
-  margin: 0 0 16px 0;
-  font-size: 13px;
-  color: rgba(132, 49, 0, 0.8);
+.invite-modal-intro strong {
+  font-weight: 700;
 }
 
 .invite-modal-steps {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 4px 0 16px;
+  gap: 10px;
+  margin: 4px 0 10px;
 }
 
 .invite-modal-step {
@@ -121,7 +120,7 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 13px;
-  color: rgba(132, 49, 0, 0.85);
+  color: rgba(132, 49, 0, 0.8);
 }
 
 .invite-modal-step-index {
@@ -142,19 +141,31 @@
   color: rgba(132, 49, 0, 1);
 }
 
-.invite-modal-tier-list {
-  margin: 4px 0 0 0;
-  padding-left: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 12px;
+.invite-modal-reward-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(132, 49, 0, 0.95);
+}
+
+.invite-modal-reward-text {
+  margin: 0;
   font-size: 12px;
-  color: rgba(132, 49, 0, 0.85);
+  line-height: 1.6;
+  color: rgba(132, 49, 0, 0.8);
+}
+
+.invite-modal-tier-list {
+  margin: 6px 0 0 0;
+  padding-left: 16px;
+  list-style: disc;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(132, 49, 0, 0.8);
 }
 
 .invite-modal-tier-list li {
-  margin: 0;
+  margin: 0 0 2px 0;
 }
 
 .invite-modal-stats-row {
