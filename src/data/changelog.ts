@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.5.3',
+    date: '2026.2.27',
+    items: [
+      '修复最小重量计算结果为0的bug',
+    ],
+  },
+  {
     version: 'V7.5.2',
     date: '2026.2.27',
     items: [

@@ -187,9 +187,11 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   // 注意：必须在所有 hooks 之后，条件返回之前
   
   const weightNum = parseFloat(weight) || 0
-  // 最小重量 = 最大重量 / 34
+  // 最小重量 = 最大重量 / 34（仅用于输入控件的提示和限制）
   const minWeight = crop ? crop.maxWeight / 34 : 0
-  const isValidWeight = crop ? (weightNum >= minWeight && weightNum <= crop.maxWeight) : false
+  // 价格计算的有效范围：> 0 且 <= 最大重量
+  // 实际输入下限已经由 InputNumber 的 minWeight 控制，这里不再重复校验，以避免边界浮点误差导致 0 价格
+  const isValidWeight = crop ? (weightNum > 0 && weightNum <= crop.maxWeight) : false
   
   /**
    * 根据计算模式计算价格或反推重量
