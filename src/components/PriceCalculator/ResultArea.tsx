@@ -11,7 +11,6 @@ interface ResultAreaProps {
   onPriceClick: () => void
   onPriceChange: (value: string) => void
   onPriceBlur: () => void
-  onSave: () => void
   onFeedback: () => void
 }
 
@@ -26,7 +25,6 @@ export const ResultArea = ({
   onPriceClick,
   onPriceChange,
   onPriceBlur,
-  onSave,
   onFeedback,
 }: ResultAreaProps) => {
   return (
@@ -35,9 +33,6 @@ export const ResultArea = ({
         反馈
       </GradientButton>
       <div className="result-right">
-        <GradientButton onClick={onSave}>
-          保存
-        </GradientButton>
         <div className="result-value-container">
           {isEditingPrice ? (
             <input

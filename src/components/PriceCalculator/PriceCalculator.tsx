@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { WeatherMutation, HistoryRecord, CalculationResult } from '@/types'
 import { calculatePrice, parseFormattedPrice, convertToYuan, calculateWeightFromPrice } from '@/utils/priceCalculator'
 import { parseShareUrl } from '@/utils/shareEncoder'
@@ -49,9 +49,21 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   // 数据恢复状态
   const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false)
 
+  // 本次进入计算页面的唯一会话 ID（锁）
+  const sessionIdRef = useRef<string | null>(null)
+
 
   // ========== 副作用处理 ==========
   
+  /**
+   * 当从「未选作物」进入到「有作物」状态时，生成新的会话 ID
+   * 等价于「每次真正打开计算器页面时，换一把新的锁」
+   */
+  useEffect(() => {
+    if (!crop) return
+    sessionIdRef.current = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  }, [crop?.name])
+
   /**
    * 从URL参数恢复配置（仅在首次加载时）
    * 用于处理分享链接的回填
@@ -134,8 +146,8 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     // 根据重量计算百分比
     const weightNum = Number(prefillData.weight)
     if (weightNum > 0 && crop) {
-      const percentageNum = Math.floor((weightNum / crop.maxWeight) * 100)
-      setPercentage(percentageNum.toString())
+      const percentageNum = getPercentageFromWeight(weightNum, crop.maxWeight)
+      setPercentage(percentageNum ? percentageNum.toString() : '')
       // 生长速度 = 生长耗时的 1%（秒）
       const secPerPercent = 0.01 * weightNum * crop.growthSpeed
       setGrowthSpeed(secPerPercent > 0 ? secPerPercent.toFixed(2).replace(/\.?0+$/, '') : '')
@@ -153,36 +165,6 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
 
   // ========== 事件处理函数 ==========
   
-  /**
-   * 保存当前计算结果到历史记录
-   */
-  const handleSaveToHistory = () => {
-    if (!crop || !isValidWeight || !result) {
-      setToastMessage('请先输入重量并选择突变')
-      setShowToast(true)
-      setTimeout(() => {
-        setShowToast(false)
-      }, 2000)
-      return
-    }
-
-    const record: HistoryRecord = {
-      id: Date.now().toString(),
-      cropName: crop.name,
-      weight: weightNum,
-      mutations: [...selectedMutations],
-      price: displayPrice,
-      timestamp: Date.now(),
-    }
-
-    addHistoryRecord(record)
-    setToastMessage('已保存到历史记录')
-    setShowToast(true)
-    setTimeout(() => {
-      setShowToast(false)
-    }, 2000)
-  }
-
   // ========== 价格计算逻辑 ==========
   // 注意：必须在所有 hooks 之后，条件返回之前
   
@@ -192,6 +174,19 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   // 价格计算的有效范围：> 0 且 <= 最大重量
   // 实际输入下限已经由 InputNumber 的 minWeight 控制，这里不再重复校验，以避免边界浮点误差导致 0 价格
   const isValidWeight = crop ? (weightNum > 0 && weightNum <= crop.maxWeight) : false
+
+  /**
+   * 根据重量计算百分比（向下取整，但最低为 3%，用于展示）
+   * - 0 或超出范围返回 0
+   * - (0, 3) 之间的有效值统一显示为 3%
+   */
+  const getPercentageFromWeight = (w: number, maxW: number): number => {
+    if (maxW <= 0 || w <= 0 || w > maxW) return 0
+    const raw = (w / maxW) * 100
+    const floored = Math.floor(raw)
+    if (floored > 0 && floored < 3) return 3
+    return floored
+  }
   
   /**
    * 根据计算模式计算价格或反推重量
@@ -225,6 +220,27 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
   const targetPrice = result ? result.formattedPrice : '0'
   // 使用动画价格 hook（必须在条件返回之前调用）
   const displayPrice = useAnimatedPrice(targetPrice)
+
+  /**
+   * 自动保存当前计算结果到历史记录
+   * - 有有效结果时自动触发
+   * - 使用 sessionId 将本次进入页面的所有操作归为一条记录（锁的概念）
+   */
+  useEffect(() => {
+    if (!crop || !isValidWeight || !result) return
+
+    const record: HistoryRecord = {
+      id: Date.now().toString(),
+      cropName: crop.name,
+      weight: weightNum,
+      mutations: [...selectedMutations],
+      price: result.formattedPrice,
+      timestamp: Date.now(),
+      sessionId: sessionIdRef.current || undefined,
+    }
+
+    addHistoryRecord(record)
+  }, [crop, isValidWeight, result, weightNum, selectedMutations])
   
   /**
    * 如果反推了重量，更新重量显示
@@ -242,9 +258,9 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
           if (calculatedWeight !== null && calculatedWeight >= minWeight && calculatedWeight <= crop.maxWeight) {
             const formattedWeight = calculatedWeight.toFixed(2).replace(/\.?0+$/, '')
             setWeight(formattedWeight)
-            // 计算百分比（向下取整）
-            const percentageNum = Math.floor((calculatedWeight / crop.maxWeight) * 100)
-            setPercentage(percentageNum.toString())
+            // 根据重量计算百分比（最低为 3%）
+            const percentageNum = getPercentageFromWeight(calculatedWeight, crop.maxWeight)
+            setPercentage(percentageNum ? percentageNum.toString() : '')
           }
         }
       } catch (e) {
@@ -280,8 +296,8 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     // 计算百分比
     if (!crop) return
     if (value > 0 && value <= crop.maxWeight) {
-      const calculatedPercentage = (value / crop.maxWeight) * 100
-      setPercentage(Math.floor(calculatedPercentage).toString())
+      const percentageNum = getPercentageFromWeight(value, crop.maxWeight)
+      setPercentage(percentageNum ? percentageNum.toString() : '')
       // 生长速度 = 生长耗时的 1%（秒），生长耗时 = value * crop.growthSpeed
       const secPerPercent = 0.01 * value * crop.growthSpeed
       setGrowthSpeed(secPerPercent > 0 ? secPerPercent.toFixed(2).replace(/\.?0+$/, '') : '')
@@ -306,8 +322,8 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     const calculatedWeight = (speedNum * 100) / crop.growthSpeed
     const clampedWeight = Math.min(Math.max(calculatedWeight, minW), crop.maxWeight)
     setWeight(clampedWeight.toFixed(2).replace(/\.?0+$/, ''))
-    const percentageNum = Math.floor((clampedWeight / crop.maxWeight) * 100)
-    setPercentage(percentageNum.toString())
+    const percentageNum = getPercentageFromWeight(clampedWeight, crop.maxWeight)
+    setPercentage(percentageNum ? percentageNum.toString() : '')
   }
 
   /**
@@ -324,7 +340,8 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (speedNum < minSpeed) {
       setGrowthSpeed(minSpeed.toFixed(2).replace(/\.?0+$/, ''))
       setWeight(minW.toFixed(2).replace(/\.?0+$/, ''))
-      setPercentage(Math.floor((minW / crop.maxWeight) * 100).toString())
+      const percentageNum = getPercentageFromWeight(minW, crop.maxWeight)
+      setPercentage(percentageNum ? percentageNum.toString() : '')
     } else if (speedNum > maxSpeed) {
       setGrowthSpeed(maxSpeed.toFixed(2).replace(/\.?0+$/, ''))
       setWeight(crop.maxWeight.toFixed(2).replace(/\.?0+$/, ''))
@@ -487,7 +504,6 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
         onPriceClick={handlePriceClick}
         onPriceChange={handlePriceChange}
         onPriceBlur={handlePriceBlur}
-        onSave={handleSaveToHistory}
         onFeedback={() => {
           if (isValidWeight && result) {
             setShowFeedbackModal(true)

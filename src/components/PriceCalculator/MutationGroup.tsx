@@ -49,7 +49,7 @@ export const MutationGroup = ({
             <span className="mutation-group-label">
               <SVGText
                 fillColor="#843100"
-                strokeColor="#fff"
+                strokeColor="transparent"
                 strokeWidth={2}
                 fontSize={14}
                 fontWeight={700}
@@ -62,7 +62,7 @@ export const MutationGroup = ({
           <span className="mutation-group-label">
             <SVGText
               fillColor="#843100"
-              strokeColor="#fff"
+              strokeColor="transparent"
               strokeWidth={2}
               fontSize={14}
               fontWeight={700}

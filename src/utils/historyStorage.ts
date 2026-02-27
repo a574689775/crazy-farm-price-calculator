@@ -30,6 +30,23 @@ export const saveHistoryRecords = (records: HistoryRecord[]) => {
 
 export const addHistoryRecord = (record: HistoryRecord) => {
   const list = getHistoryRecords()
+  // 如果带有 sessionId：同一个 sessionId 视为同一条「计算会话」记录，只保留最新一次
+  if (record.sessionId) {
+    const existingIndex = list.findIndex(item => item.sessionId === record.sessionId)
+
+    let newList: HistoryRecord[]
+    if (existingIndex >= 0) {
+      const remaining = list.filter((_, index) => index !== existingIndex)
+      newList = [record, ...remaining].slice(0, MAX_RECORDS)
+    } else {
+      newList = [record, ...list].slice(0, MAX_RECORDS)
+    }
+
+    saveHistoryRecords(newList)
+    return
+  }
+
+  // 兼容旧逻辑：没有 sessionId 的记录，直接追加
   const newList = [record, ...list].slice(0, MAX_RECORDS)
   saveHistoryRecords(newList)
 }

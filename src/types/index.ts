@@ -56,6 +56,12 @@ export interface HistoryRecord {
   mutations: WeatherMutation[]
   price: string
   timestamp: number
+  /**
+   * 计算会话 ID：
+   * - 每次进入计算页面生成一个唯一 ID
+   * - 在同一次进入期间的所有保存，都归属同一个 sessionId
+   */
+  sessionId?: string
 }
 
 /**
