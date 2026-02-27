@@ -62,6 +62,12 @@ export interface HistoryRecord {
    * - 在同一次进入期间的所有保存，都归属同一个 sessionId
    */
   sessionId?: string
+  /**
+   * 是否锁定：
+   * - 锁定的记录在历史列表中置顶展示
+   * - 不会被后续新记录自动顶掉
+   */
+  locked?: boolean
 }
 
 /**

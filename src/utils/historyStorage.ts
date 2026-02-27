@@ -1,7 +1,7 @@
 import type { HistoryRecord } from '@/types'
 
 const STORAGE_KEY = 'historyRecords'
-const MAX_RECORDS = 20
+const MAX_RECORDS = 100
 
 const safeParse = (value: string | null): HistoryRecord[] => {
   if (!value) return []
@@ -25,7 +25,17 @@ export const getHistoryRecords = (): HistoryRecord[] => {
 
 export const saveHistoryRecords = (records: HistoryRecord[]) => {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(records.slice(0, MAX_RECORDS)))
+  // 锁定的记录：永远保留，不参与被顶掉
+  const locked = records.filter((r) => r.locked)
+  const unlocked = records.filter((r) => !r.locked)
+
+  // 未锁定记录按当前顺序截断，锁定记录全部保留
+  const maxUnlocked = Math.max(0, MAX_RECORDS - locked.length)
+  const trimmedUnlocked = maxUnlocked > 0 ? unlocked.slice(0, maxUnlocked) : []
+
+  const finalList = [...locked, ...trimmedUnlocked]
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(finalList))
 }
 
 export const addHistoryRecord = (record: HistoryRecord) => {
@@ -37,9 +47,9 @@ export const addHistoryRecord = (record: HistoryRecord) => {
     let newList: HistoryRecord[]
     if (existingIndex >= 0) {
       const remaining = list.filter((_, index) => index !== existingIndex)
-      newList = [record, ...remaining].slice(0, MAX_RECORDS)
+      newList = [record, ...remaining]
     } else {
-      newList = [record, ...list].slice(0, MAX_RECORDS)
+      newList = [record, ...list]
     }
 
     saveHistoryRecords(newList)
@@ -47,7 +57,15 @@ export const addHistoryRecord = (record: HistoryRecord) => {
   }
 
   // 兼容旧逻辑：没有 sessionId 的记录，直接追加
-  const newList = [record, ...list].slice(0, MAX_RECORDS)
+  const newList = [record, ...list]
+  saveHistoryRecords(newList)
+}
+
+export const toggleHistoryRecordLock = (id: string) => {
+  const list = getHistoryRecords()
+  const newList = list.map((item) =>
+    item.id === id ? { ...item, locked: !item.locked } : item
+  )
   saveHistoryRecords(newList)
 }
 

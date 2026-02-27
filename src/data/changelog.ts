@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.6.1',
+    date: '2026.2.27',
+    items: [
+      '历史记录上限更改为100条',
+      '优化历史记录页面样式',
+      '支持锁定历史记录'
+    ],
+  },
+  {
     version: 'V7.6.0',
     date: '2026.2.27',
     items: [
