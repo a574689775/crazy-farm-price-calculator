@@ -38,7 +38,7 @@ export const CalculatorHeader = ({
         const url = generateShareUrl({
           cropIndex,
           weight: weightNum,
-          percentage: percentageNum || Math.round((weightNum / crop.maxWeight) * 100),
+          percentage: percentageNum || Math.floor((weightNum / crop.maxWeight) * 100),
           mutations: selectedMutations,
         })
         onShareClick(url)

@@ -134,7 +134,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     // 根据重量计算百分比
     const weightNum = Number(prefillData.weight)
     if (weightNum > 0 && crop) {
-      const percentageNum = Math.round((weightNum / crop.maxWeight) * 100)
+      const percentageNum = Math.floor((weightNum / crop.maxWeight) * 100)
       setPercentage(percentageNum.toString())
       // 生长速度 = 生长耗时的 1%（秒）
       const secPerPercent = 0.01 * weightNum * crop.growthSpeed
@@ -240,8 +240,8 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
           if (calculatedWeight !== null && calculatedWeight >= minWeight && calculatedWeight <= crop.maxWeight) {
             const formattedWeight = calculatedWeight.toFixed(2).replace(/\.?0+$/, '')
             setWeight(formattedWeight)
-            // 计算百分比
-            const percentageNum = Math.round((calculatedWeight / crop.maxWeight) * 100)
+            // 计算百分比（向下取整）
+            const percentageNum = Math.floor((calculatedWeight / crop.maxWeight) * 100)
             setPercentage(percentageNum.toString())
           }
         }
@@ -279,7 +279,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (!crop) return
     if (value > 0 && value <= crop.maxWeight) {
       const calculatedPercentage = (value / crop.maxWeight) * 100
-      setPercentage(Math.round(calculatedPercentage).toString())
+      setPercentage(Math.floor(calculatedPercentage).toString())
       // 生长速度 = 生长耗时的 1%（秒），生长耗时 = value * crop.growthSpeed
       const secPerPercent = 0.01 * value * crop.growthSpeed
       setGrowthSpeed(secPerPercent > 0 ? secPerPercent.toFixed(2).replace(/\.?0+$/, '') : '')
@@ -304,7 +304,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     const calculatedWeight = (speedNum * 100) / crop.growthSpeed
     const clampedWeight = Math.min(Math.max(calculatedWeight, minW), crop.maxWeight)
     setWeight(clampedWeight.toFixed(2).replace(/\.?0+$/, ''))
-    const percentageNum = Math.round((clampedWeight / crop.maxWeight) * 100)
+    const percentageNum = Math.floor((clampedWeight / crop.maxWeight) * 100)
     setPercentage(percentageNum.toString())
   }
 
@@ -322,7 +322,7 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
     if (speedNum < minSpeed) {
       setGrowthSpeed(minSpeed.toFixed(2).replace(/\.?0+$/, ''))
       setWeight(minW.toFixed(2).replace(/\.?0+$/, ''))
-      setPercentage(Math.round((minW / crop.maxWeight) * 100).toString())
+      setPercentage(Math.floor((minW / crop.maxWeight) * 100).toString())
     } else if (speedNum > maxSpeed) {
       setGrowthSpeed(maxSpeed.toFixed(2).replace(/\.?0+$/, ''))
       setWeight(crop.maxWeight.toFixed(2).replace(/\.?0+$/, ''))

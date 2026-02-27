@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.5.2',
+    date: '2026.2.27',
+    items: [
+      '修复百分比展示取整逻辑错误的bug',
+    ],
+  },
+  {
     version: 'V7.5.1',
     date: '2026.2.26',
     items: [
