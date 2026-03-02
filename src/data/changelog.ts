@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.7.3',
+    date: '2026.3.2',
+    items: [
+      '调整计算器页面icon间距',
+    ],
+  },
+  {
     version: 'V7.7.2',
     date: '2026.3.2',
     items: [
