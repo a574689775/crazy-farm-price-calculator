@@ -555,10 +555,21 @@
   border-color: rgba(225, 152, 89, 0.5);
 }
 
-/* 作物热度：与其它排行榜同结构，仅头像为作物图；方形图缩放填满圆减少留白 */
+/* 作物热度：与其它排行榜同结构，仅头像为作物图；头像改为方形、无边框 */
+.leaderboard-crop-section .leaderboard-avatar,
+.leaderboard-crop-section .leaderboard-top-avatar-wrap .leaderboard-avatar {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+.leaderboard-crop-section .leaderboard-top-item--1 .leaderboard-top-avatar-wrap .leaderboard-avatar,
+.leaderboard-crop-section .leaderboard-top-item--2 .leaderboard-top-avatar-wrap .leaderboard-avatar,
+.leaderboard-crop-section .leaderboard-top-item--3 .leaderboard-top-avatar-wrap .leaderboard-avatar {
+  border: none;
+  box-shadow: none;
+}
 .leaderboard-crop-section .leaderboard-avatar-img {
   object-fit: cover;
-  transform: scale(1.2);
 }
 
 .leaderboard-section {

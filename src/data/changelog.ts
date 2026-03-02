@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.7.1',
+    date: '2026.3.2',
+    items: [
+      '小幅度调整月莓、月核树、液光藤、幻月花、月兔价格基数',
+      '排行榜中热门作物图片更改为方形展示'
+    ],
+  },
+  {
     version: 'V7.7.0',
     date: '2026.3.2',
     items: [
