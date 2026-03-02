@@ -6,6 +6,15 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.7.0',
+    date: '2026.3.2',
+    items: [
+      '选择作物页取消热度展示，作物按品质排序',
+      '当日作物热度移至排行榜「今日查询」-「作物热度」',
+      '新增作物收藏：计算器页分享左侧星星收藏/取消，选择页顶部「收藏」区展示',
+    ],
+  },
+  {
     version: 'V7.6.1',
     date: '2026.2.27',
     items: [

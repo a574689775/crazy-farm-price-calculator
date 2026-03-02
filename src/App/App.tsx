@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { CropConfig, HistoryRecord, WeatherMutation } from '@/types'
-import { crops } from '@/data/crops'
+import { crops, getCropImagePath } from '@/data/crops'
 import { changelog } from '@/data/changelog'
 import { Footer } from '@/components/Footer'
 import { CropSelector } from '@/components/CropSelector'
@@ -12,7 +12,6 @@ import { parseShareUrl } from '@/utils/shareEncoder'
 import {
   logCropQuery,
   logUserQuery,
-  subscribeCropDailyStats,
   getSession,
   onAuthStateChange,
   useFreeQuery,
@@ -24,6 +23,9 @@ import {
   getMembershipLeaderboard,
   getQueryLeaderboard,
   getFeedbackLeaderboard,
+  fetchTodayQueryCounts,
+  getUserFavoriteCrops,
+  toggleFavoriteCrop,
 } from '@/utils/supabase'
 import type { MySubscription, MembershipLeaderboardItem, QueryLeaderboardItem, FeedbackLeaderboardItem } from '@/utils/supabase'
 import { Modal } from '@/components/Modal'
@@ -72,7 +74,6 @@ export const App = () => {
   const [currentPage, setCurrentPage] = useState<Page>('selector')
   const [showHistory, setShowHistory] = useState(false)
   const [prefillData, setPrefillData] = useState<PrefillData | null>(null)
-  const [todayQueryCounts, setTodayQueryCounts] = useState<Record<string, number>>({})
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
   const [showPaywallModal, setShowPaywallModal] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
@@ -102,6 +103,15 @@ export const App = () => {
   const [feedbackLeaderboardError, setFeedbackLeaderboardError] = useState<string | null>(null)
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
   const [leaderboardTab, setLeaderboardTab] = useState<'membership' | 'query' | 'feedback'>('membership')
+  /** 今日查询 tab 下：用户排行 | 作物热度 */
+  const [querySubTab, setQuerySubTab] = useState<'user' | 'crop'>('user')
+  const [cropHeatCounts, setCropHeatCounts] = useState<Record<string, number> | null>(null)
+  const [cropHeatLoading, setCropHeatLoading] = useState(false)
+  const [cropHeatError, setCropHeatError] = useState<string | null>(null)
+  /** 用户收藏的作物名，按收藏时间倒序（最新在前） */
+  const [favoriteCropNames, setFavoriteCropNames] = useState<string[]>([])
+  /** 正在获取收藏列表 */
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -172,6 +182,46 @@ export const App = () => {
       setFeedbackLeaderboardLoading(false)
     }
   }, [])
+
+  const loadCropHeat = useCallback(async () => {
+    setCropHeatLoading(true)
+    setCropHeatError(null)
+    try {
+      const map = await fetchTodayQueryCounts()
+      setCropHeatCounts(map)
+    } catch (e) {
+      console.error('加载作物热度失败:', e)
+      setCropHeatError('作物热度获取失败')
+    } finally {
+      setCropHeatLoading(false)
+    }
+  }, [])
+
+  const handleToggleFavorite = useCallback(
+    (cropName: string, onDone?: (success: boolean, isNowFavorite: boolean) => void) => {
+      const currentlyFavorite = favoriteCropNames.includes(cropName)
+      const nextFavorite = !currentlyFavorite
+      // 乐观更新：立即更新 UI
+      setFavoriteCropNames((prev) => {
+        if (nextFavorite) return [cropName, ...prev.filter((n) => n !== cropName)]
+        return prev.filter((n) => n !== cropName)
+      })
+      toggleFavoriteCrop(cropName)
+        .then((isNowFavorite) => {
+          onDone?.(true, isNowFavorite)
+        })
+        .catch((e) => {
+          console.error('切换收藏失败:', e)
+          // 回退状态
+          setFavoriteCropNames((prev) => {
+            if (currentlyFavorite) return [cropName, ...prev.filter((n) => n !== cropName)]
+            return prev.filter((n) => n !== cropName)
+          })
+          onDone?.(false, currentlyFavorite)
+        })
+    },
+    [favoriteCropNames]
+  )
 
   const openUserCenter = () => {
     setIsUserCenterClosing(false)
@@ -309,13 +359,20 @@ export const App = () => {
     isInitializedRef.current = true
   }, [])
 
-  // 登录后拉取会员状态（服务端判断是否有效，换设备同步）
+  // 登录后拉取会员状态与收藏列表
   useEffect(() => {
     if (!isAuthenticated) {
       setSubscriptionState(null)
+      setFavoriteCropNames([])
+      setFavoriteLoading(false)
       return
     }
     getMySubscription().then(setSubscriptionState)
+    setFavoriteLoading(true)
+    getUserFavoriteCrops()
+      .then(setFavoriteCropNames)
+      .catch(() => setFavoriteCropNames([]))
+      .finally(() => setFavoriteLoading(false))
   }, [isAuthenticated])
 
   // 从 URL/分享链接直接进入计算器时补做免费次数校验，防止绕过选择页白嫖
@@ -358,12 +415,6 @@ export const App = () => {
     if (isAuthenticated) getMySubscription().then(setSubscriptionState)
   }
 
-  // 登录后一直订阅当日作物热度（Supabase Realtime），有变更即更新；订阅时会先拉一次当日数据
-  useEffect(() => {
-    if (!isAuthenticated) return
-    const unsubscribe = subscribeCropDailyStats(setTodayQueryCounts)
-    return () => unsubscribe()
-  }, [isAuthenticated])
 
   // 首次进入选择作物页时自动弹出邀请有礼弹窗（仅一次，用 localStorage 标记）
   useEffect(() => {
@@ -595,8 +646,8 @@ export const App = () => {
                 selectedCrop={selectedCrop}
                 onSelectCrop={handleSelectCrop}
                 onOpenUserCenter={openUserCenter}
-                queryCounts={todayQueryCounts}
-                subscriptionActive={subscriptionState?.isActive}
+                favoriteCropNames={favoriteCropNames}
+                favoriteLoading={favoriteLoading}
               />
               {/* 历史记录或计算器页面打开时，让 Footer 透明但保留高度，避免高度跳动 */}
               <div
@@ -632,6 +683,8 @@ export const App = () => {
                 crop={selectedCrop}
                 onBack={handleBackToSelector}
                 prefillData={prefillData ?? undefined}
+                favoriteCropNames={favoriteCropNames}
+                onToggleFavorite={handleToggleFavorite}
               />
             </div>
           </div>
@@ -764,9 +817,11 @@ export const App = () => {
                     className="user-center-item"
                     onClick={() => {
                       setShowLeaderboardModal(true)
+                      setQuerySubTab('user')
                       void loadLeaderboard()
                       void loadQueryLeaderboard()
                       void loadFeedbackLeaderboard()
+                      void loadCropHeat()
                     }}
                   >
                     <span className="user-center-item-label">
@@ -1043,108 +1098,218 @@ export const App = () => {
           )}
           {leaderboardTab === 'query' && (
             <div className="leaderboard-section">
-              {queryLeaderboardLoading && (
-                <div className="leaderboard-loading-wrap">
-                  <div className="leaderboard-spinner" />
-                  <span className="leaderboard-loading-text">加载中...</span>
-                </div>
-              )}
-              {!queryLeaderboardLoading && queryLeaderboardError && (
-                <div className="leaderboard-error">{queryLeaderboardError}</div>
-              )}
-              {!queryLeaderboardLoading && !queryLeaderboardError && queryLeaderboard && queryLeaderboard.length === 0 && (
-                <div className="leaderboard-empty">今日暂无查询记录，选择作物进入计算器即可参与。</div>
-              )}
-              {!queryLeaderboardLoading && !queryLeaderboardError && queryLeaderboard && queryLeaderboard.length > 0 && (
-                <div className="leaderboard-section-inner">
-                  <div className="leaderboard-top3">
-                    {queryLeaderboard
-                      .filter((item) => item.rankPos >= 1 && item.rankPos <= 3)
-                      .sort((a, b) => a.rankPos - b.rankPos)
-                      .map((item) => {
-                        const rank = item.rankPos
-                        const rankClass =
-                          rank === 1
-                            ? 'leaderboard-top-item--1'
-                            : rank === 2
-                              ? 'leaderboard-top-item--2'
-                              : 'leaderboard-top-item--3'
-                        const mockAsMe = MOCK_ME_AS_TOP_RANK === rank && currentUserId
-                        const displayItem = mockAsMe
-                          ? {
-                              ...item,
-                              userId: currentUserId!,
-                              displayName: userDisplayName || '我',
-                              avatarIndex: userAvatarIndex || 1,
-                            }
-                          : item
-                        const isMe = currentUserId && displayItem.userId === currentUserId
-                        return (
-                          <div
-                            key={displayItem.userId + String(rank)}
-                            className={`leaderboard-top-item ${rankClass} ${isMe ? 'leaderboard-top-item--me' : ''}`}
-                          >
-                            <div className="leaderboard-top-rank">{rank}</div>
-                            <div className="leaderboard-top-avatar-wrap">
-                              <div className="leaderboard-avatar">
-                                <img
-                                  src={`${AVATAR_BASE_URL}/${displayItem.avatarIndex}.png`}
-                                  alt="头像"
-                                  className="leaderboard-avatar-img"
-                                />
-                              </div>
-                            </div>
-                            <div className="leaderboard-top-name">
-                              {displayItem.displayName || '神秘用户'}
-                            </div>
-                            <div className="leaderboard-top-badge">
-                              {isMe && <span className="leaderboard-me-badge">我</span>}
-                              <span>{displayItem.queryCount} 次</span>
-                            </div>
-                          </div>
-                        )
-                      })}
-                  </div>
-                  {queryLeaderboard.length > 3 && (
-                    <div className="leaderboard-list">
-                      {queryLeaderboard
-                        .filter((item) => item.rankPos > 3)
-                        .sort((a, b) => a.rankPos - b.rankPos)
-                        .map((item) => {
-                          const rank = item.rankPos
-                          const isMe = currentUserId && item.userId === currentUserId
-                          return (
-                            <div
-                              key={item.userId}
-                              className={`leaderboard-item ${isMe ? 'leaderboard-item--me' : ''}`}
-                            >
-                              <div className="leaderboard-rank-badge">{rank}</div>
-                              <div className="leaderboard-user">
-                                <div className="leaderboard-avatar">
-                                  <img
-                                    src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
-                                    alt="头像"
-                                    className="leaderboard-avatar-img"
-                                  />
-                                </div>
-                                <div className="leaderboard-user-text">
-                                  <div className="leaderboard-user-name">
-                                    {item.displayName || '神秘用户'}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="leaderboard-days-badge">
-                                {isMe && (
-                                  <span className="leaderboard-me-badge">我</span>
-                                )}
-                                {item.queryCount} 次
-                              </div>
-                            </div>
-                          )
-                        })}
+              <div className="leaderboard-sub-tabs">
+                <button
+                  type="button"
+                  className={`leaderboard-sub-tab ${querySubTab === 'user' ? 'leaderboard-sub-tab--active' : ''}`}
+                  onClick={() => setQuerySubTab('user')}
+                >
+                  用户排行
+                </button>
+                <button
+                  type="button"
+                  className={`leaderboard-sub-tab ${querySubTab === 'crop' ? 'leaderboard-sub-tab--active' : ''}`}
+                  onClick={() => setQuerySubTab('crop')}
+                >
+                  作物热度
+                </button>
+              </div>
+              {querySubTab === 'user' && (
+                <>
+                  {queryLeaderboardLoading && (
+                    <div className="leaderboard-loading-wrap">
+                      <div className="leaderboard-spinner" />
+                      <span className="leaderboard-loading-text">加载中...</span>
                     </div>
                   )}
-                </div>
+                  {!queryLeaderboardLoading && queryLeaderboardError && (
+                    <div className="leaderboard-error">{queryLeaderboardError}</div>
+                  )}
+                  {!queryLeaderboardLoading && !queryLeaderboardError && queryLeaderboard && queryLeaderboard.length === 0 && (
+                    <div className="leaderboard-empty">今日暂无查询记录，选择作物进入计算器即可参与。</div>
+                  )}
+                  {!queryLeaderboardLoading && !queryLeaderboardError && queryLeaderboard && queryLeaderboard.length > 0 && (
+                    <div className="leaderboard-section-inner">
+                      <div className="leaderboard-top3">
+                        {queryLeaderboard
+                          .filter((item) => item.rankPos >= 1 && item.rankPos <= 3)
+                          .sort((a, b) => a.rankPos - b.rankPos)
+                          .map((item) => {
+                            const rank = item.rankPos
+                            const rankClass =
+                              rank === 1
+                                ? 'leaderboard-top-item--1'
+                                : rank === 2
+                                  ? 'leaderboard-top-item--2'
+                                  : 'leaderboard-top-item--3'
+                            const mockAsMe = MOCK_ME_AS_TOP_RANK === rank && currentUserId
+                            const displayItem = mockAsMe
+                              ? {
+                                  ...item,
+                                  userId: currentUserId!,
+                                  displayName: userDisplayName || '我',
+                                  avatarIndex: userAvatarIndex || 1,
+                                }
+                              : item
+                            const isMe = currentUserId && displayItem.userId === currentUserId
+                            return (
+                              <div
+                                key={displayItem.userId + String(rank)}
+                                className={`leaderboard-top-item ${rankClass} ${isMe ? 'leaderboard-top-item--me' : ''}`}
+                              >
+                                <div className="leaderboard-top-rank">{rank}</div>
+                                <div className="leaderboard-top-avatar-wrap">
+                                  <div className="leaderboard-avatar">
+                                    <img
+                                      src={`${AVATAR_BASE_URL}/${displayItem.avatarIndex}.png`}
+                                      alt="头像"
+                                      className="leaderboard-avatar-img"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="leaderboard-top-name">
+                                  {displayItem.displayName || '神秘用户'}
+                                </div>
+                                <div className="leaderboard-top-badge">
+                                  {isMe && <span className="leaderboard-me-badge">我</span>}
+                                  <span>{displayItem.queryCount} 次</span>
+                                </div>
+                              </div>
+                            )
+                          })}
+                      </div>
+                      {queryLeaderboard.length > 3 && (
+                        <div className="leaderboard-list">
+                          {queryLeaderboard
+                            .filter((item) => item.rankPos > 3)
+                            .sort((a, b) => a.rankPos - b.rankPos)
+                            .map((item) => {
+                              const rank = item.rankPos
+                              const isMe = currentUserId && item.userId === currentUserId
+                              return (
+                                <div
+                                  key={item.userId}
+                                  className={`leaderboard-item ${isMe ? 'leaderboard-item--me' : ''}`}
+                                >
+                                  <div className="leaderboard-rank-badge">{rank}</div>
+                                  <div className="leaderboard-user">
+                                    <div className="leaderboard-avatar">
+                                      <img
+                                        src={`${AVATAR_BASE_URL}/${item.avatarIndex}.png`}
+                                        alt="头像"
+                                        className="leaderboard-avatar-img"
+                                      />
+                                    </div>
+                                    <div className="leaderboard-user-text">
+                                      <div className="leaderboard-user-name">
+                                        {item.displayName || '神秘用户'}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="leaderboard-days-badge">
+                                    {isMe && (
+                                      <span className="leaderboard-me-badge">我</span>
+                                    )}
+                                    {item.queryCount} 次
+                                  </div>
+                                </div>
+                              )
+                            })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+              {querySubTab === 'crop' && (
+                <>
+                  {cropHeatLoading && (
+                    <div className="leaderboard-loading-wrap">
+                      <div className="leaderboard-spinner" />
+                      <span className="leaderboard-loading-text">加载中...</span>
+                    </div>
+                  )}
+                  {!cropHeatLoading && cropHeatError && (
+                    <div className="leaderboard-error">{cropHeatError}</div>
+                  )}
+                  {!cropHeatLoading && !cropHeatError && cropHeatCounts && (() => {
+                    const entries = Object.entries(cropHeatCounts)
+                      .filter(([, count]) => count > 0)
+                      .sort((a, b) => b[1] - a[1])
+                    if (entries.length === 0) {
+                      return <div className="leaderboard-empty">今日暂无作物查询数据。</div>
+                    }
+                    const formatCount = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}万` : String(n)
+                    const top3 = entries.slice(0, 3)
+                    const rest = entries.slice(3)
+                    return (
+                      <div className="leaderboard-section-inner leaderboard-crop-section">
+                        <div className="leaderboard-top3">
+                          {top3.map(([cropName, count], index) => {
+                            const rank = index + 1
+                            const rankClass =
+                              rank === 1
+                                ? 'leaderboard-top-item--1'
+                                : rank === 2
+                                  ? 'leaderboard-top-item--2'
+                                  : 'leaderboard-top-item--3'
+                            return (
+                              <div
+                                key={cropName}
+                                className={`leaderboard-top-item ${rankClass}`}
+                              >
+                                <div className="leaderboard-top-rank">{rank}</div>
+                                <div className="leaderboard-top-avatar-wrap">
+                                  <div className="leaderboard-avatar">
+                                    <img
+                                      src={getCropImagePath(cropName)}
+                                      alt={cropName}
+                                      className="leaderboard-avatar-img"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="leaderboard-top-name">{cropName}</div>
+                                <div className="leaderboard-top-badge">
+                                  <span>{formatCount(count)} 次</span>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                        {rest.length > 0 && (
+                          <div className="leaderboard-list">
+                            {rest.map(([cropName, count], index) => {
+                              const rank = index + 4
+                              return (
+                                <div key={cropName} className="leaderboard-item">
+                                  <div className="leaderboard-rank-badge">{rank}</div>
+                                  <div className="leaderboard-user">
+                                    <div className="leaderboard-avatar">
+                                      <img
+                                        src={getCropImagePath(cropName)}
+                                        alt={cropName}
+                                        className="leaderboard-avatar-img"
+                                      />
+                                    </div>
+                                    <div className="leaderboard-user-text">
+                                      <div className="leaderboard-user-name">{cropName}</div>
+                                    </div>
+                                  </div>
+                                  <div className="leaderboard-days-badge">
+                                    {formatCount(count)} 次
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()}
+                  {!cropHeatLoading && !cropHeatError && !cropHeatCounts && (
+                    <div className="leaderboard-empty">暂无数据</div>
+                  )}
+                </>
               )}
             </div>
           )}

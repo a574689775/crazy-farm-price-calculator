@@ -524,6 +524,43 @@
   border-color: rgba(225, 152, 89, 0.6);
 }
 
+.leaderboard-sub-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.leaderboard-sub-tab {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(132, 49, 0, 0.65);
+  background: rgba(255, 243, 224, 0.5);
+  border: 1px solid rgba(225, 152, 89, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.leaderboard-sub-tab:hover {
+  background: rgba(255, 243, 224, 0.85);
+  color: #843100;
+}
+
+.leaderboard-sub-tab--active {
+  background: rgba(255, 236, 200, 0.9);
+  color: #843100;
+  border-color: rgba(225, 152, 89, 0.5);
+}
+
+/* 作物热度：与其它排行榜同结构，仅头像为作物图；方形图缩放填满圆减少留白 */
+.leaderboard-crop-section .leaderboard-avatar-img {
+  object-fit: cover;
+  transform: scale(1.2);
+}
+
 .leaderboard-section {
   flex: 1;
   display: flex;

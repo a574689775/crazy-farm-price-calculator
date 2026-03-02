@@ -1,7 +1,7 @@
 import type { CropConfig } from '@/types'
 import { getCropImagePath } from '@/data/crops'
-import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { FireFilled, UserOutlined } from '@ant-design/icons'
+import { useLayoutEffect, useMemo, useRef } from 'react'
+import { UserOutlined } from '@ant-design/icons'
 import { SVGText } from '@/components/SVGText'
 import { GradientButton } from '@/components/GradientButton'
 import './CropSelector.css'
@@ -12,104 +12,47 @@ interface CropSelectorProps {
   onSelectCrop: (crop: CropConfig) => void
   /** 打开个人中心抽屉 */
   onOpenUserCenter?: () => void
-  queryCounts?: Record<string, number>
-  /** 当前是否为会员用户，用于展示免费次数提示逻辑 */
-  subscriptionActive?: boolean
+  /** 用户收藏的作物名，按收藏时间倒序（最新在前） */
+  favoriteCropNames?: string[]
+  /** 正在获取收藏列表 */
+  favoriteLoading?: boolean
 }
-
-const SHAKE_DURATION_MS = 400
 
 export const CropSelector = ({
   crops,
   onSelectCrop,
   onOpenUserCenter,
-  queryCounts = {},
+  favoriteCropNames = [],
+  favoriteLoading = false,
 }: CropSelectorProps) => {
   const nodeRefs = useRef(new Map<string, HTMLDivElement>())
   const prevPositionsRef = useRef(new Map<string, DOMRect>())
   const prevOrderRef = useRef<string>('')
   const clearTimersRef = useRef(new Map<string, number>())
   const isAnimatingRef = useRef(false)
-  const prevQueryCountsRef = useRef<Record<string, number>>({})
-  const [shakeCrops, setShakeCrops] = useState<Set<string>>(new Set())
-  const shakeTimersRef = useRef(new Map<string, number>())
 
   // 数据文件中的顺序即品质优先级（索引越小品质越高）
   const cropOrder = useMemo(() => new Map(crops.map((crop, index) => [crop.name, index])), [crops])
 
-  // 计算最大查询量，用于颜色计算
-  const maxQueryCount = useMemo(() => {
-    const counts = Object.values(queryCounts)
-    return counts.length > 0 ? Math.max(...counts) : 1
-  }, [queryCounts])
+  // 排序函数：仅按品质排序（品质越高越靠前，索引越小品质越高）
+  const sortByQuality = (a: CropConfig, b: CropConfig) =>
+    (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0)
 
-  // 根据查询量计算颜色（热度越高越红）
-  const getHeatColor = (count: number): string => {
-    if (count === 0 || maxQueryCount === 0) {
-      // 没有查询量时使用默认颜色
-      return '#fff'
-    }
-    // 计算热度比例（0-1）
-    const heatRatio = Math.min(count / maxQueryCount, 1)
-    // 从浅橙红色 (#FFA07A, rgb(255, 160, 122)) 到深红色 (#FF4500, rgb(255, 69, 0))
-    const r = 255 // 红色通道保持255
-    const g = Math.floor(160 - (160 - 69) * heatRatio)  // 从 160 到 69
-    const b = Math.floor(122 - (122 - 0) * heatRatio)   // 从 122 到 0
-    return `rgb(${r}, ${g}, ${b})`
-  }
+  // 月球作物、普通作物分开，各自按品质排序
+  const moonCrops = useMemo(
+    () => crops.filter(c => c.type === '月球').sort(sortByQuality),
+    [crops, cropOrder]
+  )
+  const normalCrops = useMemo(
+    () => crops.filter(c => c.type === '普通').sort(sortByQuality),
+    [crops, cropOrder]
+  )
 
-  // 排序函数：按查询量排序，查询量相同则按品质排序
-  const sortByCountThenQuality = (a: CropConfig, b: CropConfig) => {
-    const countDiff = (queryCounts[b.name] ?? 0) - (queryCounts[a.name] ?? 0)
-    if (countDiff !== 0) return countDiff
-    return (cropOrder.get(b.name) ?? 0) - (cropOrder.get(a.name) ?? 0)
-  }
-
-  // 月球作物、普通作物分开，各自按热度排序
-  const moonCrops = useMemo(() => {
-    return crops.filter(c => c.type === '月球').sort(sortByCountThenQuality)
-  }, [crops, queryCounts, cropOrder])
-
-  const normalCrops = useMemo(() => {
-    return crops.filter(c => c.type === '普通').sort(sortByCountThenQuality)
-  }, [crops, queryCounts, cropOrder])
-
-  // 谁的热度变了，那个热度标签抖一抖
-  useEffect(() => {
-    const prev = prevQueryCountsRef.current
-    const toShake: string[] = []
-    crops.forEach(crop => {
-      const name = crop.name
-      const curr = queryCounts[name] ?? 0
-      const prevCount = prev[name] ?? 0
-      if (curr !== prevCount && curr > 0) toShake.push(name)
-    })
-    if (toShake.length === 0) {
-      prevQueryCountsRef.current = { ...queryCounts }
-      return
-    }
-    setShakeCrops(s => new Set([...s, ...toShake]))
-    toShake.forEach(name => {
-      const captured = queryCounts[name] ?? 0
-      const existing = shakeTimersRef.current.get(name)
-      if (existing) window.clearTimeout(existing)
-      const timer = window.setTimeout(() => {
-        shakeTimersRef.current.delete(name)
-        setShakeCrops(s => {
-          const next = new Set(s)
-          next.delete(name)
-          return next
-        })
-        prevQueryCountsRef.current = { ...prevQueryCountsRef.current, [name]: captured }
-      }, SHAKE_DURATION_MS)
-      shakeTimersRef.current.set(name, timer)
-    })
-  }, [queryCounts, crops])
-
-  useEffect(() => () => {
-    shakeTimersRef.current.forEach(t => window.clearTimeout(t))
-    shakeTimersRef.current.clear()
-  }, [])
+  /** 我的收藏：按 favoriteCropNames 顺序（最新在前），只保留在 crops 中存在的 */
+  const favoriteCrops = useMemo(() => {
+    const nameToCrop = new Map(crops.map(c => [c.name, c]))
+    return favoriteCropNames.map(name => nameToCrop.get(name)).filter((c): c is CropConfig => !!c)
+  }, [crops, favoriteCropNames])
 
   const orderKey = useMemo(
     () => [...moonCrops, ...normalCrops].map(c => c.name).join(','),
@@ -223,45 +166,23 @@ export const CropSelector = ({
     nodeRefs.current.set(name, el)
   }
 
-  const renderCropItem = (crop: CropConfig) => {
-    const rawCount = queryCounts[crop.name] ?? 0
-    const count =
-      rawCount >= 10000 ? `${(rawCount / 10000).toFixed(1)}万` : rawCount
-    const heatColor = getHeatColor(rawCount)
-    
-    return (
-      <div
-        key={crop.name}
-        className="crop-item"
-        ref={setNodeRef(crop.name)}
-        onClick={() => onSelectCrop(crop)}
-      >
-        <div className="crop-item-image-wrapper">
-          {rawCount > 0 && (
-            <div 
-              className={`crop-item-count${shakeCrops.has(crop.name) ? ' heat-shake' : ''}`}
-              style={{ 
-                borderColor: heatColor,
-                color: heatColor
-              }}
-            >
-              <FireFilled 
-                className="crop-item-count-icon" 
-                style={{ color: heatColor }}
-              />
-              <span className="crop-item-count-text">{count}</span>
-            </div>
-          )}
-          <img 
-            src={getCropImagePath(crop.name)}
-            alt={crop.name}
-            className="crop-item-image"
-          />
-        </div>
-        <div className="crop-item-name">{crop.name}</div>
+  const renderCropItem = (crop: CropConfig, refKey?: string) => (
+    <div
+      key={refKey ?? crop.name}
+      className="crop-item"
+      ref={setNodeRef(refKey ?? crop.name)}
+      onClick={() => onSelectCrop(crop)}
+    >
+      <div className="crop-item-image-wrapper">
+        <img
+          src={getCropImagePath(crop.name)}
+          alt={crop.name}
+          className="crop-item-image"
+        />
       </div>
-    )
-  }
+      <div className="crop-item-name">{crop.name}</div>
+    </div>
+  )
 
   return (
     <div className="crop-selector">
@@ -278,27 +199,44 @@ export const CropSelector = ({
         </SVGText>
       </div>
       <div className="crop-selector-content">
-        {/* 月球作物 */}
-        <div className="champion-section">
+        {/* 收藏：常驻，无收藏时居中提示 */}
+        <div className="champion-section champion-section-favorite">
           <div className="champion-title-row">
-            <div className="champion-title">月球作物：</div>
+            <span className="champion-title-label">我的收藏</span>
             <GradientButton onClick={onOpenUserCenter}>
               <UserOutlined style={{ marginRight: '4px', color: '#000' }} />
               个人中心
             </GradientButton>
           </div>
+          {favoriteLoading ? (
+            <div className="crop-selector-empty-favorite crop-selector-favorite-loading">
+              正在获取收藏…
+            </div>
+          ) : favoriteCrops.length > 0 ? (
+            <div className="champion-grid">
+              {favoriteCrops.map((crop) => renderCropItem(crop, `favorite-${crop.name}`))}
+            </div>
+          ) : (
+            <div className="crop-selector-empty-favorite">
+              暂无收藏作物
+            </div>
+          )}
+        </div>
+        <div className="champion-section">
+          <div className="champion-title-row">
+            <span className="champion-title-label">月球作物</span>
+          </div>
           <div className="champion-grid">
-            {moonCrops.map(renderCropItem)}
+            {moonCrops.map((crop) => renderCropItem(crop))}
           </div>
         </div>
 
-        {/* 普通作物 */}
         <div className="champion-section champion-section-normal">
           <div className="champion-title-row">
-            <div className="champion-title">普通作物：</div>
+            <span className="champion-title-label">普通作物</span>
           </div>
           <div className="champion-grid">
-            {normalCrops.map(renderCropItem)}
+            {normalCrops.map((crop) => renderCropItem(crop))}
           </div>
         </div>
       </div>

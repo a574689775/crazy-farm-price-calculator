@@ -347,6 +347,68 @@ export const signOut = async () => {
   }
 }
 
+/**
+ * 用户收藏作物（绑定账号，存数据库）
+ * 表 user_favorite_crops: user_id (uuid), crop_name (text), created_at (timestamptz)
+ * 主键 (user_id, crop_name)。RLS: auth.uid() = user_id。
+ * 建表 SQL 见项目内 scripts/sql 或文档。
+ */
+/** 获取当前用户收藏的作物名列表，按收藏时间倒序（最新在前） */
+export const getUserFavoriteCrops = async (): Promise<string[]> => {
+  const { data: user } = await supabase.auth.getUser()
+  if (!user?.user?.id) return []
+  const { data, error } = await supabase
+    .from('user_favorite_crops')
+    .select('crop_name')
+    .eq('user_id', user.user.id)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []).map((row: { crop_name: string }) => row.crop_name).filter(Boolean)
+}
+
+/** 添加收藏（若已存在则更新 created_at，使最新在前） */
+export const addFavoriteCrop = async (cropName: string): Promise<void> => {
+  const { data: user } = await supabase.auth.getUser()
+  if (!user?.user?.id) throw new Error('未登录')
+  const { error } = await supabase
+    .from('user_favorite_crops')
+    .upsert(
+      { user_id: user.user.id, crop_name: cropName, created_at: new Date().toISOString() },
+      { onConflict: 'user_id,crop_name' }
+    )
+  if (error) throw error
+}
+
+/** 取消收藏 */
+export const removeFavoriteCrop = async (cropName: string): Promise<void> => {
+  const { data: user } = await supabase.auth.getUser()
+  if (!user?.user?.id) throw new Error('未登录')
+  const { error } = await supabase
+    .from('user_favorite_crops')
+    .delete()
+    .eq('user_id', user.user.id)
+    .eq('crop_name', cropName)
+  if (error) throw error
+}
+
+/** 切换收藏状态，返回当前是否已收藏 */
+export const toggleFavoriteCrop = async (cropName: string): Promise<boolean> => {
+  const { data: user } = await supabase.auth.getUser()
+  if (!user?.user?.id) throw new Error('未登录')
+  const { data: existing } = await supabase
+    .from('user_favorite_crops')
+    .select('crop_name')
+    .eq('user_id', user.user.id)
+    .eq('crop_name', cropName)
+    .maybeSingle()
+  if (existing) {
+    await removeFavoriteCrop(cropName)
+    return false
+  }
+  await addFavoriteCrop(cropName)
+  return true
+}
+
 // 获取当前会话
 export const getSession = async () => {
   const { data: { session } } = await supabase.auth.getSession()

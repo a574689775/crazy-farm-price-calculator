@@ -25,7 +25,7 @@ import './PriceCalculator.css'
  * 4. 分享计算结果
  * 5. 保存到历史记录
  */
-export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorProps) => {
+export const PriceCalculator = ({ crop, onBack, prefillData, favoriteCropNames = [], onToggleFavorite }: PriceCalculatorProps) => {
   // ========== 状态管理 ==========
   // 输入相关
   const [weight, setWeight] = useState<string>('')
@@ -470,6 +470,20 @@ export const PriceCalculator = ({ crop, onBack, prefillData }: PriceCalculatorPr
           setShowShareModal(true)
         }}
         onError={showToastMessage}
+        isFavorite={favoriteCropNames.includes(safeCrop.name)}
+        onFavoriteClick={
+          onToggleFavorite
+            ? () => {
+                onToggleFavorite(safeCrop.name, (success, isNowFavorite) => {
+                  if (success) {
+                    showToastMessage(isNowFavorite ? '已收藏' : '已取消收藏')
+                  } else {
+                    showToastMessage('操作失败，请重试')
+                  }
+                })
+              }
+            : undefined
+        }
       />
 
       <div className="calculator-inputs">
