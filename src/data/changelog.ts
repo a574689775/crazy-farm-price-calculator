@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.7.4',
+    date: '2026.3.3',
+    items: [
+      '添加瓷化、流火互斥逻辑',
+    ],
+  },
+  {
     version: 'V7.7.3',
     date: '2026.3.2',
     items: [

@@ -31,9 +31,12 @@ export const MutationGroups = ({
    * 获取组的选择状态
    */
   const getGroupState = (mutations: WeatherMutation[]): 'none' | 'all' | 'indeterminate' => {
-    const selectedCount = mutations.filter(m => selectedMutations.includes(m)).length
-    if (selectedCount === 0) return 'none'
-    if (selectedCount === mutations.length) return 'all'
+    // 只统计当前「可选」的突变（被禁用的视为不参与全选）
+    const availableMutations = mutations.filter(m => !isMutationDisabled(m, selectedMutations))
+    const selectedCount = availableMutations.filter(m => selectedMutations.includes(m)).length
+
+    if (availableMutations.length === 0 || selectedCount === 0) return 'none'
+    if (selectedCount === availableMutations.length) return 'all'
     return 'indeterminate'
   }
 

@@ -85,16 +85,26 @@ export const isMutationDisabled = (
   mutationName: WeatherMutation,
   selectedMutations: WeatherMutation[]
 ): boolean => {
+  const hasLiuhuo = selectedMutations.includes('流火')
+  const hasCihua = selectedMutations.includes('瓷化')
+
+  // 流火与瓷化不能共存：如果已经存在其中一个，则禁用另一个
+  if (mutationName === '流火' && hasCihua) {
+    return true
+  }
+  if (mutationName === '瓷化' && hasLiuhuo) {
+    return true
+  }
+
   // 潮湿比较特殊，即使"陶化"或"瓷化"存在，潮湿也不禁用
   if (mutationName === '潮湿') {
     return false
   }
   
-  // 特殊处理：灼热是流火(太阳耀斑+灼热)和瓷化(陶化+灼热)的共同原料，只有流火和瓷化都存在时才禁用灼热
+  // 特殊处理：灼热是流火(太阳耀斑+灼热)和瓷化(陶化+灼热)的共同原料
+  // 只要已经有了流火或瓷化任意一个，就不能再选中灼热
   if (mutationName === '灼热') {
-    const hasLiuhuo = selectedMutations.includes('流火')
-    const hasCihua = selectedMutations.includes('瓷化')
-    return hasLiuhuo && hasCihua
+    return hasLiuhuo || hasCihua
   }
   
   // 特殊处理："沙尘"不能和"潮湿"共存（因为会合成"陶化"）
@@ -144,6 +154,14 @@ export const applyCombinations = (mutations: WeatherMutation[]): WeatherMutation
       const hasResult = result.includes(rule.result)
       
       if (hasAllIngredients && !hasResult) {
+        // 特殊规则：流火与瓷化不能共存，如果已经存在另一个结果，则不再合成当前结果
+        if (
+          (rule.result === '流火' && result.includes('瓷化')) ||
+          (rule.result === '瓷化' && result.includes('流火'))
+        ) {
+          continue
+        }
+
         // 移除所有原料，添加合成结果
         result = result.filter(m => !rule.ingredients.includes(m))
         result.push(rule.result)
