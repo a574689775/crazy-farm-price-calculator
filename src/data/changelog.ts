@@ -9,7 +9,7 @@ export const changelog: ChangelogItem[] = [
     version: 'V7.7.5',
     date: '2026.3.4',
     items: [
-      '调整松果、星空玫瑰、月兔、红包树价格基数',
+      '调整松果、幻月花、星空玫瑰、月兔、红包树价格基数',
     ],
   },
   {
