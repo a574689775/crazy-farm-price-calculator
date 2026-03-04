@@ -26,7 +26,7 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
   /* 顶部为标题留出更多空间，底部留白更充足 */
-  padding: 40px 16px 20px;
+  padding: 36px 16px 0;
   position: relative;
   z-index: 1;
   border-radius: 16px;
@@ -38,7 +38,7 @@
 
 .crop-title {
   position: fixed;
-  top: 12px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: 277px;
@@ -55,7 +55,7 @@
 }
 
 .champion-section {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .champion-section-normal {
@@ -70,7 +70,7 @@
   justify-content: center;
   text-align: center;
   color: rgba(132, 49, 0, 0.5);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   padding: 16px;
   box-sizing: border-box;
@@ -84,24 +84,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   gap: 8px;
+  height: 20px;
 }
 
 .champion-title-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: rgba(132, 49, 0, 0.72);
-  font-size: 13px;
+  color: #843100;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
 .champion-title-label::before {
   content: '';
-  width: 3px;
-  height: 12px;
+  width: 4px;
+  height: 14px;
   border-radius: 2px;
   background: linear-gradient(180deg, rgba(132, 49, 0, 0.5), rgba(132, 49, 0, 0.25));
 }
@@ -110,7 +111,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .champion-divider {
@@ -180,7 +181,7 @@
   margin-top: 4px;
   color: #843100;
   font-style: normal;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 17px;
   letter-spacing: 0px;

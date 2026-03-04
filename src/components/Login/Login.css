@@ -37,7 +37,7 @@
   background: linear-gradient(180deg, #fffdf8 0%, #fff8eb 35%, #fff0dc 100%);
   border: 1px solid rgba(132, 49, 0, 0.18);
   border-radius: 20px;
-  padding: 24px 20px;
+  padding: 16px;
   box-sizing: border-box;
   overflow: visible;
   margin-top: 160px;
@@ -108,7 +108,7 @@
 }
 
 .login-input-group {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .login-label {
@@ -161,7 +161,7 @@
   border: 2px solid rgba(255, 212, 176, 1);
   border-radius: 8px;
   color: rgba(132, 49, 0, 1);
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 0;
   text-align: center;
   font-family: 'ResourceHanRoundedCN Medium', sans-serif;
@@ -232,7 +232,7 @@
   margin-top: 16px;
   margin-bottom: 12px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(132, 49, 0, 0.85);
   line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
@@ -478,9 +478,6 @@
 }
 
 @media (max-width: 768px) {
-  .login-box {
-    padding: 24px 20px;
-  }
 
   .login-title {
     font-size: 20px;

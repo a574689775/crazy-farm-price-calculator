@@ -248,7 +248,7 @@
 .feedback-data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .feedback-data-table thead {
@@ -414,7 +414,7 @@
   border: 1px solid rgba(39, 215, 119, 0.5);
   border-radius: 4px;
   color: rgba(132, 49, 0, 1);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -440,7 +440,7 @@
 
   .feedback-crop-item {
     padding: 4px 8px;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .feedback-stats {
@@ -458,7 +458,7 @@
   }
 
   .feedback-data-table {
-    font-size: 11px;
+    font-size: 12px;
     min-width: 800px;
   }
 
@@ -493,7 +493,7 @@
 }
 
 .feedback-batch-copy-ok {
-  font-size: 13px;
+  font-size: 14px;
   color: #0a7c42;
   font-weight: 600;
 }
@@ -504,7 +504,7 @@
   border: 2px solid rgba(132, 49, 0, 0.3);
   border-radius: 6px;
   color: rgba(132, 49, 0, 1);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -528,7 +528,7 @@
 .feedback-batch-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .feedback-batch-table th,

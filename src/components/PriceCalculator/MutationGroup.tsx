@@ -30,6 +30,16 @@ export const MutationGroup = ({
   onToggleMutation,
   onToggleExclusiveMutation,
 }: MutationGroupProps) => {
+  const availableMutations = mutations.filter(m => !isMutationDisabled(m, selectedMutations))
+
+  const totalCount = isExclusive ? 1 : availableMutations.length
+  const selectedCount = isExclusive
+    ? (mutations.some(m => selectedMutations.includes(m)) ? 1 : 0)
+    : availableMutations.filter(m => selectedMutations.includes(m)).length
+
+  const titleWithCount =
+    totalCount > 0 ? `${title} (${selectedCount}/${totalCount})` : title
+
   return (
     <div className="mutation-group">
       <div className="mutation-group-header">
@@ -54,7 +64,7 @@ export const MutationGroup = ({
                 fontSize={14}
                 fontWeight={700}
               >
-                {title}
+                {titleWithCount}
               </SVGText>
             </span>
           </label>
@@ -67,7 +77,7 @@ export const MutationGroup = ({
               fontSize={14}
               fontWeight={700}
             >
-              {title}
+              {titleWithCount}
             </SVGText>
           </span>
         )}

@@ -113,7 +113,7 @@
   z-index: 10;
   /* 与内容背景统一，去掉块状头部感，只保留底部分隔线 */
   background: transparent;
-  padding: 12px 60px 10px 16px;
+  padding: 12px 60px 12px 16px;
   height: auto;
   display: flex;
   align-items: center;
@@ -121,7 +121,6 @@
   gap: 0;
   flex-shrink: 0;
   position: relative;
-  border-bottom: 1px dashed rgba(132, 49, 0, 0.22);
 }
 
 .modal-title-wrapper {
@@ -186,7 +185,7 @@
 }
 
 .modal-body {
-  padding: 16px;
+  padding: 0 16px 16px;
   overflow: hidden;
   flex: 1;
   min-height: 0;

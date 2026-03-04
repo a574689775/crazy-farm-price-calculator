@@ -21,7 +21,7 @@
 }
 
 .history-header {
-  padding: 20px 20px 16px;
+  padding: 20px 16px;
   position: sticky;
   top: 0;
   background: transparent;
@@ -30,7 +30,6 @@
   align-items: center;
   flex-shrink: 0;
   position: relative;
-  margin: 4px 4px 0 4px;
   border-radius: 16px 16px 0 0;
 }
 
@@ -95,7 +94,7 @@
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .history-empty {
@@ -112,7 +111,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: 84px;
-  padding: 12px 14px;
+  padding: 8px 12px;
   /* 简洁的卡片样式：柔和渐变 + 细边框 */
   background: linear-gradient(to bottom, #fffaf2, #fff0dc);
   border-radius: 12px;
@@ -122,7 +121,6 @@
 
 .history-item-locked {
   border-color: rgba(214, 140, 60, 0.9);
-  box-shadow: 0 3px 10px rgba(214, 140, 60, 0.35);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -146,7 +144,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
+  gap: 12px;
   position: relative;
   z-index: 1;
   width: 100%;
@@ -182,7 +180,8 @@
 .history-item-row1 {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .history-item-name {
@@ -204,7 +203,7 @@
 }
 
 .history-item-weight {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(132, 49, 0, 0.9);
   line-height: 16px;
@@ -213,7 +212,7 @@
 .history-mutations {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 6px;
+  gap: 8px 8px;
 }
 
 .history-mutation-tag {
@@ -243,17 +242,17 @@
 .history-item-price-inline {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
 }
 
 .history-item-price-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #843100;
 }
 
 .history-item-price-value {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #843100;
 }
@@ -285,8 +284,8 @@
   background: rgba(255, 252, 239, 0.9);
   color: rgba(132, 49, 0, 0.85);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-  right: 46px;
-  top: 12px;
+  right: 50px;
+  top: 8px;
 }
 
 .history-item-lock--active {
@@ -298,8 +297,8 @@
   background: rgba(255, 252, 239, 0.9);
   color: rgba(132, 49, 0, 0.85);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-  right: 14px;
-  top: 12px;
+  right: 12px;
+  top: 8px;
 }
 
 .history-item-lock:hover,
