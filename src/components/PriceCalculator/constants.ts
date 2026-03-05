@@ -10,13 +10,13 @@ export const QUALITY_MUTATIONS: WeatherMutation[] = ['星空', '流光', '水晶
 export const MOON_COMMON_MUTATIONS: WeatherMutation[] = ['流火', '日蚀', '暗雾', '陨石']
 
 // 常见突变（品质顺序：紫→绿→蓝→灰）
-export const COMMON_MUTATIONS: WeatherMutation[] = ['瓷化', '亮晶晶', '落雷', '冰冻', '金币', '颤栗', '覆雪', '潮湿', '迷雾', '生机']
+export const COMMON_MUTATIONS: WeatherMutation[] = ['瓷化', '亮晶晶', '落雷', '冰冻', '颤栗', '覆雪', '潮湿', '迷雾', '生机']
 
 // 罕见突变
 export const RARE_MUTATIONS: WeatherMutation[] = ['霓虹', '星环', '血月', '彩虹', '荧光']
 
 // 往期突变
-export const PAST_MUTATIONS: WeatherMutation[] = ['极光', '幽魂', '惊魂夜']
+export const PAST_MUTATIONS: WeatherMutation[] = ['金币', '极光', '幽魂', '惊魂夜']
 
 // 中间状态突变（不显示checkbox，由合成规则自动生成）
 export const INTERMEDIATE_MUTATIONS: WeatherMutation[] = ['陶化', '沙尘', '灼热', '结霜']
