@@ -653,8 +653,11 @@ export const App = () => {
     return (
       <div className="app">
         <main className="main">
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <div>加载中...</div>
+          <div className="app-loading">
+            <div className="leaderboard-loading-wrap">
+              <div className="leaderboard-spinner" />
+              <span className="leaderboard-loading-text">正在获取登录信息...</span>
+            </div>
           </div>
         </main>
       </div>
