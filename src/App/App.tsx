@@ -821,7 +821,11 @@ export const App = () => {
                       <div className="user-center-user-email-sub">{userEmail}</div>
                     )}
                     <div className="user-center-user-tag">
-                      {subscriptionState?.isActive ? '会员用户' : '免费用户'}
+                      {subscriptionLoading
+                        ? '身份获取中'
+                        : subscriptionState?.isActive
+                          ? '会员用户'
+                          : '免费用户'}
                     </div>
                   </div>
                 </div>
