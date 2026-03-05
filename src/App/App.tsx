@@ -9,6 +9,7 @@ import { HistoryView } from '@/components/HistoryView'
 import { FeedbackDataView } from '@/components/FeedbackDataView'
 import { Login } from '@/components/Login'
 import { parseShareUrl } from '@/utils/shareEncoder'
+import { Toast } from '@/components/PriceCalculator/Toast'
 import {
   logCropQuery,
   logUserQuery,
@@ -112,6 +113,12 @@ export const App = () => {
   const [favoriteCropNames, setFavoriteCropNames] = useState<string[]>([])
   /** 正在获取收藏列表 */
   const [favoriteLoading, setFavoriteLoading] = useState(false)
+  /** 会员状态加载中 */
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false)
+  /** 会员状态是否出错（超时或请求失败） */
+  const [subscriptionError, setSubscriptionError] = useState(false)
+  /** 全局 Toast 文案 */
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -365,14 +372,51 @@ export const App = () => {
       setSubscriptionState(null)
       setFavoriteCropNames([])
       setFavoriteLoading(false)
+      setSubscriptionLoading(false)
+      setSubscriptionError(false)
       return
     }
-    getMySubscription().then(setSubscriptionState)
+    let cancelled = false
+
+    setSubscriptionLoading(true)
+    setSubscriptionError(false)
+
+    const timeoutId = window.setTimeout(() => {
+      if (cancelled) return
+      // 超过 3 秒仍未完成，则标记为超时异常，并提示用户
+      setSubscriptionError(true)
+      setSubscriptionLoading(false)
+      setToastMessage('网络异常，暂时无法获取会员状态，请检查网络后刷新页面再试')
+    }, 3000)
+
+    getMySubscription()
+      .then((sub) => {
+        if (cancelled) return
+        setSubscriptionState(sub)
+        setSubscriptionError(false)
+      })
+      .catch((e) => {
+        if (cancelled) return
+        console.error('加载会员状态失败:', e)
+        setSubscriptionState(null)
+        setSubscriptionError(true)
+        setToastMessage('网络异常，暂时无法获取会员状态，请检查网络后刷新页面再试')
+      })
+      .finally(() => {
+        if (cancelled) return
+        setSubscriptionLoading(false)
+        window.clearTimeout(timeoutId)
+      })
+
     setFavoriteLoading(true)
     getUserFavoriteCrops()
       .then(setFavoriteCropNames)
       .catch(() => setFavoriteCropNames([]))
       .finally(() => setFavoriteLoading(false))
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeoutId)
+    }
   }, [isAuthenticated])
 
   // 从 URL/分享链接直接进入计算器时补做免费次数校验，防止绕过选择页白嫖
@@ -412,7 +456,21 @@ export const App = () => {
   }, [currentPage, selectedCrop, isAuthenticated, subscriptionState])
 
   const refreshSubscription = () => {
-    if (isAuthenticated) getMySubscription().then(setSubscriptionState)
+    if (!isAuthenticated) return
+    setSubscriptionLoading(true)
+    setSubscriptionError(false)
+    getMySubscription()
+      .then((sub) => {
+        setSubscriptionState(sub)
+      })
+      .catch((e) => {
+        console.error('刷新会员状态失败:', e)
+        setSubscriptionError(true)
+        setToastMessage('网络异常，暂时无法获取会员状态，请检查网络后刷新页面再试')
+      })
+      .finally(() => {
+        setSubscriptionLoading(false)
+      })
   }
 
 
@@ -429,6 +487,17 @@ export const App = () => {
   }, [isAuthenticated, currentPage, showHistory])
 
   const handleSelectCrop = async (crop: CropConfig) => {
+    // 会员状态仍在加载时，不允许进入计算器，提示稍候重试
+    if (subscriptionLoading && !subscriptionError) {
+      setToastMessage('会员状态获取中，请稍候再试')
+      return
+    }
+    // 会员状态已确定为出错（超时或失败）
+    if (subscriptionError) {
+      setToastMessage('网络异常，暂时无法获取会员状态，请检查网络后刷新页面再试')
+      return
+    }
+
     if (subscriptionState?.isActive) {
       calculatorEntryCheckedRef.current = true
       doOpenCalculator(crop, null)
@@ -517,6 +586,16 @@ export const App = () => {
     if (!crop) return
 
     const prefill = { weight: record.weight, mutations: record.mutations }
+
+    // 与选择作物一致的会员状态校验逻辑
+    if (subscriptionLoading && !subscriptionError) {
+      setToastMessage('会员状态获取中，请稍候再试')
+      return
+    }
+    if (subscriptionError) {
+      setToastMessage('网络异常，暂时无法获取会员状态，请检查网络后刷新页面再试')
+      return
+    }
     if (subscriptionState?.isActive) {
       calculatorEntryCheckedRef.current = true
       doOpenCalculator(crop, prefill)
@@ -539,6 +618,17 @@ export const App = () => {
       setShowPaywallModal(true)
     }
   }
+
+  // Toast 自动隐藏（停留 6 秒）
+  useEffect(() => {
+    if (!toastMessage) return
+    const timer = window.setTimeout(() => {
+      setToastMessage(null)
+    }, 6000)
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [toastMessage])
 
   // 监听浏览器前进/后退
   useEffect(() => {
@@ -1582,6 +1672,7 @@ export const App = () => {
           <p>我们可能适时更新本隐私说明，更新后将通过应用内展示或公告方式告知，继续使用即视为接受更新后的条款。</p>
         </div>
       </Modal>
+      {toastMessage && <Toast message={toastMessage} />}
     </div>
   )
 }

@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.9.0',
+    date: '2026.3.5',
+    items: [
+      '现在进入计算器前会先可靠地获取并判断会员状态，若加载中或网络异常则用 Toast 明确提示用户稍后重试或检查网络，否则才按会员/非会员逻辑继续进行每日次数校验与跳转。',
+    ],
+  },
+  {
     version: 'V7.8.3',
     date: '2026.3.5',
     items: [
