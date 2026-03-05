@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.9.2',
+    date: '2026.3.5',
+    items: [
+      '个人中心会员信息模块优化，添加加载状态展示及刷新页面按钮',
+    ],
+  },
+  {
     version: 'V7.9.1',
     date: '2026.3.5',
     items: [

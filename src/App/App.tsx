@@ -840,7 +840,12 @@ export const App = () => {
               </div>
               <div className="user-center-section">
                 <div className="user-center-membership">
-                  {subscriptionState?.isActive ? (
+                  {subscriptionLoading ? (
+                    <>
+                      <div className="user-center-membership-main">会员信息获取中</div>
+                      <div className="user-center-membership-sub">若加载时间过长，请刷新页面重试。</div>
+                    </>
+                  ) : subscriptionState?.isActive ? (
                     <>
                       <div className="user-center-membership-main">已开通会员 · 不限次数查询</div>
                       {subscriptionState.subscriptionEndAt && (
@@ -865,11 +870,19 @@ export const App = () => {
                     type="button"
                     className="user-center-primary-btn"
                     onClick={() => {
+                      if (subscriptionLoading) {
+                        window.location.reload()
+                        return
+                      }
                       closeUserCenter()
                       setShowSubscriptionModal(true)
                     }}
                   >
-                    {subscriptionState?.isActive ? '续费会员' : '开通会员'}
+                    {subscriptionLoading
+                      ? '刷新页面'
+                      : subscriptionState?.isActive
+                        ? '续费会员'
+                        : '开通会员'}
                   </button>
                 </div>
               </div>
