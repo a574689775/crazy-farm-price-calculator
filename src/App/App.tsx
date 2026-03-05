@@ -843,7 +843,7 @@ export const App = () => {
                   {subscriptionLoading ? (
                     <>
                       <div className="user-center-membership-main">会员信息获取中</div>
-                      <div className="user-center-membership-sub">若加载时间过长，请刷新页面重试。</div>
+                      <div className="user-center-membership-sub">若加载时间过长，请刷新页面重试</div>
                     </>
                   ) : subscriptionState?.isActive ? (
                     <>
