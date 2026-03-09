@@ -43,6 +43,8 @@ import {
 import './App.css'
 
 const INVITE_MODAL_FIRST_SHOWN_KEY = 'invite_modal_first_shown'
+/** 续费提醒弹窗：同一天只弹一次，存当天日期 YYYY-MM-DD（北京时间） */
+const RENEW_REMIND_LAST_DATE_KEY = 'renew_remind_last_date'
 /** 静态资源基础路径，本地走 vite 代理，线上走 nginx 代理，同域后可被 SW 缓存 */
 const CARZYFARM_BASE = '/carzyfarm'
 const AVATAR_BASE_URL = `${CARZYFARM_BASE}/avatars`
@@ -78,6 +80,7 @@ export const App = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
   const [showPaywallModal, setShowPaywallModal] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
+  const [showRenewRemindModal, setShowRenewRemindModal] = useState(false)
   const [subscriptionState, setSubscriptionState] = useState<MySubscription | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userDisplayName, setUserDisplayName] = useState<string | null>(null)
@@ -374,6 +377,7 @@ export const App = () => {
       setFavoriteLoading(false)
       setSubscriptionLoading(false)
       setSubscriptionError(false)
+      setShowRenewRemindModal(false)
       return
     }
     let cancelled = false
@@ -485,6 +489,21 @@ export const App = () => {
       // ignore
     }
   }, [isAuthenticated, currentPage, showHistory])
+
+  // 会员剩余天数 ≤7 天时，同一天只弹一次续费提醒
+  useEffect(() => {
+    if (!isAuthenticated || subscriptionLoading || !subscriptionState?.isActive || !subscriptionState.subscriptionEndAt) return
+    const daysLeft = Math.max(0, Math.ceil((subscriptionState.subscriptionEndAt - Date.now()) / (24 * 60 * 60 * 1000)))
+    if (daysLeft > 7) return
+    try {
+      const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Shanghai' })
+      if (localStorage.getItem(RENEW_REMIND_LAST_DATE_KEY) === todayStr) return
+      localStorage.setItem(RENEW_REMIND_LAST_DATE_KEY, todayStr)
+      setShowRenewRemindModal(true)
+    } catch {
+      setShowRenewRemindModal(true)
+    }
+  }, [isAuthenticated, subscriptionLoading, subscriptionState])
 
   const handleSelectCrop = async (crop: CropConfig) => {
     // 会员状态仍在加载时，不允许进入计算器，提示稍候重试
@@ -1073,6 +1092,46 @@ export const App = () => {
       </Modal>
 
       <InviteModal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} />
+
+      {/* 会员即将到期续费提醒（剩余 ≤7 天且同一天只弹一次） */}
+      <Modal
+        isOpen={showRenewRemindModal}
+        onClose={() => setShowRenewRemindModal(false)}
+        title="会员即将到期"
+        contentClassName="renew-remind-modal"
+      >
+        <div className="renew-remind-body">
+          <p className="renew-remind-message">
+            您的会员还剩
+            <span className="renew-remind-days">
+              {subscriptionState?.subscriptionEndAt
+                ? Math.max(0, Math.ceil((subscriptionState.subscriptionEndAt - Date.now()) / (24 * 60 * 60 * 1000)))
+                : 0}
+            </span>
+            天到期
+          </p>
+          <p className="renew-remind-sub">续费后可延长享受不限次数查价</p>
+          <div className="renew-remind-actions">
+          <button
+              type="button"
+              className="renew-remind-btn renew-remind-btn-secondary"
+              onClick={() => setShowRenewRemindModal(false)}
+            >
+              稍后再说
+            </button>
+            <button
+              type="button"
+              className="renew-remind-btn renew-remind-btn-primary"
+              onClick={() => {
+                setShowRenewRemindModal(false)
+                setShowSubscriptionModal(true)
+              }}
+            >
+              去续费
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* 排行榜模态框：Tab 切换 会员时长 / 今日查询 */}
       <Modal

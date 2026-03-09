@@ -240,6 +240,77 @@
   background: rgba(255, 247, 220, 0.6);
 }
 
+/* 会员即将到期续费提醒弹窗 */
+.renew-remind-modal .modal-body {
+  padding: 0px 12px 12px;
+}
+.renew-remind-body {
+  text-align: center;
+}
+.renew-remind-message {
+  font-size: 16px;
+  color: #843100;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+.renew-remind-days {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 2px 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #c45c26;
+}
+.renew-remind-sub {
+  font-size: 14px;
+  color: #843100;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+.renew-remind-actions {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  justify-content: center;
+}
+.renew-remind-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s, background-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.renew-remind-btn-primary {
+  background: #843100;
+  border: none;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(132, 49, 0, 0.25);
+}
+.renew-remind-btn-primary:hover {
+  opacity: 0.95;
+}
+.renew-remind-btn-primary:active {
+  opacity: 0.9;
+}
+.renew-remind-btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(132, 49, 0, 0.4);
+  color: rgba(132, 49, 0, 0.9);
+}
+.renew-remind-btn-secondary:hover {
+  background: rgba(255, 247, 220, 0.5);
+}
+@media (max-width: 360px) {
+  .renew-remind-actions {
+    flex-direction: column;
+  }
+}
+
 /* 选择页固定「邀请有礼」小圆球 */
 .invite-fab {
   position: fixed;
