@@ -723,33 +723,36 @@
   transform: translate(-50%, -50%);
   z-index: 10001;
   pointer-events: none;
-  animation: toastFadeIn 0.3s ease-out;
-  width: fit-content;
+  /* 渐入后停留一段时间再渐出，并停留在最终状态，避免再次闪现 */
+  animation: toastFadeInOut 2s ease-in-out forwards;
 }
 
 .toast-content {
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
-  padding: 0.75rem 1.5rem;
+  padding: 8px 12px !important;
   border-radius: 8px;
-  font-size: 0.875rem;
+  font-size: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   max-width: 300px;
-  word-wrap: break-word;
-  word-break: break-word;
-  display: inline-block;
-  width: fit-content;
-  box-sizing: border-box;
 }
 
-@keyframes toastFadeIn {
-  from {
+@keyframes toastFadeInOut {
+  0% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.9);
   }
-  to {
+  10% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
   }
 }
 

@@ -4,6 +4,7 @@ import { submitFeedback, type FeedbackData } from '@/utils/supabase'
 import type { CropConfig, WeatherMutation } from '@/types'
 import { parseFormattedPrice, convertToYuan } from '@/utils/priceCalculator'
 import './PriceFeedback.css'
+import { Toast } from '../PriceCalculator/Toast'
 
 interface PriceFeedbackProps {
   isOpen: boolean
@@ -200,11 +201,7 @@ export const PriceFeedback = ({
       </Modal>
 
       {/* Toast 提示 */}
-      {showToast && (
-        <div className="toast">
-          <div className="toast-content">感谢您的反馈！</div>
-        </div>
-      )}
+      {showToast && <Toast message={"感谢您的反馈！"} />}
     </>
   )
 }

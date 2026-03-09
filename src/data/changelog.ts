@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.11.1',
+    date: '2026.3.9',
+    items: [
+      '轻提示Toast组件优化，减少内边距，增加淡出动画',
+    ],
+  },
+  {
     version: 'V7.11.0',
     date: '2026.3.9',
     items: [

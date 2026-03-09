@@ -171,6 +171,7 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+#variable_conflict use_column
 declare
   v_date date;
   v_now timestamptz;
@@ -216,16 +217,16 @@ begin
 
     -- 若该用户该日已发过奖，则跳过（防止重复结算）
     if exists (
-      select 1 from public.feedback_daily_rewards
-      where reward_date = v_date and user_id = rec.user_id
+      select 1 from public.feedback_daily_rewards fdr
+      where fdr.reward_date = v_date and fdr.user_id = rec.user_id
     ) then
       continue;
     end if;
 
     -- 续费规则：在当前到期日之后顺延 v_reward_days 天；若已过期或没有记录则从 now() 起算
-    select subscription_end_at into v_current_end
-    from public.user_subscriptions
-    where user_id = rec.user_id;
+    select us.subscription_end_at into v_current_end
+    from public.user_subscriptions us
+    where us.user_id = rec.user_id;
 
     if v_current_end is not null and v_current_end > v_now then
       v_new_end := v_current_end + v_reward_days * interval '1 day';
