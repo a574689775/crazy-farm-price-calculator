@@ -54,6 +54,13 @@ export const CropSelector = ({
     return favoriteCropNames.map(name => nameToCrop.get(name)).filter((c): c is CropConfig => !!c)
   }, [crops, favoriteCropNames])
 
+  /** 果王争霸：写死三个作物 */
+  const KING_CROP_NAMES = ['惊奇菇', '月灯草', '月光草'] as const
+  const kingCrops = useMemo(() => {
+    const nameToCrop = new Map(crops.map(c => [c.name, c]))
+    return KING_CROP_NAMES.map(name => nameToCrop.get(name)).filter((c): c is CropConfig => !!c)
+  }, [crops])
+
   const orderKey = useMemo(
     () => [...moonCrops, ...normalCrops].map(c => c.name).join(','),
     [moonCrops, normalCrops]
@@ -221,6 +228,15 @@ export const CropSelector = ({
               暂无收藏作物
             </div>
           )}
+        </div>
+        {/* 果王争霸：写死三个作物 */}
+        <div className="champion-section">
+          <div className="champion-title-row">
+            <span className="champion-title-label">果王争霸</span>
+          </div>
+          <div className="champion-grid">
+            {kingCrops.map((crop) => renderCropItem(crop, `king-${crop.name}`))}
+          </div>
         </div>
         <div className="champion-section">
           <div className="champion-title-row">

@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.10.0',
+    date: '2026.3.9',
+    items: [
+      '选择作物页面添加果王争霸分类',
+    ],
+  },
+  {
     version: 'V7.9.3',
     date: '2026.3.9',
     items: [
