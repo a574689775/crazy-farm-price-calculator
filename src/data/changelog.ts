@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.11.2',
+    date: '2026.3.9',
+    items: [
+      'X5内核浏览器高度兼容',
+    ],
+  },
+  {
     version: 'V7.11.1',
     date: '2026.3.9',
     items: [
