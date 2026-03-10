@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.11.3',
+    date: '2026.3.10',
+    items: [
+      '移除各页面边框，协调视觉',
+    ],
+  },
+  {
     version: 'V7.11.2',
     date: '2026.3.9',
     items: [

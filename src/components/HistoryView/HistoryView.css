@@ -1,7 +1,5 @@
 .history-view {
   box-sizing: border-box;
-  /* 改为 1px 细边框并增加轻微阴影，营造悬浮感 */
-  border: 1px solid rgba(132, 49, 0, 0.18);
   border-radius: 20px;
   /* 使用个人中心同款柔和背景渐变 */
   background: linear-gradient(180deg, #fffdf8 0%, #fff8eb 35%, #fff0dc 100%);

@@ -46,8 +46,6 @@
 .modal-content {
   position: relative;
   box-sizing: border-box;
-  /* 与页面卡片保持一致的细边框与阴影 */
-  border: 1px solid rgba(132, 49, 0, 0.22);
   border-radius: 20px;
   /* 使用个人中心同款柔和背景渐变 */
   background: linear-gradient(180deg, #fffdf8 0%, #fff8eb 35%, #fff0dc 100%);
