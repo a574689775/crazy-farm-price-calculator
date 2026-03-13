@@ -969,6 +969,20 @@ export const App = () => {
                     className="user-center-item"
                     onClick={() => {
                       closeUserCenter()
+                      window.open('https://docs.qq.com/doc/DTW1yU1hOc1VHR3hF', '_blank')
+                    }}
+                  >
+                    <span className="user-center-item-label">
+                      <FileTextOutlined className="user-center-item-icon" />
+                      <span>使用教程</span>
+                    </span>
+                    <span className="user-center-item-arrow">›</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="user-center-item"
+                    onClick={() => {
+                      closeUserCenter()
                       setShowUserContactModal(true)
                     }}
                   >
