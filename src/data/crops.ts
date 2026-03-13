@@ -38,7 +38,7 @@ const rawCrops: CropConfig[] = [
   { name: '魔鬼朝天椒', priceCoefficient: 33143.6022, maxWeight: 10.20, growthSpeed: 2400, type: '普通' },
   // 月球作物
   { name: '月光草', priceCoefficient: 330.8416, maxWeight: 3.40, growthSpeed: 111, type: '月球' },
-  { name: '灰壤豆', priceCoefficient: 1375.3368, maxWeight: 3.40, growthSpeed: 180, type: '月球' },
+  { name: '灰壤豆', priceCoefficient: 1342.6567, maxWeight: 3.40, growthSpeed: 180, type: '月球' },
   { name: '月灯草', priceCoefficient: 1498.0086, maxWeight: 5.10, growthSpeed: 205, type: '月球' },
   { name: '月番茄', priceCoefficient: 662.4846, maxWeight: 10.20, growthSpeed: 111, type: '月球' },
   { name: '月环树', priceCoefficient: 321.9977, maxWeight: 20.40, growthSpeed: 58, type: '月球' },
