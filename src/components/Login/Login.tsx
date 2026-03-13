@@ -601,7 +601,15 @@ export const Login = ({ onLoginSuccess, onOpenDisclaimer, onOpenPrivacy }: Login
       </div>
 
       <div className="login-help-text">
-        有登录问题可添加微信 <strong>18746870222</strong> 联系处理
+        遇到困难？可先查看
+        {' '}
+        <a
+          href="https://docs.qq.com/doc/DTW1yU1hOc1VHR3hF"
+          target="_blank"
+          rel="noreferrer"
+        >
+          使用教程
+        </a>
       </div>
 
       <Footer hideSignOut={true} hideSubscription={true} />
