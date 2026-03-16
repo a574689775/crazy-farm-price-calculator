@@ -37,7 +37,7 @@ const rawCrops: CropConfig[] = [
   { name: '仙人掌象', priceCoefficient: 9525.0487, maxWeight: 34.00, growthSpeed: 720, type: '普通' },
   { name: '魔鬼朝天椒', priceCoefficient: 33143.6022, maxWeight: 10.20, growthSpeed: 2400, type: '普通' },
   // 月球作物
-  { name: '月光草', priceCoefficient: 330.8416, maxWeight: 3.40, growthSpeed: 111, type: '月球' },
+  { name: '月光草', priceCoefficient: 343.8951, maxWeight: 3.40, growthSpeed: 111, type: '月球' },
   { name: '灰壤豆', priceCoefficient: 1342.6567, maxWeight: 3.40, growthSpeed: 180, type: '月球' },
   { name: '月灯草', priceCoefficient: 1498.0086, maxWeight: 5.10, growthSpeed: 205, type: '月球' },
   { name: '月番茄', priceCoefficient: 662.4846, maxWeight: 10.20, growthSpeed: 111, type: '月球' },
@@ -47,7 +47,7 @@ const rawCrops: CropConfig[] = [
   { name: '星叶菜', priceCoefficient: 3973.0842, maxWeight: 10.2, growthSpeed: 416, type: '月球' },
   { name: '月核树', priceCoefficient: 3388.6303, maxWeight: 17, growthSpeed: 460, type: '月球' },
   { name: '液光藤', priceCoefficient: 3512.6104, maxWeight: 20.4, growthSpeed: 520, type: '月球' },
-  { name: '幻月花', priceCoefficient: 8366.0855, maxWeight: 23.8, growthSpeed: 1142.5, type: '月球' },
+  { name: '幻月花', priceCoefficient: 8366.0613, maxWeight: 23.8, growthSpeed: 1142.5, type: '月球' },
   { name: '星空玫瑰', priceCoefficient: 33096.7468, maxWeight: 10.2, growthSpeed: 2966.6, type: '月球' },
   { name: '月兔', priceCoefficient: 11161.3085, maxWeight: 23.8, growthSpeed: 1524, type: '月球' },
   { name: '红包树', priceCoefficient: 83300.1019, maxWeight: 5.10, growthSpeed: 5270, type: '月球' },

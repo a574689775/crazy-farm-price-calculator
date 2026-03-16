@@ -6,6 +6,14 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.12.2',
+    date: '2026.3.16',
+    items: [
+      '小幅调整幻月花价格基数',
+      '大幅调整月光草价格基数'
+    ],
+  },
+  {
     version: 'V7.12.1',
     date: '2026.3.13',
     items: [
