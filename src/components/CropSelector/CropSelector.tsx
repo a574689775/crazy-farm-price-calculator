@@ -55,7 +55,7 @@ export const CropSelector = ({
   }, [crops, favoriteCropNames])
 
   /** 果王争霸：写死三个作物 */
-  const KING_CROP_NAMES = ['惊奇菇', '月灯草', '月光草'] as const
+  const KING_CROP_NAMES = ['仙人掌象', '月核树', '月番茄'] as const
   const kingCrops = useMemo(() => {
     const nameToCrop = new Map(crops.map(c => [c.name, c]))
     return KING_CROP_NAMES.map(name => nameToCrop.get(name)).filter((c): c is CropConfig => !!c)
