@@ -1,5 +1,5 @@
 import type { CropConfig } from '@/types'
-import { getCropImagePath } from '@/data/crops'
+import { getCropDisplayName, getCropImagePath } from '@/data/crops'
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { UserOutlined } from '@ant-design/icons'
 import { SVGText } from '@/components/SVGText'
@@ -183,11 +183,11 @@ export const CropSelector = ({
       <div className="crop-item-image-wrapper">
         <img
           src={getCropImagePath(crop.name)}
-          alt={crop.name}
+          alt={getCropDisplayName(crop.name)}
           className="crop-item-image"
         />
       </div>
-      <div className="crop-item-name">{crop.name}</div>
+      <div className="crop-item-name">{getCropDisplayName(crop.name)}</div>
     </div>
   )
 

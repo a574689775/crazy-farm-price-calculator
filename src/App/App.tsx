@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { CropConfig, HistoryRecord, WeatherMutation } from '@/types'
 import { crops, getCropImagePath } from '@/data/crops'
+import { getCropDisplayName } from '@/data/crops'
 import { changelog } from '@/data/changelog'
 import { Footer } from '@/components/Footer'
 import { CropSelector } from '@/components/CropSelector'
@@ -1446,12 +1447,12 @@ export const App = () => {
                                   <div className="leaderboard-avatar">
                                     <img
                                       src={getCropImagePath(cropName)}
-                                      alt={cropName}
+                                      alt={getCropDisplayName(cropName)}
                                       className="leaderboard-avatar-img"
                                     />
                                   </div>
                                 </div>
-                                <div className="leaderboard-top-name">{cropName}</div>
+                                <div className="leaderboard-top-name">{getCropDisplayName(cropName)}</div>
                                 <div className="leaderboard-top-badge">
                                   <span>{formatCount(count)} 次</span>
                                 </div>
@@ -1470,12 +1471,12 @@ export const App = () => {
                                     <div className="leaderboard-avatar">
                                       <img
                                         src={getCropImagePath(cropName)}
-                                        alt={cropName}
+                                      alt={getCropDisplayName(cropName)}
                                         className="leaderboard-avatar-img"
                                       />
                                     </div>
                                     <div className="leaderboard-user-text">
-                                      <div className="leaderboard-user-name">{cropName}</div>
+                                      <div className="leaderboard-user-name">{getCropDisplayName(cropName)}</div>
                                     </div>
                                   </div>
                                   <div className="leaderboard-days-badge">

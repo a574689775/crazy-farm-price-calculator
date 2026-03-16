@@ -1,5 +1,6 @@
 import { Modal } from '@/components/Modal'
 import type { CropConfig, WeatherMutation } from '@/types'
+import { getCropDisplayName } from '@/data/crops'
 import { getSelectedQuality, getSelectedSpecial, shareTemplatesWithSpecial, shareTemplatesWithoutSpecial } from './utils'
 import './PriceCalculator.css'
 
@@ -27,7 +28,7 @@ export const ShareModal = ({
     // 获取当前品质、异形突变和作物名
     const quality = getSelectedQuality(selectedMutations)
     const special = getSelectedSpecial(selectedMutations)
-    const cropName = crop.name
+    const cropName = getCropDisplayName(crop.name)
     
     // 根据是否有异形突变选择不同的文案模版
     let shareText: string

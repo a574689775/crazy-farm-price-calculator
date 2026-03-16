@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase, type FeedbackData, deleteFeedback } from '@/utils/supabase'
-import { crops } from '@/data/crops'
+import { crops, getCropDisplayName } from '@/data/crops'
 import { formatPrice, parseFormattedPrice, convertToYuan, roundedPriceToYuan } from '@/utils/priceCalculator'
 import { getWeatherMutation } from '@/data/weatherMutations'
 import type { CropConfig, WeatherMutation } from '@/types'
@@ -458,7 +458,7 @@ export const FeedbackDataView = () => {
                 className={`feedback-crop-item ${selectedCrop?.name === crop.name ? 'selected' : ''}`}
                 onClick={() => handleCropSelect(crop)}
               >
-                {crop.name}
+                {getCropDisplayName(crop.name)}
               </div>
             ))}
           </div>
@@ -646,7 +646,7 @@ export const FeedbackDataView = () => {
                             </button>
                           </td>
                           <td>{item.id}</td>
-                          <td>{item.crop_name}</td>
+                          <td>{getCropDisplayName(item.crop_name)}</td>
                           <td>{item.weight}kg</td>
                           <td>{totalMultiplier.toFixed(2)}×</td>
                           <td>{formatPrice(item.calculated_price)}</td>

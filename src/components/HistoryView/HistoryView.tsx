@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { LeftOutlined, LockOutlined, UnlockOutlined, DeleteOutlined } from '@ant-design/icons'
 import { Modal } from '@/components/Modal'
 import type { HistoryRecord } from '@/types'
-import { getCropImagePath } from '@/data/crops'
+import { getCropDisplayName, getCropImagePath } from '@/data/crops'
 import { getHistoryRecords, removeHistoryRecord, toggleHistoryRecordLock } from '@/utils/historyStorage'
 import { weatherMutations, mutationColorConfig } from '@/data/weatherMutations'
 import { SVGText } from '@/components/SVGText'
@@ -114,11 +114,11 @@ export const HistoryView = ({ onBack, active, onSelectRecord }: HistoryViewProps
             <img
               className="history-item-image"
               src={getCropImagePath(record.cropName)}
-              alt={record.cropName}
+              alt={getCropDisplayName(record.cropName)}
             />
             <div className="history-item-info">
               <div className="history-item-row1">
-                <span className="history-item-name">{record.cropName}</span>
+                <span className="history-item-name">{getCropDisplayName(record.cropName)}</span>
                 <span className="history-item-weight">{weightDisplay}kg</span>
               </div>
               <div className="history-item-price-inline">
@@ -172,7 +172,7 @@ export const HistoryView = ({ onBack, active, onSelectRecord }: HistoryViewProps
             <p>确定要删除这条历史记录吗？此操作不可撤销。</p>
             {deleteTarget && (
               <p className="history-delete-meta">
-                作物：{deleteTarget.cropName}，价格：{deleteTarget.price}
+                作物：{getCropDisplayName(deleteTarget.cropName)}，价格：{deleteTarget.price}
               </p>
             )}
             <div className="history-delete-actions">

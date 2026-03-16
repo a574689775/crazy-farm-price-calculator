@@ -6,6 +6,13 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V7.12.4',
+    date: '2026.3.16',
+    items: [
+      '更新月核树、月环树、红包树名字为月核果、月环果、红包果',
+    ],
+  },
+  {
     version: 'V7.12.3',
     date: '2026.3.16',
     items: [

@@ -1,6 +1,6 @@
 import { ShareAltOutlined, LeftOutlined, StarFilled, StarOutlined } from '@ant-design/icons'
 import type { CropConfig, WeatherMutation } from '@/types'
-import { crops } from '@/data/crops'
+import { crops, getCropDisplayName } from '@/data/crops'
 import { generateShareUrl } from '@/utils/shareEncoder'
 import './PriceCalculator.css'
 
@@ -61,7 +61,7 @@ export const CalculatorHeader = ({
           <LeftOutlined />
         </span>
       )}
-      <h3 className="calculator-title">{crop.name}</h3>
+      <h3 className="calculator-title">{getCropDisplayName(crop.name)}</h3>
       <div className="calculator-header-actions">
         {onFavoriteClick && (
           <button
