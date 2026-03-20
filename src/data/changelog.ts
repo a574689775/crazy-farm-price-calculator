@@ -6,6 +6,17 @@ export interface ChangelogItem {
 
 export const changelog: ChangelogItem[] = [
   {
+    version: 'V8.0.0',
+    date: '2026.3.20',
+    items: [
+      '增加手机号登录方式，包含手机号登录、注册、找回',
+      '登录页视觉交互优化',
+      '用户隐私更新',
+      '增加邮箱用户绑定手机号功能',
+      '微调黄瓜、月番茄、幻月花、月影梅作物价格基数',
+    ],
+  },
+  {
     version: 'V7.12.4',
     date: '2026.3.16',
     items: [

@@ -421,6 +421,43 @@ export const getCurrentUser = async () => {
   return user
 }
 
+/**
+ * 获取当前登录用户已绑定的手机号（来自 user_profiles.phone）
+ * - 未绑定：返回 null
+ * - 绑定但字段为空/异常：返回 null（前端会退回展示邮箱/虚拟邮箱手机号）
+ */
+export const getBoundPhoneForCurrentUser = async (userId?: string | null): Promise<string | null> => {
+  const resolvedUserId = (userId ?? '').toString().trim()
+
+  // 如果外部已传入 userId，则避免再调用一次 auth.getUser()，减少接口重复请求
+  const idToQuery =
+    resolvedUserId ||
+    (await (async () => {
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData?.user?.id) return null
+      return userData.user.id
+    })())
+
+  if (!idToQuery) return null
+
+  try {
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('phone')
+      .eq('user_id', idToQuery)
+      .maybeSingle()
+
+    if (profileError) return null
+    const phone = (profile?.phone ?? '').toString().trim()
+    if (!phone) return null
+    // 仅在前端需要展示时做简单格式校验，避免脏数据导致展示异常
+    if (!/^1[3-9][0-9]{9}$/.test(phone)) return null
+    return phone
+  } catch {
+    return null
+  }
+}
+
 /** 从 user 或 user_metadata 取展示用昵称（优先 display_name，否则 email 前缀） */
 export const getDisplayName = (user: { email?: string | null; user_metadata?: Record<string, unknown> } | null): string | null => {
   if (!user) return null
@@ -843,6 +880,230 @@ const isDevelopment = (): boolean => {
   if (typeof window === 'undefined') return false
   const hostname = window.location.hostname
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0'
+}
+
+/**
+ * 发送手机短信验证码（通过 Edge Function：send-sms-code）
+ * scene: 'register' | 'reset_password' | 'bind'
+ */
+export const sendSmsCode = async (
+  phone: string,
+  scene: 'register' | 'reset_password' | 'bind'
+): Promise<{ ok: boolean; error?: string }> => {
+  const trimmed = (phone || '').trim()
+  if (!trimmed) return { ok: false, error: '请输入手机号' }
+  const phoneRegex = /^1[3-9][0-9]{9}$/
+  if (!phoneRegex.test(trimmed)) {
+    return { ok: false, error: '手机号格式不正确，仅支持中国大陆 11 位手机号' }
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('send-sms-code', {
+      body: { phone: trimmed, scene },
+    })
+
+    if (error) {
+      const msg = error.message || ''
+      let backendError = ''
+      if (error instanceof FunctionsHttpError && error.context) {
+        try {
+          const body = await error.context.json()
+          if (body && typeof body === 'object' && typeof (body as { error?: string }).error === 'string') {
+            backendError = (body as { error: string }).error
+          }
+        } catch {
+          // ignore parse error, fallback to message
+        }
+      }
+      const merged = `${backendError} ${msg}`
+      if (merged.includes('当前请求过多')) {
+        return { ok: false, error: '当前请求过多，请稍后再试' }
+      }
+      if (merged.includes('429') || merged.includes('过于频繁')) {
+        return { ok: false, error: '验证码发送过于频繁，请稍后再试' }
+      }
+      return { ok: false, error: '验证码发送失败，请稍后再试' }
+    }
+
+    if (data?.ok === true) {
+      return { ok: true }
+    }
+
+    return { ok: false, error: data?.error || '验证码发送失败，请稍后再试' }
+  } catch (e: any) {
+    const msg = e?.message || ''
+    if (msg.includes('Failed to send') || msg.includes('fetch') || msg.includes('network')) {
+      return { ok: false, error: '网络异常，发送失败，请检查网络后重试' }
+    }
+    return { ok: false, error: '验证码发送失败，请稍后再试' }
+  }
+}
+
+/**
+ * 根据手机号获取对应用户的虚拟邮箱（用于「手机号+密码」登录时调用 signInWithPassword）
+ */
+export const getEmailByPhone = async (
+  phone: string
+): Promise<{ ok: boolean; email?: string; error?: string }> => {
+  const trimmed = (phone || '').trim()
+  if (!trimmed) return { ok: false, error: '请输入手机号' }
+  const phoneRegex = /^1[3-9][0-9]{9}$/
+  if (!phoneRegex.test(trimmed)) {
+    return { ok: false, error: '手机号格式不正确，仅支持中国大陆 11 位手机号' }
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('get-email-by-phone', {
+      body: { phone: trimmed },
+    })
+
+    if (error) {
+      return { ok: false, error: '服务暂不可用，请稍后再试' }
+    }
+
+    if (data?.ok === true && data.email) {
+      return { ok: true, email: data.email }
+    }
+
+    return { ok: false, error: data?.error || '该手机号未注册' }
+  } catch (e: any) {
+    const msg = e?.message || ''
+    if (msg.includes('Failed to send') || msg.includes('fetch') || msg.includes('network')) {
+      return { ok: false, error: '网络异常，请检查网络后重试' }
+    }
+    return { ok: false, error: '服务暂不可用，请稍后再试' }
+  }
+}
+
+/**
+ * 校验手机验证码并注册（scene = 'register'），创建账号后返回 session
+ */
+export const verifySmsCodeForRegister = async (
+  phone: string,
+  code: string,
+  password: string
+): Promise<{ ok: boolean; session?: any; error?: string }> => {
+  const trimmedPhone = (phone || '').trim()
+  const trimmedCode = (code || '').trim()
+  if (!trimmedPhone || !trimmedCode) return { ok: false, error: '请输入手机号和验证码' }
+  if (!password || password.length < 6) return { ok: false, error: '请设置至少 6 位密码' }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('verify-sms-code', {
+      body: { phone: trimmedPhone, code: trimmedCode, scene: 'register', password },
+    })
+
+    if (error) {
+      const msg = (error as any)?.message || ''
+      if (msg.includes('验证码错误')) return { ok: false, error: '验证码错误，请重试' }
+      if (msg.includes('已注册')) return { ok: false, error: '该手机号已注册，请直接登录' }
+      return { ok: false, error: data?.error || '注册失败，请稍后再试' }
+    }
+
+    if (data?.ok === true && data.session) {
+      return { ok: true, session: data.session }
+    }
+
+    return { ok: false, error: data?.error || '注册失败，请稍后再试' }
+  } catch (e: any) {
+    const msg = e?.message || ''
+    if (msg.includes('Failed to send') || msg.includes('fetch') || msg.includes('network')) {
+      return { ok: false, error: '网络异常，请检查网络后重试' }
+    }
+    return { ok: false, error: '注册失败，请稍后再试' }
+  }
+}
+
+/**
+ * 手机号找回密码（scene = 'reset_password'）
+ */
+export const resetPasswordByPhone = async (
+  phone: string,
+  code: string,
+  newPassword: string
+): Promise<{ ok: boolean; error?: string }> => {
+  const trimmedPhone = (phone || '').trim()
+  const trimmedCode = (code || '').trim()
+  if (!trimmedPhone || !trimmedCode) return { ok: false, error: '请输入手机号和验证码' }
+  if (!newPassword || newPassword.length < 6) return { ok: false, error: '请设置至少 6 位新密码' }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('verify-sms-code', {
+      body: { phone: trimmedPhone, code: trimmedCode, scene: 'reset_password', newPassword },
+    })
+
+    if (error) {
+      return { ok: false, error: data?.error || '重置失败，请稍后再试' }
+    }
+
+    if (data?.ok === true) {
+      return { ok: true }
+    }
+
+    return { ok: false, error: data?.error || '重置失败，请稍后再试' }
+  } catch (e: any) {
+    const msg = e?.message || ''
+    if (msg.includes('Failed to send') || msg.includes('fetch') || msg.includes('network')) {
+      return { ok: false, error: '网络异常，请检查网络后重试' }
+    }
+    return { ok: false, error: '重置失败，请稍后再试' }
+  }
+}
+
+/**
+ * 校验手机验证码并绑定手机号到当前登录用户（scene = 'bind'）
+ */
+export const verifySmsCodeForBind = async (
+  phone: string,
+  code: string
+): Promise<{ ok: boolean; error?: string }> => {
+  const trimmedPhone = (phone || '').trim()
+  const trimmedCode = (code || '').trim()
+  if (!trimmedPhone || !trimmedCode) return { ok: false, error: '请输入手机号和验证码' }
+
+  try {
+    const { data: sessionData } = await supabase.auth.getSession()
+    const accessToken = sessionData.session?.access_token
+    if (!accessToken) {
+      return { ok: false, error: '请先登录后再绑定手机号' }
+    }
+
+    const { data, error } = await supabase.functions.invoke('verify-sms-code', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: { phone: trimmedPhone, code: trimmedCode, scene: 'bind' },
+    })
+
+    if (error) {
+      const msg = (error as any)?.message || ''
+      if (msg.includes('暂时无法绑定')) {
+        return { ok: false, error: '该手机号暂时无法绑定，请更换手机号或稍后再试' }
+      }
+      if (msg.includes('未检测到登录状态') || msg.includes('登录状态无效')) {
+        return { ok: false, error: '请先登录后再绑定手机号' }
+      }
+      if (msg.includes('验证码错误')) {
+        return { ok: false, error: '验证码错误，请重试' }
+      }
+      if (msg.includes('过期')) {
+        return { ok: false, error: '验证码已过期，请重新获取' }
+      }
+      return { ok: false, error: '绑定手机号失败，请稍后再试' }
+    }
+
+    if (data?.ok === true) {
+      return { ok: true }
+    }
+
+    return { ok: false, error: data?.error || '绑定手机号失败，请稍后再试' }
+  } catch (e: any) {
+    const msg = e?.message || ''
+    if (msg.includes('Failed to send') || msg.includes('fetch') || msg.includes('network')) {
+      return { ok: false, error: '网络异常，绑定失败，请检查网络后重试' }
+    }
+    return { ok: false, error: '绑定手机号失败，请稍后再试' }
+  }
 }
 
 // 发送重置密码验证码

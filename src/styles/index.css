@@ -41,6 +41,28 @@ body {
   color: #000 !important;
 }
 
+/* 全局关闭移动端点击高亮，避免蓝色背景闪烁 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 常见可点击元素去掉默认 outline，具体组件按需自定义 focus 样式 */
+button,
+a,
+input,
+textarea {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 通用可点击区域（项目中大量使用） */
+.clickable,
+.login-tab,
+.login-switch-button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
 /* 全局控制 input 和 button 使用自定义字体 */
 input,
 button,

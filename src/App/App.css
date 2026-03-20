@@ -1242,6 +1242,98 @@
   color: rgba(132, 49, 0, 0.45);
 }
 
+/* 绑定手机号弹窗 */
+.bind-phone-modal {
+  display: flex;
+  flex-direction: column;
+}
+
+.bind-phone-modal-desc {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: rgba(132, 49, 0, 0.85);
+  line-height: 1.6;
+}
+
+.bind-phone-modal-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bind-phone-modal-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(132, 49, 0, 0.95);
+}
+
+.bind-phone-modal-input {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(225, 152, 89, 0.7);
+  padding: 0 16px;
+  font-size: 14px;
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+  color: rgba(132, 49, 0, 1);
+  background: rgba(255, 252, 239, 1);
+  box-sizing: border-box;
+}
+
+.bind-phone-modal-input:focus {
+  outline: none;
+  border-color: rgba(132, 49, 0, 0.9);
+  background: rgba(255, 252, 239, 1);
+}
+
+.bind-phone-modal-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bind-phone-modal-code-input {
+  flex: 1;
+}
+
+.bind-phone-modal-send-btn {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(132, 49, 0, 0.06);
+  color: rgba(132, 49, 0, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+}
+
+.bind-phone-modal-send-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bind-phone-modal-submit {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(132, 49, 0, 1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'ResourceHanRoundedCN Medium', sans-serif;
+}
+
+.bind-phone-modal-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .user-center-section-danger {
   margin-top: 20px;
   margin-bottom: 0;

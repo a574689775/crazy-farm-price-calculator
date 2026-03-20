@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { CropConfig, HistoryRecord, WeatherMutation } from '@/types'
 import { crops, getCropImagePath } from '@/data/crops'
 import { getCropDisplayName } from '@/data/crops'
@@ -28,18 +28,21 @@ import {
   fetchTodayQueryCounts,
   getUserFavoriteCrops,
   toggleFavoriteCrop,
+  sendSmsCode,
+  verifySmsCodeForBind,
+  getBoundPhoneForCurrentUser,
 } from '@/utils/supabase'
 import type { MySubscription, MembershipLeaderboardItem, QueryLeaderboardItem, FeedbackLeaderboardItem } from '@/utils/supabase'
 import { Modal } from '@/components/Modal'
 import { InviteModal } from '@/components/InviteModal'
 import {
   HistoryOutlined,
-  GiftOutlined,
   TrophyOutlined,
   CustomerServiceOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
   LockOutlined,
+  GiftOutlined,
 } from '@ant-design/icons'
 import './App.css'
 
@@ -53,6 +56,20 @@ const AVATAR_COUNT = 18
 
 /** 临时 mock：把当前用户显示为第几名（1/2/3），0 表示关闭。看效果后记得改回 0 */
 const MOCK_ME_AS_TOP_RANK = 0
+
+/** 手机号注册账号：auth 侧虚拟邮箱为 phone_{11位手机号}@crazyfarm.local，无需再展示「绑定手机号」 */
+const isPhoneRegisteredAuthEmail = (email: string | null | undefined): boolean => {
+  if (!email) return false
+  const local = email.split('@')[0] ?? ''
+  return local.startsWith('phone_')
+}
+
+/** 从虚拟邮箱解析登录用手机号，用于个人中心展示（避免露出 phone_xxx@...） */
+const phoneDigitsFromRegisteredAuthEmail = (email: string | null | undefined): string | null => {
+  if (!email || !isPhoneRegisteredAuthEmail(email)) return null
+  const local = email.split('@')[0] ?? ''
+  return local.slice('phone_'.length) || null
+}
 
 /** 昵称校验：最多 12 字符、最多 6 个汉字，仅允许中文/字母/数字 */
 const validateNickname = (s: string): { ok: true } | { ok: false; error: string } => {
@@ -71,6 +88,55 @@ interface PrefillData {
   mutations: WeatherMutation[]
 }
 
+const DisclaimerContent = () => (
+  <div className="modal-text disclaimer-text">
+    <p><strong>1. 收费与合规说明</strong></p>
+    <p>本工具已实行部分收费，并非完全免费。收费手续合法，运营主体已完成企业备案。根据现行法规，本服务类型不需要 ICP 许可证。</p>
+
+    <p><strong>2. 版权与素材声明（重要）</strong></p>
+    <p>页面中的作物等图片素材来源于网易游戏《蛋仔派对》，其所有权及知识产权归网易公司所有。我们仅将上述图片用于标识作物，不用于其他用途，不主张任何素材权利，并尊重网易游戏原创内容。</p>
+    <p>如您为相关素材的版权方或授权方，认为本使用方式构成侵权，请通过 574689775@qq.com 联系我们，我们将在收到有效通知后及时下架或替换相关素材。</p>
+    
+    <p><strong>3. 非官方与独立性声明</strong></p>
+    <p>本工具为爱好者独立开发，与网易游戏《蛋仔派对》官方无任何关联、赞助或授权关系。非官方产品。</p>
+    
+    <p><strong>4. 数据免责与风险自担</strong></p>
+    <p>本工具所有计算功能、数据及结果均基于对公开游戏机制的分析，仅供参考，不保证100%准确性，不作为游戏内交易的官方依据。实际游戏内数值请以官方发布为准。</p>
+    <p>用户因使用、依赖本工具信息所产生的任何直接或间接风险、损失，需自行承担全部责任。</p>
+    
+    <p><strong>5. 开发者责任限制</strong></p>
+    <p>开发者在本工具可用的技术上尽力保证其稳定，但对于服务的连续性、准确性、安全性不作担保。对于因使用本工具而产生的任何问题，开发者的责任在法律允许的最大范围内予以免除。</p>
+    
+    <p><strong>6. 服务变更与终止</strong></p>
+    <p>开发者保留随时修改、暂停或终止本工具服务的权利，无需事先通知。</p>
+    
+    <p><strong>7. 用户同意</strong></p>
+    <p>继续使用本工具，即表示您已阅读、理解并完全同意本声明的全部条款。</p>
+  </div>
+)
+
+const PrivacyContent = () => (
+  <div className="modal-text disclaimer-text">
+    <p><strong>1. 信息收集范围</strong></p>
+    <p>为提供登录、会员与查询服务，我们可能收集：您登录时使用的账号信息（如邮箱、手机号）、昵称与头像设置、查询与计算记录（用于历史与统计）、会员激活与到期信息、以及您主动提交的反馈内容。</p>
+    
+    <p><strong>2. 使用目的</strong></p>
+    <p>上述信息仅用于账号识别、会员权益校验、历史记录展示、产品改进与必要的客服联系，不会用于与产品无关的营销或对外出售。</p>
+    
+    <p><strong>3. 存储与安全</strong></p>
+    <p>数据在服务端与本地按需存储（包括登录邮箱与手机号等账号标识），我们采取合理技术措施保护数据安全。因网络或设备原因导致的数据丢失，我们无法完全避免，请重要信息自行备份。</p>
+    
+    <p><strong>4. 第三方与共享</strong></p>
+    <p>登录、短信、支付等由第三方服务（如 Supabase、短信服务提供商、支付渠道）处理，其隐私政策以对方为准。我们不会将您的个人信息出售给第三方。</p>
+    
+    <p><strong>5. 用户权利</strong></p>
+    <p>您可随时在应用内查看、修改昵称与头像；如需删除账号或数据，可通过 574689775@qq.com 联系我们处理。</p>
+    
+    <p><strong>6. 条款更新</strong></p>
+    <p>我们可能适时更新本隐私说明，更新后将通过应用内展示或公告方式告知，继续使用即视为接受更新后的条款。</p>
+  </div>
+)
+
 export const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -85,6 +151,7 @@ export const App = () => {
   const [subscriptionState, setSubscriptionState] = useState<MySubscription | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userDisplayName, setUserDisplayName] = useState<string | null>(null)
+  const [userPhone, setUserPhone] = useState<string | null>(null)
   const [userAvatarIndex, setUserAvatarIndex] = useState<number>(1)
   const [showUserCenter, setShowUserCenter] = useState(false)
   const [showNicknameModal, setShowNicknameModal] = useState(false)
@@ -123,6 +190,19 @@ export const App = () => {
   const [subscriptionError, setSubscriptionError] = useState(false)
   /** 全局 Toast 文案 */
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  /** 绑定手机号（个人中心） */
+  const [showBindPhoneModal, setShowBindPhoneModal] = useState(false)
+  const [bindPhone, setBindPhone] = useState('')
+  const [bindPhoneCode, setBindPhoneCode] = useState('')
+  const [bindPhoneSending, setBindPhoneSending] = useState(false)
+  const [bindPhoneCountdown, setBindPhoneCountdown] = useState(0)
+  const [bindPhoneLoading, setBindPhoneLoading] = useState(false)
+
+  /** 个人中心账号展示：已绑定手机 > 虚拟邮箱解析出的手机号 > 登录邮箱 */
+  const userCenterAccountLine = useMemo(
+    () => userPhone ?? phoneDigitsFromRegisteredAuthEmail(userEmail) ?? userEmail ?? null,
+    [userPhone, userEmail],
+  )
 
   // 统一的动画时长（与 CSS transform 过渡一致）
   const ANIMATION_DURATION = 300
@@ -193,6 +273,16 @@ export const App = () => {
       setFeedbackLeaderboardLoading(false)
     }
   }, [])
+
+  // 绑定手机号验证码倒计时
+  useEffect(() => {
+    if (bindPhoneCountdown > 0) {
+      const timer = window.setTimeout(() => {
+        setBindPhoneCountdown((prev) => (prev > 0 ? prev - 1 : 0))
+      }, 1000)
+      return () => window.clearTimeout(timer)
+    }
+  }, [bindPhoneCountdown])
 
   const loadCropHeat = useCallback(async () => {
     setCropHeatLoading(true)
@@ -289,6 +379,8 @@ export const App = () => {
   const isInitializedRef = useRef(false)
   // 从选择页点击进入计算器时已做过免费次数校验，避免重复扣减；从 URL/分享链接进入时未做，需在 effect 中补检
   const calculatorEntryCheckedRef = useRef(false)
+  // 按 userId 只拉一次 user_profiles.phone，避免刷新时重复调用 supabase.auth.getUser()
+  const boundPhoneFetchUserIdRef = useRef<string | null>(null)
 
   // 检查登录状态
   useEffect(() => {
@@ -379,9 +471,26 @@ export const App = () => {
       setSubscriptionLoading(false)
       setSubscriptionError(false)
       setShowRenewRemindModal(false)
+      setUserPhone(null)
+      boundPhoneFetchUserIdRef.current = null
       return
     }
     let cancelled = false
+
+    // 刷新/重新进入页面时，从 user_profiles 拉取已绑定手机号，避免一直展示邮箱且仍显示“绑定手机号”入口
+    if (!currentUserId) return
+    if (boundPhoneFetchUserIdRef.current === currentUserId) return
+
+    boundPhoneFetchUserIdRef.current = currentUserId
+    getBoundPhoneForCurrentUser(currentUserId)
+      .then((phone) => {
+        if (cancelled) return
+        setUserPhone(phone)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setUserPhone(null)
+      })
 
     setSubscriptionLoading(true)
     setSubscriptionError(false)
@@ -422,7 +531,7 @@ export const App = () => {
       cancelled = true
       window.clearTimeout(timeoutId)
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, currentUserId])
 
   // 从 URL/分享链接直接进入计算器时补做免费次数校验，防止绕过选择页白嫖
   useEffect(() => {
@@ -701,44 +810,14 @@ export const App = () => {
           onClose={() => setShowUserDisclaimerModal(false)}
           title="免责声明"
         >
-          <div className="modal-text disclaimer-text">
-            <p><strong>1. 收费与合规说明</strong></p>
-            <p>本工具已实行部分收费，并非完全免费。收费手续合法，运营主体已完成企业备案。根据现行法规，本服务类型不需要 ICP 许可证。</p>
-            <p><strong>2. 版权与素材声明（重要）</strong></p>
-            <p>页面中的作物等图片素材来源于网易游戏《蛋仔派对》，其所有权及知识产权归网易公司所有。我们仅将上述图片用于标识作物，不用于其他用途，不主张任何素材权利，并尊重网易游戏原创内容。</p>
-            <p>如您为相关素材的版权方或授权方，认为本使用方式构成侵权，请通过 574689775@qq.com 联系我们，我们将在收到有效通知后及时下架或替换相关素材。</p>
-            <p><strong>3. 非官方与独立性声明</strong></p>
-            <p>本工具为爱好者独立开发，与网易游戏《蛋仔派对》官方无任何关联、赞助或授权关系。非官方产品。</p>
-            <p><strong>4. 数据免责与风险自担</strong></p>
-            <p>本工具所有计算功能、数据及结果均基于对公开游戏机制的分析，仅供参考，不保证100%准确性，不作为游戏内交易的官方依据。实际游戏内数值请以官方发布为准。</p>
-            <p>用户因使用、依赖本工具信息所产生的任何直接或间接风险、损失，需自行承担全部责任。</p>
-            <p><strong>5. 开发者责任限制</strong></p>
-            <p>开发者在本工具可用的技术上尽力保证其稳定，但对于服务的连续性、准确性、安全性不作担保。对于因使用本工具而产生的任何问题，开发者的责任在法律允许的最大范围内予以免除。</p>
-            <p><strong>6. 服务变更与终止</strong></p>
-            <p>开发者保留随时修改、暂停或终止本工具服务的权利，无需事先通知。</p>
-            <p><strong>7. 用户同意</strong></p>
-            <p>继续使用本工具，即表示您已阅读、理解并完全同意本声明的全部条款。</p>
-          </div>
+        <DisclaimerContent />
         </Modal>
         <Modal
           isOpen={showUserPrivacyModal}
           onClose={() => setShowUserPrivacyModal(false)}
           title="用户隐私"
         >
-          <div className="modal-text disclaimer-text">
-            <p><strong>1. 信息收集范围</strong></p>
-            <p>为提供登录、会员与查询服务，我们可能收集：您登录时使用的账号信息（如邮箱）、昵称与头像设置、查询与计算记录（用于历史与统计）、会员激活与到期信息、以及您主动提交的反馈内容。</p>
-            <p><strong>2. 使用目的</strong></p>
-            <p>上述信息仅用于账号识别、会员权益校验、历史记录展示、产品改进与必要的客服联系，不会用于与产品无关的营销或对外出售。</p>
-            <p><strong>3. 存储与安全</strong></p>
-            <p>数据在服务端与本地按需存储，我们采取合理技术措施保护数据安全。因网络或设备原因导致的数据丢失，我们无法完全避免，请重要信息自行备份。</p>
-            <p><strong>4. 第三方与共享</strong></p>
-            <p>登录、支付等由第三方服务（如 Supabase、支付渠道）处理，其隐私政策以对方为准。我们不会将您的个人信息出售给第三方。</p>
-            <p><strong>5. 用户权利</strong></p>
-            <p>您可随时在应用内查看、修改昵称与头像；如需删除账号或数据，可通过 574689775@qq.com 联系我们处理。</p>
-            <p><strong>6. 条款更新</strong></p>
-            <p>我们可能适时更新本隐私说明，更新后将通过应用内展示或公告方式告知，继续使用即视为接受更新后的条款。</p>
-          </div>
+        <PrivacyContent />
         </Modal>
       </div>
     )
@@ -835,10 +914,12 @@ export const App = () => {
                   </div>
                   <div className="user-center-user-text">
                     <div className="user-center-user-email">
-                      {userDisplayName || userEmail || '已登录用户'}
+                      {userDisplayName || userCenterAccountLine || '已登录用户'}
                     </div>
-                    {userDisplayName && userEmail && (
-                      <div className="user-center-user-email-sub">{userEmail}</div>
+                    {userDisplayName && userCenterAccountLine && (
+                      <div className="user-center-user-email-sub">
+                        {userCenterAccountLine}
+                      </div>
                     )}
                     <div className="user-center-user-tag">
                       {subscriptionLoading
@@ -857,6 +938,7 @@ export const App = () => {
                     setNicknameError(null)
                     setTempAvatarIndex(userAvatarIndex || 1)
                     setShowNicknameModal(true)
+                    closeUserCenter()
                   }}
                 >
                   修改个人信息
@@ -928,6 +1010,22 @@ export const App = () => {
                     </span>
                     <span className="user-center-item-arrow">›</span>
                   </button>
+                  {!userPhone && !isPhoneRegisteredAuthEmail(userEmail) && (
+                    <button
+                      type="button"
+                      className="user-center-item"
+                      onClick={() => {
+                        closeUserCenter()
+                        setShowBindPhoneModal(true)
+                      }}
+                    >
+                      <span className="user-center-item-label">
+                        <LockOutlined className="user-center-item-icon" />
+                        <span>绑定手机号</span>
+                      </span>
+                      <span className="user-center-item-arrow">›</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="user-center-item"
@@ -946,6 +1044,7 @@ export const App = () => {
                     type="button"
                     className="user-center-item"
                     onClick={() => {
+                      closeUserCenter()
                       setShowLeaderboardModal(true)
                       setQuerySubTab('user')
                       void loadLeaderboard()
@@ -1714,30 +1813,7 @@ export const App = () => {
         onClose={() => setShowUserDisclaimerModal(false)}
         title="免责声明"
       >
-        <div className="modal-text disclaimer-text">
-          <p><strong>1. 收费与合规说明</strong></p>
-          <p>本工具已实行部分收费，并非完全免费。收费手续合法，运营主体已完成企业备案。根据现行法规，本服务类型不需要 ICP 许可证。</p>
-
-          <p><strong>2. 版权与素材声明（重要）</strong></p>
-          <p>页面中的作物等图片素材来源于网易游戏《蛋仔派对》，其所有权及知识产权归网易公司所有。我们仅将上述图片用于标识作物，不用于其他用途，不主张任何素材权利，并尊重网易游戏原创内容。</p>
-          <p>如您为相关素材的版权方或授权方，认为本使用方式构成侵权，请通过 574689775@qq.com 联系我们，我们将在收到有效通知后及时下架或替换相关素材。</p>
-          
-          <p><strong>3. 非官方与独立性声明</strong></p>
-          <p>本工具为爱好者独立开发，与网易游戏《蛋仔派对》官方无任何关联、赞助或授权关系。非官方产品。</p>
-          
-          <p><strong>4. 数据免责与风险自担</strong></p>
-          <p>本工具所有计算功能、数据及结果均基于对公开游戏机制的分析，仅供参考，不保证100%准确性，不作为游戏内交易的官方依据。实际游戏内数值请以官方发布为准。</p>
-          <p>用户因使用、依赖本工具信息所产生的任何直接或间接风险、损失，需自行承担全部责任。</p>
-          
-          <p><strong>5. 开发者责任限制</strong></p>
-          <p>开发者在本工具可用的技术上尽力保证其稳定，但对于服务的连续性、准确性、安全性不作担保。对于因使用本工具而产生的任何问题，开发者的责任在法律允许的最大范围内予以免除。</p>
-          
-          <p><strong>6. 服务变更与终止</strong></p>
-          <p>开发者保留随时修改、暂停或终止本工具服务的权利，无需事先通知。</p>
-          
-          <p><strong>7. 用户同意</strong></p>
-          <p>继续使用本工具，即表示您已阅读、理解并完全同意本声明的全部条款。</p>
-        </div>
+        <DisclaimerContent />
       </Modal>
 
       {/* 个人中心：用户隐私模态框 */}
@@ -1746,26 +1822,111 @@ export const App = () => {
         onClose={() => setShowUserPrivacyModal(false)}
         title="用户隐私"
       >
-        <div className="modal-text disclaimer-text">
-          <p><strong>1. 信息收集范围</strong></p>
-          <p>为提供登录、会员与查询服务，我们可能收集：您登录时使用的账号信息（如邮箱）、昵称与头像设置、查询与计算记录（用于历史与统计）、会员激活与到期信息、以及您主动提交的反馈内容。</p>
-          
-          <p><strong>2. 使用目的</strong></p>
-          <p>上述信息仅用于账号识别、会员权益校验、历史记录展示、产品改进与必要的客服联系，不会用于与产品无关的营销或对外出售。</p>
-          
-          <p><strong>3. 存储与安全</strong></p>
-          <p>数据在服务端与本地按需存储，我们采取合理技术措施保护数据安全。因网络或设备原因导致的数据丢失，我们无法完全避免，请重要信息自行备份。</p>
-          
-          <p><strong>4. 第三方与共享</strong></p>
-          <p>登录、支付等由第三方服务（如 Supabase、支付渠道）处理，其隐私政策以对方为准。我们不会将您的个人信息出售给第三方。</p>
-          
-          <p><strong>5. 用户权利</strong></p>
-          <p>您可随时在应用内查看、修改昵称与头像；如需删除账号或数据，可通过 574689775@qq.com 联系我们处理。</p>
-          
-          <p><strong>6. 条款更新</strong></p>
-          <p>我们可能适时更新本隐私说明，更新后将通过应用内展示或公告方式告知，继续使用即视为接受更新后的条款。</p>
+        <PrivacyContent />
+      </Modal>
+
+      {/* 绑定手机号弹窗 */}
+      <Modal
+        isOpen={showBindPhoneModal}
+        onClose={() => {
+          if (bindPhoneLoading || bindPhoneSending) return
+          setShowBindPhoneModal(false)
+        }}
+        title="绑定手机号"
+      >
+        <div className="bind-phone-modal">
+          <p className="bind-phone-modal-desc">
+            绑定后可使用短信登录当前账号
+          </p>
+          <div className="login-input-group">
+            <label className="login-label">手机号</label>
+            <input
+              type="tel"
+              className="login-input"
+              placeholder="请输入中国大陆手机号"
+              value={bindPhone}
+              onChange={(e) => setBindPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+              disabled={bindPhoneLoading}
+            />
+          </div>
+          <div className="login-input-group">
+            <label className="login-label">验证码</label>
+            <div className="login-verification-wrapper">
+              <input
+                type="text"
+                className="login-input login-verification-input"
+                placeholder="请输入短信验证码"
+                value={bindPhoneCode}
+                onChange={(e) => setBindPhoneCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                maxLength={6}
+                disabled={bindPhoneLoading}
+              />
+              <button
+                type="button"
+                className="login-send-code-button"
+                onClick={async () => {
+                  if (bindPhoneSending || bindPhoneCountdown > 0) return
+                  const trimmed = bindPhone.trim()
+                  if (!trimmed) {
+                    setToastMessage('请先输入手机号')
+                    return
+                  }
+                  setBindPhoneSending(true)
+                  try {
+                    const res = await sendSmsCode(trimmed, 'bind')
+                    if (!res.ok) {
+                      setToastMessage(res.error || '验证码发送失败，请稍后再试')
+                    } else {
+                      setBindPhoneCountdown(60)
+                      setToastMessage('验证码已发送，请查收短信')
+                    }
+                  } finally {
+                    setBindPhoneSending(false)
+                  }
+                }}
+                disabled={bindPhoneSending || !bindPhone || bindPhoneCountdown > 0 || bindPhoneLoading}
+              >
+                {bindPhoneSending
+                  ? '发送中...'
+                  : bindPhoneCountdown > 0
+                    ? `${bindPhoneCountdown}秒后重发`
+                    : '发送验证码'}
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="login-submit-button login-submit-button--compact"
+            onClick={async () => {
+              if (bindPhoneLoading) return
+              const phone = bindPhone.trim()
+              const code = bindPhoneCode.trim()
+              if (!phone || !code) {
+                setToastMessage('请先输入手机号和验证码')
+                return
+              }
+              setBindPhoneLoading(true)
+              try {
+                const res = await verifySmsCodeForBind(phone, code)
+                if (!res.ok) {
+                  setToastMessage(res.error || '绑定手机号失败，请稍后再试')
+                } else {
+                  setToastMessage('手机号绑定成功')
+                  setUserPhone(phone)
+                  setBindPhoneCode('')
+                  setShowBindPhoneModal(false)
+                }
+              } finally {
+                setBindPhoneLoading(false)
+              }
+            }}
+            disabled={bindPhoneLoading || !bindPhone || !bindPhoneCode}
+          >
+            {bindPhoneLoading ? '绑定中...' : '确认绑定手机号'}
+          </button>
         </div>
       </Modal>
+
       {toastMessage && <Toast message={toastMessage} />}
     </div>
   )
